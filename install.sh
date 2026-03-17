@@ -135,8 +135,14 @@ harness_copy_file() {
     fi
   fi
 
-  mkdir -p "$(dirname "$_hcf_dst")"
-  cp "$_hcf_src" "$_hcf_dst"
+  if ! mkdir -p "$(dirname "$_hcf_dst")"; then
+    echo "harness: error: cannot create parent directory for $_hcf_rel" >&2
+    return 1
+  fi
+  if ! cp "$_hcf_src" "$_hcf_dst"; then
+    echo "harness: error: failed to copy $_hcf_rel" >&2
+    return 1
+  fi
   return 0
 }
 
