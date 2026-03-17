@@ -1,0 +1,23 @@
+schema_version: 1
+
+project:
+  name: {{project_name}}
+  description: ""
+
+stack:
+  language: {{language}}
+  framework: {{framework}}
+  frontend: null
+  database: {{database}}
+
+build:
+  test: "{{build_test}}"
+  build: "{{build_build}}"
+  lint: "{{build_lint}}"
+  format: "{{build_format}}"
+
+review_routing: {{review_routing}}
+
+extensions: {{extensions}}
+
+anti_patterns: []
