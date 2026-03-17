@@ -1,12 +1,12 @@
 ---
-description: "Fix lint/build issues and update PR title/description — intelligent fixer using code-quality rules"
+description: "Fix lint/build issues and create or update PR — intelligent fixer using code-quality rules"
 user_invocable: true
 skills: [code-quality]
 ---
 
 # /pr-prep $ARGUMENTS
 
-Intelligent lint/build fixer and PR description updater for branches with active PRs. Fixes code issues that need reasoning, then ensures the PR title and description accurately reflect what the branch actually does.
+Intelligent lint/build fixer and PR manager. Fixes code issues that need reasoning, then creates a PR if none exists or ensures an existing PR's title and description accurately reflect what the branch actually does.
 
 **Config injection**: If `.claude/harness.yaml` exists in the current project directory,
 read it and include a "Project Stack Context" section (language, framework, database,
@@ -107,15 +107,25 @@ If no code changes were needed, skip this step.
 
 Skip this step if `$ARGUMENTS` contains `--no-pr`.
 
-1. Fetch the current PR metadata:
+### Step 8a: Check for Existing PR
+
+Check if a PR already exists for the current branch:
 ```bash
-gh pr view --json title,body,baseRefName -q '{title: .title, body: .body, base: .baseRefName}'
+gh pr view --json number,title,body,baseRefName 2>/dev/null
 ```
+
+If this succeeds, a PR exists — proceed to **Step 8b** (review existing PR).
+
+If this fails (no PR for this branch), proceed to **Step 8c** (create new PR).
+
+### Step 8b: Review Existing PR
+
+1. Parse the PR metadata from the `gh pr view` output above.
 
 2. Fetch the full diff against the base branch:
 ```bash
-git log $(gh pr view --json baseRefName -q '.baseRefName')..HEAD --oneline
-git diff $(gh pr view --json baseRefName -q '.baseRefName')...HEAD --stat
+git log <baseRefName>..HEAD --oneline
+git diff <baseRefName>...HEAD --stat
 ```
 
 3. **Evaluate accuracy** — compare the current title and body against what the commits actually do:
@@ -140,6 +150,52 @@ git diff $(gh pr view --json baseRefName -q '.baseRefName')...HEAD --stat
    EOF
    )"
    ```
+
+Skip to Step 9.
+
+### Step 8c: Create New PR
+
+1. Determine the base branch (default branch of the repo):
+```bash
+gh repo view --json defaultBranchRef -q '.defaultBranchRef.name'
+```
+
+2. Ensure the current branch is pushed to the remote:
+```bash
+git push -u origin HEAD
+```
+
+3. Gather context for the PR description:
+```bash
+git log <base-branch>..HEAD --oneline
+git diff <base-branch>...HEAD --stat
+```
+
+4. Draft a PR title (under 70 chars, describes the "what") and body using this format:
+   ```
+   ## Summary
+   <1-3 bullet points describing the key changes>
+
+   ## Test plan
+   <bulleted checklist of how to verify the changes>
+   ```
+
+5. Show the proposed PR to the user:
+   ```
+   Proposed PR title: <title>
+   Proposed PR body:
+   <body>
+   ```
+
+   Wait for user approval, then create:
+   ```bash
+   gh pr create --title "..." --body "$(cat <<'EOF'
+   ...
+   EOF
+   )"
+   ```
+
+6. Report the PR URL to the user.
 
 ## Step 9: Report
 
