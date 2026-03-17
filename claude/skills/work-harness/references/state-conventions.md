@@ -1,0 +1,107 @@
+# State Conventions
+
+How the adaptive work harness stores and manages task state. This is the most critical reference for subagents — understanding state.json is required to participate correctly in any task.
+
+## State Location
+
+Each task's state lives at `.work/<name>/state.json`.
+
+## Name Derivation Algorithm
+
+Task names are derived from the title:
+
+```
+name = lowercase(title)
+name = replace(/[^a-z0-9-]/g, '-', name)    # non-alphanumeric → hyphen
+name = replace(/-+/g, '-', name)              # collapse consecutive hyphens
+name = trim('-', name)                        # remove leading/trailing hyphens
+name = truncate(40, name)                     # max 40 characters
+if .work/<name>/ exists: name = name + "-2"   # increment until unique
+```
+
+## State.json Schema
+
+```json
+{
+  "name":           "string  — kebab-case task slug",
+  "tier":           "number  — 1, 2, or 3",
+  "title":          "string  — human-readable task description",
+  "created_at":     "string  — ISO 8601 timestamp",
+  "updated_at":     "string  — ISO 8601 timestamp, updated on every state change",
+  "issue_id":       "string  — beads issue ID (e.g., 'rag-1234')",
+  "current_step":   "string  — must be a value in the steps array",
+  "steps":          "string[] — ordered list of step names for this tier",
+  "step_status":    "object  — keyed by step name",
+  "assessment":     "object|null — triage scoring, null until assess step completes",
+  "docs_path":      "string|null — relative path to docs/feature/<name>, null for Tier 1",
+  "beads_epic_id":  "string|null — beads epic ID, only for Tier 3",
+  "sessions":       "array   — session checkpoint records",
+  "base_commit":    "string  — git commit hash at task creation time",
+  "findings_file":  "string  — always '.review/findings.jsonl'",
+  "archived_at":    "string|null — ISO 8601 when archived, null while active"
+}
+```
+
+## Step Names by Tier
+
+| Tier | Steps (in order) |
+|------|-----------------|
+| 1 (Fix) | `assess`, `implement`, `review` |
+| 2 (Feature) | `assess`, `plan`, `implement`, `review` |
+| 3 (Initiative) | `assess`, `research`, `plan`, `spec`, `decompose`, `implement`, `review` |
+
+## Step Lifecycle State Machine
+
+```
+not_started ──► active ──► completed
+     │
+     └──► skipped
+```
+
+No other transitions are valid:
+- Cannot go from `completed` back to `active` (no re-opening)
+- Cannot go from `skipped` to `active` (skip is permanent)
+- Cannot go from `active` to `not_started` (no rollback)
+
+### Step Status Object
+
+```json
+{
+  "status":         "string  — 'not_started' | 'active' | 'completed' | 'skipped'",
+  "started_at":     "string|null — set when status becomes 'active'",
+  "completed_at":   "string|null — set when status becomes 'completed'",
+  "skipped_reason": "string|null — one-line reason when status is 'skipped'",
+  "handoff_prompt": "string|null — Tier 3 only, path relative to .work/<name>/",
+  "gate_id":        "string|null — beads issue ID for gate review, Tier 3 only"
+}
+```
+
+## Step Advancement Rules
+
+- Only one step can be `active` at a time
+- `current_step` must match the active step
+- When a step completes: set `completed_at`, advance `current_step` to next in `steps` array
+- `updated_at` is set on every write
+- Tier 1 last-step completion triggers auto-archive (`archived_at` set)
+- Tier 2-3 remain active until explicit `/work-archive`
+
+## Task Discovery
+
+To find the active task:
+
+1. Scan `.work/` directory for subdirectories
+2. Read `state.json` in each subdirectory
+3. Filter by `archived_at == null` (active tasks only)
+4. Multiple active → ask user which one
+5. One active → use it
+6. None → suggest `/work` to create a new task
+
+## Concurrency Model
+
+- Single-session per task
+- Parallel streams (Tier 3) use separate beads issues, not separate tasks
+- No locking mechanism — assumed single-user, single-session at a time
+
+## Critical Rule for Subagents
+
+**Subagents do NOT modify state.json directly.** Report results back to the orchestrating command. Only commands (`/work`, `/work-review`, `/work-checkpoint`, etc.) write state. This is the most important convention for subagents to follow.

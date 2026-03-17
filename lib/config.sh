@@ -3,6 +3,11 @@
 # Component: C10
 set -eu
 
+# Ensure mise-managed tools are on PATH (hooks run in minimal shell environments)
+if [ -d "${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims" ]; then
+  PATH="${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims:$PATH"
+fi
+
 # R1: yq dependency check at source time
 command -v yq >/dev/null 2>&1 || {
   echo "harness: yq required but not found. Run install.sh to verify." >&2

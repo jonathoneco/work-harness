@@ -21,17 +21,19 @@ CWD=$(printf '%s\n' "$INPUT" | jq -r '.cwd')
 
 # Resolve harness directory from this script's location
 HARNESS_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-. "$HARNESS_DIR/lib/config.sh"
+if command -v yq >/dev/null 2>&1; then
+  . "$HARNESS_DIR/lib/config.sh"
 
-# Graceful skip: no harness.yaml means project is not harness-enabled
-if ! harness_has_config "$CWD"; then
-  exit 0
-fi
+  # Graceful skip: no harness.yaml means project is not harness-enabled
+  if ! harness_has_config "$CWD"; then
+    exit 0
+  fi
 
-# Validate config parses (R2: malformed = exit 2, not silent skip)
-if ! harness_validate_config "$CWD"; then
-  echo "harness: .claude/harness.yaml is malformed — fix or remove it" >&2
-  exit 2
+  # Validate config parses (R2: malformed = exit 2, not silent skip)
+  if ! harness_validate_config "$CWD"; then
+    echo "harness: .claude/harness.yaml is malformed — fix or remove it" >&2
+    exit 2
+  fi
 fi
 
 # Only check in projects with active work tasks

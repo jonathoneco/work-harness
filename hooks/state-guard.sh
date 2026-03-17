@@ -12,15 +12,15 @@ command -v jq >/dev/null 2>&1 || { echo "harness: jq required but not found" >&2
 INPUT=$(cat)
 CWD=$(printf '%s\n' "$INPUT" | jq -r '.cwd')
 
-# Resolve harness directory from this script's location
+# Optional: validate harness config if yq is available
+# state-guard uses jq only — config.sh requires yq and is not essential here
 HARNESS_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-. "$HARNESS_DIR/lib/config.sh"
-
-# state-guard always runs (state.json validation is config-independent)
-# But still validate config if present (R2)
-if harness_has_config "$CWD" && ! harness_validate_config "$CWD"; then
-  echo "harness: .claude/harness.yaml is malformed — fix or remove it" >&2
-  exit 2
+if command -v yq >/dev/null 2>&1; then
+  . "$HARNESS_DIR/lib/config.sh"
+  if harness_has_config "$CWD" && ! harness_validate_config "$CWD"; then
+    echo "harness: .claude/harness.yaml is malformed — fix or remove it" >&2
+    exit 2
+  fi
 fi
 
 # Extract file path from tool input — only validate state.json files in .work/

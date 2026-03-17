@@ -11,6 +11,8 @@ MANIFEST="$CLAUDE_DIR/.harness-manifest.json"
 SETTINGS="$CLAUDE_DIR/settings.json"
 CLAUDE_MD="$CLAUDE_DIR/CLAUDE.md"
 BLOCK_FILE="$HARNESS_DIR/lib/claude-md-block.txt"
+AGENCY_REPO="https://github.com/msitarzewski/agency-agents.git"
+AGENCY_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/work-harness/agency-agents"
 
 # --- Usage ---
 
@@ -24,6 +26,7 @@ Modes:
   --uninstall   Remove all harness artifacts
 
 Options:
+  --agents      Install/update agency-agents from github.com/msitarzewski/agency-agents
   --force       Force install even if manifest exists (recovery)
   -h, --help    Show this help
 
@@ -34,20 +37,27 @@ EOF
 
 # --- Flag Parsing ---
 
-MODE="install"
+MODE=""
 FORCE="false"
+INSTALL_AGENTS="false"
 
 while [ $# -gt 0 ]; do
   case "$1" in
     install|--install)   MODE="install" ;;
     update|--update)     MODE="update" ;;
     uninstall|--uninstall) MODE="uninstall" ;;
+    agents|--agents)     INSTALL_AGENTS="true" ;;
     --force)             FORCE="true" ;;
     -h|--help)           usage; exit 0 ;;
     *)                   echo "harness: unknown flag: $1" >&2; usage >&2; exit 2 ;;
   esac
   shift
 done
+
+# Default mode to install unless only --agents was requested
+if [ -z "$MODE" ] && [ "$INSTALL_AGENTS" != "true" ]; then
+  MODE="install"
+fi
 
 # --- Source Libraries ---
 
@@ -87,7 +97,10 @@ harness_hook_entries() {
   {"event":"Stop","matcher":"","command":"$_hhe_dir/hooks/review-gate.sh"},
   {"event":"Stop","matcher":"","command":"$_hhe_dir/hooks/artifact-gate.sh"},
   {"event":"Stop","matcher":"","command":"$_hhe_dir/hooks/review-verify.sh"},
-  {"event":"PreToolUse","matcher":"Bash","command":"$_hhe_dir/hooks/pr-gate.sh"}
+  {"event":"PreToolUse","matcher":"Bash","command":"$_hhe_dir/hooks/pr-gate.sh"},
+  {"event":"PostCompact","matcher":"","command":"$_hhe_dir/hooks/post-compact.sh"},
+  {"event":"PreToolUse","matcher":"Edit|Write","command":"FILE=\$(jq -r '.tool_input.file_path // empty'); if echo \"\$FILE\" | grep -qE '(\\\\.env\$|\\\\.env\\\\.)'; then echo 'Blocked: .env files cannot be edited by Claude' >&2; exit 2; fi"},
+  {"event":"PreToolUse","matcher":"Edit|Write","command":"FILE=\$(jq -r '.tool_input.file_path // empty'); if echo \"\$FILE\" | grep -q '/\\\\.review/'; then echo 'Blocked: Do not write to .review/ — review findings must go to .work/<task-name>/review/findings.jsonl (see work-review.md Step 6)' >&2; exit 2; fi"}
 ]
 HOOKS_EOF
 }
@@ -247,6 +260,40 @@ harness_remove_claude_md() {
   fi
 }
 
+# --- Agency-Agents Install/Update ---
+
+harness_install_agents() {
+  echo "harness: installing agency-agents..." >&2
+
+  if [ -d "$AGENCY_CACHE/.git" ]; then
+    echo "harness: updating cached repo..." >&2
+    git -C "$AGENCY_CACHE" pull --ff-only >&2 || {
+      echo "harness: pull failed, re-cloning..." >&2
+      rm -rf "$AGENCY_CACHE"
+      mkdir -p "$(dirname "$AGENCY_CACHE")"
+      git clone "$AGENCY_REPO" "$AGENCY_CACHE" >&2
+    }
+  else
+    mkdir -p "$(dirname "$AGENCY_CACHE")"
+    rm -rf "$AGENCY_CACHE"
+    git clone "$AGENCY_REPO" "$AGENCY_CACHE" >&2
+  fi
+
+  # Copy all agent .md files to ~/.claude/agents/
+  # The repo organizes agents in category subdirectories (engineering/, testing/, etc.)
+  mkdir -p "$CLAUDE_DIR/agents"
+  _hia_count=$(find "$AGENCY_CACHE" -name '*.md' \
+    -not -name 'README.md' -not -name 'CONTRIBUTING.md' -not -name 'LICENSE*' \
+    -not -path '*/.git/*' -not -path '*/.github/*' -not -path '*/examples/*' \
+    -type f -exec cp {} "$CLAUDE_DIR/agents/" \; -print | wc -l)
+
+  if [ "$_hia_count" -eq 0 ]; then
+    echo "harness: warning: no agent files found in repo" >&2
+  else
+    echo "harness: installed $_hia_count agency-agents to ~/.claude/agents/" >&2
+  fi
+}
+
 # --- Agency-Agents Companion Check ---
 
 harness_check_agency() {
@@ -257,7 +304,8 @@ harness_check_agency() {
   echo "harness: Tip: Install agency-agents for domain-expertise review agents." >&2
   echo "harness: The work harness review routing works best with agents like code-reviewer," >&2
   echo "harness: security-reviewer, and devops-automator from agency-agents." >&2
-  echo "harness: See: https://github.com/..." >&2
+  echo "harness: See: https://github.com/msitarzewski/agency-agents" >&2
+  echo "harness: Run: ./install.sh --agents" >&2
 }
 
 # --- Install Mode ---
@@ -544,8 +592,16 @@ harness_uninstall() {
 
 # --- Main ---
 
-case "$MODE" in
-  install)   harness_install ;;
-  update)    harness_update ;;
-  uninstall) harness_uninstall ;;
-esac
+# Run agents install if requested (standalone or combined with a mode)
+if [ "$INSTALL_AGENTS" = "true" ]; then
+  harness_install_agents
+fi
+
+# Run harness mode if one was specified
+if [ -n "$MODE" ]; then
+  case "$MODE" in
+    install)   harness_install ;;
+    update)    harness_update ;;
+    uninstall) harness_uninstall ;;
+  esac
+fi

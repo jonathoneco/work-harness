@@ -21,17 +21,19 @@ CWD=$(printf '%s\n' "$INPUT" | jq -r '.cwd')
 
 # Resolve harness directory from this script's location
 HARNESS_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-. "$HARNESS_DIR/lib/config.sh"
+if command -v yq >/dev/null 2>&1; then
+  . "$HARNESS_DIR/lib/config.sh"
 
-# Graceful skip: no harness.yaml means project is not harness-enabled
-if ! harness_has_config "$CWD"; then
-  exit 0
-fi
+  # Graceful skip: no harness.yaml means project is not harness-enabled
+  if ! harness_has_config "$CWD"; then
+    exit 0
+  fi
 
-# Validate config parses (R2: malformed = exit 2, not silent skip)
-if ! harness_validate_config "$CWD"; then
-  echo "harness: .claude/harness.yaml is malformed — fix or remove it" >&2
-  exit 2
+  # Validate config parses (R2: malformed = exit 2, not silent skip)
+  if ! harness_validate_config "$CWD"; then
+    echo "harness: .claude/harness.yaml is malformed — fix or remove it" >&2
+    exit 2
+  fi
 fi
 
 # Only enforce in directories that use beads
@@ -45,13 +47,16 @@ if ! command -v bd >/dev/null 2>&1; then
 fi
 
 # Read extensions from harness.yaml; fall back to sensible defaults
-ext_list=$(harness_config_list '.extensions' "$CWD")
+ext_list=""
+if command -v yq >/dev/null 2>&1; then
+  ext_list=$(harness_config_list '.extensions' "$CWD")
+fi
 if [ -n "$ext_list" ]; then
   # Build grep pattern from extensions: strip leading dots, join with |
   # e.g. ".go\n.sql" -> "go|sql"
   ext_pattern=$(printf '%s\n' "$ext_list" | sed 's/^\.//' | grep -v '^$' | tr '\n' '|' | sed 's/|$//')
 else
-  # Fallback extensions when not configured
+  # Fallback extensions when not configured (or yq unavailable)
   ext_pattern="go|py|ts|js|rs|sql|html|css"
 fi
 
