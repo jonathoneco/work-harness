@@ -135,7 +135,23 @@ harness_copy_file() {
     fi
   fi
 
-  if ! mkdir -p "$(dirname "$_hcf_dst")"; then
+  _hcf_dstdir="$(dirname "$_hcf_dst")"
+  if ! mkdir -p "$_hcf_dstdir" 2>/dev/null; then
+    # Find the path component that's blocking directory creation
+    _hcf_check="$_hcf_dstdir"
+    while [ "$_hcf_check" != "$CLAUDE_DIR" ] && [ "$_hcf_check" != "/" ]; do
+      if [ -e "$_hcf_check" ] && [ ! -d "$_hcf_check" ]; then
+        _hcf_pretty=$(echo "$_hcf_check" | sed "s|$HOME|~|")
+        # Only print the hint once per blocking path
+        if [ "${_hcf_reported_blocker:-}" != "$_hcf_check" ]; then
+          _hcf_reported_blocker="$_hcf_check"
+          echo "harness: error: $_hcf_pretty is a file but must be a directory" >&2
+          echo "harness: hint: remove it (rm $_hcf_pretty) then re-run" >&2
+        fi
+        return 1
+      fi
+      _hcf_check="$(dirname "$_hcf_check")"
+    done
     echo "harness: error: cannot create parent directory for $_hcf_rel" >&2
     return 1
   fi
