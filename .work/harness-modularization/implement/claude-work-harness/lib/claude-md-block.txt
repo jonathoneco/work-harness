@@ -1,0 +1,8 @@
+<!-- harness:start -->
+## Work Harness
+
+This environment uses the [claude-work-harness](https://github.com/<user>/claude-work-harness).
+Commands, skills, agents, and rules are installed globally. Projects customize via `.claude/harness.yaml`.
+
+See `/harness-doctor` to check health. See `/harness-update` to check compatibility.
+<!-- harness:end -->

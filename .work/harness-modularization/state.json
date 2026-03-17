@@ -1,0 +1,29 @@
+{
+  "title": "Extract work harness into standalone repo",
+  "tier": 3,
+  "steps": ["assess", "research", "plan", "spec", "decompose", "implement", "review"],
+  "step_status": {
+    "assess": { "status": "completed" },
+    "research": { "status": "completed", "gate_id": "rag-uyet2" },
+    "plan": { "status": "completed", "gate_id": "rag-wfd73" },
+    "spec": { "status": "completed", "gate_id": "rag-khs7b" },
+    "decompose": { "status": "completed", "gate_id": "rag-4ladz" },
+    "implement": { "status": "completed", "gate_id": "rag-f5ldn" },
+    "review": { "status": "completed" }
+  },
+  "current_step": "review",
+  "assessment": {
+    "scope_breadth": 2,
+    "uncertainty": 2,
+    "session_span": 2,
+    "total": 6,
+    "rationale": "Cross-repo extraction (gaucho .claude/, dotfiles .claude/, new standalone repo). Install script with settings merge is the hardest part. Parameterization schema needs design. Multi-session."
+  },
+  "base_commit": "e01a29344df5d5be13a29b2b16d05440acee88aa",
+  "beads_epic_id": "rag-7bfsr",
+  "issue_id": "rag-7pv90",
+  "created_at": "2026-03-16T18:00:00Z",
+  "updated_at": "2026-03-17T22:00:00Z",
+  "reviewed_at": "2026-03-17T22:00:00Z",
+  "archived_at": "2026-03-17T22:00:00Z"
+}

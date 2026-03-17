@@ -1,0 +1,13 @@
+{"phase": 2, "check": "W-08 archive reviewed_at gate", "result": "PASS", "timestamp": "2026-03-15T01:30:00Z"}
+{"phase": 2, "check": "W-14 directory conversion (no dirs remaining)", "result": "PASS", "timestamp": "2026-03-15T01:30:00Z"}
+{"phase": 2, "check": "W-14 spec file relocation (171 files)", "result": "PASS", "timestamp": "2026-03-15T01:30:00Z"}
+{"phase": 2, "check": "W-14 summary files format (template compliance)", "result": "PASS", "timestamp": "2026-03-15T01:30:00Z"}
+{"phase": 2, "check": "W-14 external reference updates (10+ refs)", "result": "PASS", "timestamp": "2026-03-15T01:30:00Z"}
+{"phase": 2, "check": "W-14 orphaned agentic-push archived", "result": "PASS", "timestamp": "2026-03-15T01:30:00Z"}
+{"phase": 2, "check": "W-14 state.json docs_path updates", "result": "PASS", "timestamp": "2026-03-15T01:30:00Z"}
+{"phase": 2, "check": "settings.json hook registration complete", "result": "PASS", "timestamp": "2026-03-15T01:45:00Z"}
+{"phase": 2, "check": "work-review.md reviewed_at in Step 8", "result": "PASS", "timestamp": "2026-03-15T01:45:00Z"}
+{"phase": 2, "check": "work-archive.md reviewed_at gate (Step 3)", "result": "PASS", "timestamp": "2026-03-15T01:45:00Z"}
+{"phase": 2, "check": "stop hooks compose without conflicts", "result": "PASS", "timestamp": "2026-03-15T01:45:00Z"}
+{"phase": 2, "check": "artifact-gate backward compat (has updated_at guard)", "result": "PASS", "timestamp": "2026-03-15T01:45:00Z"}
+{"phase": 2, "check": "zero old docs/feature/<name>/ refs in .claude/", "result": "PASS", "timestamp": "2026-03-15T01:45:00Z"}

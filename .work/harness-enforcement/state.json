@@ -1,0 +1,54 @@
+{
+  "name": "harness-enforcement",
+  "title": "Harden work harness enforcement \u2014 mechanical guardrails",
+  "tier": 3,
+  "base_commit": "6c0f03dfc9f1f980816687d9d69a04b7c06e3b1d",
+  "beads_epic_id": "rag-rne9",
+  "issue_id": "rag-bg59",
+  "current_step": "implement",
+  "steps": [
+    {
+      "name": "assess",
+      "status": "completed"
+    },
+    {
+      "name": "research",
+      "status": "completed",
+      "gate_id": "rag-7fe2"
+    },
+    {
+      "name": "plan",
+      "status": "completed",
+      "gate_id": "rag-7fe2"
+    },
+    {
+      "name": "spec",
+      "status": "completed",
+      "gate_id": "rag-nf00"
+    },
+    {
+      "name": "decompose",
+      "status": "completed",
+      "gate_id": "rag-d8gc"
+    },
+    {
+      "name": "implement",
+      "status": "active"
+    },
+    {
+      "name": "review",
+      "status": "not_started"
+    }
+  ],
+  "assessment": {
+    "scope_spread": 2,
+    "design_novelty": 2,
+    "decomposability": 2,
+    "bulk_modifier": 0,
+    "total": 6,
+    "rationale": "Touches 4 layers (commands, skills, hooks, state model). New enforcement mechanisms needed \u2014 pre-advance validation, artifact guards, review blocking. Clear decomposition into hook hardening, command validation, state integrity, review gates."
+  },
+  "docs_path": "docs/feature/harness-enforcement.md",
+  "created_at": "2026-03-14T23:00:00Z",
+  "archived_at": "2026-03-15T17:56:55Z"
+}

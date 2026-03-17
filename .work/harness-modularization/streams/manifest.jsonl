@@ -1,0 +1,13 @@
+{"work_item":"W-01","beads_id":"rag-nq7ut","title":"Repo scaffold","spec":"01","stream":"A","phase":1,"tags":["Scaffold"]}
+{"work_item":"W-02","beads_id":"rag-3rpm0","title":"Config reader (lib/config.sh)","spec":"02","stream":"A","phase":1,"tags":["Infra"]}
+{"work_item":"W-03","beads_id":"rag-u5br4","title":"Settings merger (lib/merge.sh)","spec":"03","stream":"A","phase":1,"tags":["Infra"]}
+{"work_item":"W-04","beads_id":"rag-um0k7","title":"Work commands (10 commands)","spec":"04","stream":"B","phase":2,"tags":["Content"]}
+{"work_item":"W-05","beads_id":"rag-6plf9","title":"Skills + language packs","spec":"05","stream":"B","phase":2,"tags":["Content"]}
+{"work_item":"W-06","beads_id":"rag-fs6ap","title":"Workflow agents (4 agents)","spec":"06","stream":"B","phase":2,"tags":["Content"]}
+{"work_item":"W-07","beads_id":"rag-7ypmv","title":"Rules (2 rules)","spec":"07","stream":"B","phase":2,"tags":["Content"]}
+{"work_item":"W-08","beads_id":"rag-cgew8","title":"Hooks (7 hooks)","spec":"08","stream":"C","phase":2,"tags":["Infra"]}
+{"work_item":"W-09","beads_id":"rag-wzlyt","title":"Schema migrator (lib/migrate.sh)","spec":"09","stream":"C","phase":2,"tags":["Infra"]}
+{"work_item":"W-10","beads_id":"rag-d4xkc","title":"Install script (install.sh)","spec":"10","stream":"E","phase":3,"tags":["Integration"]}
+{"work_item":"W-11","beads_id":"rag-i8h9z","title":"harness-init command","spec":"11","stream":"D","phase":2,"tags":["Command"]}
+{"work_item":"W-12","beads_id":"rag-wwpv6","title":"harness-update command","spec":"12","stream":"D","phase":2,"tags":["Command"]}
+{"work_item":"W-13","beads_id":"rag-nrxsn","title":"harness-doctor command","spec":"13","stream":"D","phase":2,"tags":["Command"]}
