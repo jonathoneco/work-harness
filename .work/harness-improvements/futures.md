@@ -2,8 +2,6 @@
 
 ## Next Horizon
 
-- **State schema consolidation**: `work-harness.md` State Management section and `depth-escalation.md` reference still describe the old `step_status` keyed-object format alongside string-array `steps`. Commands and hooks use the new object-array `steps` format. Update parent skill and escalation reference to use object-array format exclusively and remove `step_status` from `state-conventions.md`. *Why not now*: Pre-existing tech debt, not blocking — `state-conventions.md` documents both formats and `state-guard.sh` handles legacy detection.
-
 - **Plugin conversion**: Convert harness from global install to Claude Code plugin format for easier distribution. *Why not now*: Current install.sh works; plugin format has security restrictions (no hooks/mcpServers in plugin agents).
 - **Agent Teams integration**: Experimental but promising for large parallel work. *Why not now*: Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` flag, no session resumption, API may change.
 - **agnix CI integration**: Lint harness configs in CI pipeline. *Why not now*: Need to establish baseline configs first; agnix is new.

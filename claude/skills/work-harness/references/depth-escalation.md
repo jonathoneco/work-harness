@@ -55,13 +55,12 @@ Step-by-step:
 ```json
 {
   "tier": 1,
-  "steps": ["assess", "implement", "review"],
-  "current_step": "implement",
-  "step_status": {
-    "assess": { "status": "completed", "started_at": "2026-03-14T10:00:00Z", "completed_at": "2026-03-14T10:01:00Z" },
-    "implement": { "status": "active", "started_at": "2026-03-14T10:01:00Z" },
-    "review": { "status": "not_started" }
-  }
+  "steps": [
+    {"name": "assess", "status": "completed", "started_at": "2026-03-14T10:00:00Z", "completed_at": "2026-03-14T10:01:00Z"},
+    {"name": "implement", "status": "active", "started_at": "2026-03-14T10:01:00Z"},
+    {"name": "review", "status": "not_started"}
+  ],
+  "current_step": "implement"
 }
 ```
 
@@ -70,17 +69,16 @@ Step-by-step:
 ```json
 {
   "tier": 3,
-  "steps": ["assess", "research", "plan", "spec", "decompose", "implement", "review"],
-  "current_step": "research",
-  "step_status": {
-    "assess": { "status": "completed", "started_at": "2026-03-14T10:00:00Z", "completed_at": "2026-03-14T10:01:00Z" },
-    "research": { "status": "not_started" },
-    "plan": { "status": "not_started" },
-    "spec": { "status": "not_started" },
-    "decompose": { "status": "not_started" },
-    "implement": { "status": "not_started" },
-    "review": { "status": "not_started" }
-  }
+  "steps": [
+    {"name": "assess", "status": "completed", "started_at": "2026-03-14T10:00:00Z", "completed_at": "2026-03-14T10:01:00Z"},
+    {"name": "research", "status": "not_started"},
+    {"name": "plan", "status": "not_started"},
+    {"name": "spec", "status": "not_started"},
+    {"name": "decompose", "status": "not_started"},
+    {"name": "implement", "status": "not_started"},
+    {"name": "review", "status": "not_started"}
+  ],
+  "current_step": "research"
 }
 ```
 

@@ -6,7 +6,7 @@
 
 ## What
 
-Systematic improvement of the work-harness across 10 areas: reducing ~700 lines of duplication through modular shared skills, enabling smarter agent delegation with step-level routing, auto-maintaining project docs via manifest, enhancing parallel work decomposition with hybrid execution strategies, integrating Codex for optional review delegation, and improving developer experience with file-based review, auto-reground, and cross-session memory.
+Systematic improvement of the work-harness across 11 components: reducing ~700 lines of duplication through modular shared skills, enabling smarter agent delegation with step-level routing, auto-maintaining project docs via manifest, enhancing parallel work decomposition with hybrid execution strategies, integrating Codex for optional review delegation, and improving developer experience with file-based review, auto-reground, and cross-session memory.
 
 ## Components
 

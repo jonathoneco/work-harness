@@ -113,6 +113,7 @@ harness_list_content_files() {
 
 # --- File Copy with Conflict Detection ---
 # Uses _hcf_manifest_files (newline-separated list) set by caller.
+# Uses _hcf_reported_blocker (shared across calls) for dedup of blocker messages.
 # Args: $1=relative_path
 # Returns: 0=copied, 1=skipped (conflict)
 
@@ -141,7 +142,7 @@ harness_copy_file() {
     _hcf_check="$_hcf_dstdir"
     while [ "$_hcf_check" != "$CLAUDE_DIR" ] && [ "$_hcf_check" != "/" ]; do
       if [ -e "$_hcf_check" ] && [ ! -d "$_hcf_check" ]; then
-        _hcf_pretty=$(echo "$_hcf_check" | sed "s|$HOME|~|")
+        _hcf_pretty="~${_hcf_check#"$HOME"}"
         # Only print the hint once per blocking path
         if [ "${_hcf_reported_blocker:-}" != "$_hcf_check" ]; then
           _hcf_reported_blocker="$_hcf_check"

@@ -58,8 +58,7 @@ Each task's state lives at `.work/<name>/state.json`:
 - `name`: kebab-case task slug (max 40 chars)
 - `tier`: 1, 2, or 3
 - `current_step`: must be a value in the steps array
-- `steps`: ordered list of step names for this tier
-- `step_status`: keyed by step name, each has status/started_at/completed_at
+- `steps`: ordered array of step objects (`[{name, status, started_at, completed_at, gate_id, gate_file}, ...]`)
 - `assessment`: triage scoring (null until assess step completes)
 - `base_commit`: git commit hash at task creation time
 - `archived_at`: null while active, ISO 8601 when archived

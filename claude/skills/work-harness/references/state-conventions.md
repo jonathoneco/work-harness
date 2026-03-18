@@ -31,7 +31,7 @@ if .work/<name>/ exists: name = name + "-2"   # increment until unique
   "issue_id":       "string  — beads issue ID (e.g., 'rag-1234')",
   "current_step":   "string  — must be a value in the steps array",
   "steps":          "object[] — ordered array of step objects [{name, status, ...}] for this tier",
-  "step_status":    "object  — keyed by step name",
+  "step_status":    "object|null — DEPRECATED, use steps[].status instead. Legacy field, ignored by hooks.",
   "assessment":     "object|null — triage scoring, null until assess step completes",
   "docs_path":      "string|null — relative path to docs/feature/<name>, null for Tier 1",
   "beads_epic_id":  "string|null — beads epic ID, only for Tier 3",
