@@ -1,0 +1,30 @@
+{
+  "name": "harness-improvements",
+  "title": "Harness Improvements — Research & Triage",
+  "description": "Research and triage session for 10 harness improvement areas: dynamic agent delegation, auto-reground, code-quality references, context doc lifecycle, codex integration, parallel decomposition, command modularization, memory integration, agent-written research notes, file-based review UX",
+  "tier": 3,
+  "steps": [
+    {"name": "assess", "status": "completed"},
+    {"name": "research", "status": "completed", "gate_id": "work-harness-vx1"},
+    {"name": "plan", "status": "active"},
+    {"name": "spec", "status": "not_started"},
+    {"name": "decompose", "status": "not_started"},
+    {"name": "implement", "status": "not_started"},
+    {"name": "review", "status": "not_started"}
+  ],
+  "current_step": "plan",
+  "assessment": {
+    "scope_spread": 2,
+    "design_novelty": 2,
+    "decomposability": 2,
+    "bulk_modifier": 0,
+    "total": 6,
+    "rationale": "10 distinct improvement areas spanning commands, agents, skills, rules, hooks, and new subsystems (memory, codex delegation, context doc lifecycle, gate files). Research/triage focus — decompose into actionable beads issues for future sessions."
+  },
+  "base_commit": "a2dd393a70ea2d02f432ac8731c3f86d893c6d13",
+  "beads_id": "work-harness-t4e",
+  "beads_epic_id": "work-harness-65t",
+  "created_at": "2026-03-17T00:00:00Z",
+  "updated_at": "2026-03-17T00:00:00Z",
+  "archived_at": null
+}
