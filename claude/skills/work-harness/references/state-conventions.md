@@ -30,7 +30,7 @@ if .work/<name>/ exists: name = name + "-2"   # increment until unique
   "updated_at":     "string  — ISO 8601 timestamp, updated on every state change",
   "issue_id":       "string  — beads issue ID (e.g., 'rag-1234')",
   "current_step":   "string  — must be a value in the steps array",
-  "steps":          "string[] — ordered list of step names for this tier",
+  "steps":          "object[] — ordered array of step objects [{name, status, ...}] for this tier",
   "step_status":    "object  — keyed by step name",
   "assessment":     "object|null — triage scoring, null until assess step completes",
   "docs_path":      "string|null — relative path to docs/feature/<name>, null for Tier 1",

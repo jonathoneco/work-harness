@@ -6,13 +6,13 @@
   "steps": [
     {"name": "assess", "status": "completed"},
     {"name": "research", "status": "completed", "gate_id": "work-harness-vx1"},
-    {"name": "plan", "status": "active"},
-    {"name": "spec", "status": "not_started"},
-    {"name": "decompose", "status": "not_started"},
+    {"name": "plan", "status": "completed", "gate_id": "work-harness-6vf"},
+    {"name": "spec", "status": "completed", "gate_id": "work-harness-2m0"},
+    {"name": "decompose", "status": "active"},
     {"name": "implement", "status": "not_started"},
     {"name": "review", "status": "not_started"}
   ],
-  "current_step": "plan",
+  "current_step": "decompose",
   "assessment": {
     "scope_spread": 2,
     "design_novelty": 2,
@@ -25,6 +25,6 @@
   "beads_id": "work-harness-t4e",
   "beads_epic_id": "work-harness-65t",
   "created_at": "2026-03-17T00:00:00Z",
-  "updated_at": "2026-03-17T00:00:00Z",
+  "updated_at": "2026-03-18T00:15:00Z",
   "archived_at": null
 }
