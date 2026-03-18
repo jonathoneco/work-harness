@@ -5,45 +5,23 @@
 # Matcher: (empty)
 set -eu
 
-# Dependency check: jq required for JSON parsing
-command -v jq >/dev/null 2>&1 || { echo "harness: jq required but not found" >&2; exit 2; }
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/common.sh
+. "$SCRIPT_DIR/lib/common.sh"
 
-# Read JSON context from stdin
-INPUT=$(cat)
-
-# Prevent infinite loop: if stop hook already fired, allow stop
-STOP_ACTIVE=$(printf '%s\n' "$INPUT" | jq -r '.stop_hook_active // false')
-if [ "$STOP_ACTIVE" = "true" ]; then
-  exit 0
-fi
-
-CWD=$(printf '%s\n' "$INPUT" | jq -r '.cwd')
-
-# Resolve harness directory from this script's location
-HARNESS_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-if command -v yq >/dev/null 2>&1; then
-  . "$HARNESS_DIR/lib/config.sh"
-
-  # Graceful skip: no harness.yaml means project is not harness-enabled
-  if ! harness_has_config "$CWD"; then
-    exit 0
-  fi
-
-  # Validate config parses (R2: malformed = exit 2, not silent skip)
-  if ! harness_validate_config "$CWD"; then
-    echo "harness: .claude/harness.yaml is malformed — fix or remove it" >&2
-    exit 2
-  fi
-fi
+harness_require_jq
+harness_read_hook_input
+harness_stop_guard
+harness_init_config
 
 # Only run if .work/ exists with active tasks
-if [ ! -d "$CWD/.work" ]; then
+if [ ! -d "$HOOK_CWD/.work" ]; then
   exit 0
 fi
 
 # Check for active tasks (any state.json where archived_at is null)
 active_task=false
-for state_file in "$CWD"/.work/*/state.json; do
+for state_file in "$HOOK_CWD"/.work/*/state.json; do
   [ -f "$state_file" ] || continue
   archived=$(jq -r '.archived_at // "null"' "$state_file")
   if [ "$archived" = "null" ]; then
@@ -59,7 +37,7 @@ fi
 # Anti-pattern checking requires yq for config reading
 if command -v yq >/dev/null 2>&1; then
   # Read anti_patterns from harness.yaml
-  patterns_json=$(harness_config_get '.anti_patterns' "$CWD")
+  patterns_json=$(harness_config_get '.anti_patterns' "$HOOK_CWD")
   if [ -z "$patterns_json" ]; then
     # No anti_patterns configured — nothing to check
     exit 0
@@ -72,7 +50,7 @@ if command -v yq >/dev/null 2>&1; then
   fi
 
   # Get session diff (staged + unstaged changes)
-  diff_output=$(cd "$CWD" && git diff HEAD 2>/dev/null || true)
+  diff_output=$(cd "$HOOK_CWD" && git diff HEAD 2>/dev/null || true)
   if [ -z "$diff_output" ]; then
     exit 0
   fi

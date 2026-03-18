@@ -13,12 +13,11 @@ build commands) in all subagent prompts and handoff prompts you produce.
 
 ## Step 1: Detect Active Task
 
-Scan `.work/` for `state.json` files where `archived_at` is null.
-
-- **Active Tier 2 task exists**: Resume it. Read `current_step` and jump to the Step Router.
-- **Active task of different tier exists**: "You have an active Tier <N> task '<name>'. Continue with it, or archive it and start a new one?"
+Follow the **task-discovery** skill (`claude/skills/work-harness/task-discovery.md`).
+This command expects Tier 2. Apply tier-specific handling:
+- **Matching tier (Tier 2)**: Resume at `current_step`. Jump to the Step Router.
+- **Different tier**: "You have an active Tier <N> task '<name>'. Continue with it, or archive it and start a new one?"
 - **No active task**: Proceed to assessment.
-- **`$ARGUMENTS` references a beads issue**: Read issue details with `bd show`.
 
 ## Step 2: Assessment (Tier 2 pre-selected)
 
@@ -51,11 +50,46 @@ Apply the 3-factor depth assessment against `$ARGUMENTS` and conversation contex
 
 ## Step Router
 
+---
+
+## Step Routing Table
+
+| Step | Agent Type | Skills | Context Sources |
+|------|-----------|--------|-----------------|
+| plan | Explore + Plan | work-harness, code-quality | beads issues, managed docs |
+| implement | general-purpose | work-harness, code-quality | plan document, managed docs |
+| review | (delegates to /work-review) | code-quality | diff since base_commit |
+
+### Skill Injection (Path B — Prompt-Based)
+
+Claude Code agent YAML frontmatter does not natively support `skills:`. When spawning agents, include explicit skill loading instructions in the prompt. Consult the routing table above for which skills each step requires, then inject them using these fragments:
+
+**plan-agent-skills:**
+> Before starting work, read and follow these skills:
+> 1. Read `claude/skills/work-harness.md` for work harness conventions (parent skill with all references).
+> 2. Read `claude/skills/code-quality.md` for quality standards.
+> Then proceed with the planning task below.
+
+**implement-agent-skills:**
+> Before starting work, read and follow these skills:
+> 1. Read `claude/skills/work-harness.md` for work harness conventions (parent skill with all references).
+> 2. Read `claude/skills/code-quality.md` for quality standards.
+> Then proceed with the implementation task below.
+
+**review-agent-skills:**
+> Before starting work, read and follow these skills:
+> 1. Read `claude/skills/code-quality.md` for quality standards.
+> Then proceed with the review task below.
+
+---
+
 ### When current_step = "plan"
 
-1. **Search for context**: Check closed beads issues and existing code for related work:
+1. **Search for context**: Consult the **Step Routing Table** for `plan`. Spawn an Explore agent (read-only) with skills injected per the `plan-agent-skills` fragment. Check closed beads issues and existing code for related work:
    ```
-   Agent(subagent_type="Explore", prompt="Search beads issues and code for context about <feature>.
+   Agent(subagent_type="Explore", prompt="<plan-agent-skills injection>
+
+   Search beads issues and code for context about <feature>.
    Run: bd search '<keyword>' --limit 10
    Return: related files, patterns, prior decisions.")
    ```
@@ -75,13 +109,7 @@ Apply the 3-factor depth assessment against `$ARGUMENTS` and conversation contex
 
 3. **Futures**: If planning reveals deferred enhancements, append to `.work/<name>/futures.md`.
 
-4. **Present for review**: Show the plan to the user. End with: "Ready to advance to **implement**? (yes/no)". Do NOT update state.json in the same turn as presenting the plan.
-
-5. **If user asks questions or gives feedback**: Answer, then re-present: "Ready to advance to **implement**? (yes/no)"
-
-6. **On explicit approval** (yes, proceed, approve, lgtm, go ahead, continue): Advance — mark `plan` as `completed`, set `implement` to `active`, update `current_step`.
-
-7. **Context compaction** (recommended): Tell the user: "Plan complete. Recommend: `/compact` then `/work-feature` to start **implement** with clean context." If user continues without compacting, re-invoke via `Skill('work-feature')`, then proceed normally.
+4. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`) for plan -> implement: Present the plan to the user. STOP and wait for explicit approval. On approval: mark `plan` as `completed`, set `implement` to `active`, update `current_step` in a single state.json write. Tier 2 adaptations apply (gate issue optional, compaction recommended). Tell the user: "Plan complete. Recommend: `/compact` then `/work-feature` to start **implement** with clean context." If user continues without compacting, re-invoke via `Skill('work-feature')`, then proceed normally.
 
 ### When current_step = "implement"
 
@@ -95,7 +123,7 @@ Apply the 3-factor depth assessment against `$ARGUMENTS` and conversation contex
 
 2. **Context**: Read the plan document. Search closed issues for patterns.
 
-3. **Skill propagation**: When spawning implementation subagents: `skills: [work-harness, code-quality]`
+3. **Skill propagation**: Consult the **Step Routing Table** for `implement`. Inject skills per the `implement-agent-skills` fragment when spawning implementation subagents.
 
 4. **Testing**: Run the project's test command after each logical unit. Commit with conventional commits.
 
@@ -103,13 +131,7 @@ Apply the 3-factor depth assessment against `$ARGUMENTS` and conversation contex
 
 6. **Multi-session**: If work spans sessions, suggest `/work-checkpoint` before ending. On resume, `/work-feature` detects the active task and continues.
 
-7. **Present results**: When all implementation is complete, summarize what was done. End with: "Ready to advance to **review**? (yes/no)". Do NOT update state.json in the same turn.
-
-8. **If user asks questions or gives feedback**: Answer, then re-present: "Ready to advance to **review**? (yes/no)"
-
-9. **On explicit approval**: Mark `implement` as `completed`, set `review` to `active`.
-
-10. **Context compaction** (recommended): Tell the user: "Implementation complete. Recommend: `/compact` then `/work-feature` to start **review** with clean context." If user continues without compacting, re-invoke via `Skill('work-feature')`, then proceed normally.
+7. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`) for implement -> review: Present implementation summary. STOP and wait for explicit approval. On approval: mark `implement` as `completed`, set `review` to `active` in a single state.json write. Tell the user: "Implementation complete. Recommend: `/compact` then `/work-feature` to start **review** with clean context." If user continues without compacting, re-invoke via `Skill('work-feature')`, then proceed normally.
 
 ### When current_step = "review"
 
@@ -132,3 +154,14 @@ If the task reveals Tier 3 complexity during implementation:
 5. Create beads epic, set `beads_epic_id`
 6. Create research/specs/streams directories in `.work/<name>/`
 7. Append escalation note to `assessment.rationale`
+
+## Skill Propagation
+
+Agent skills are determined by the **Step Routing Table** above. Each step
+specifies the exact skills to propagate. The routing table is the single
+source of truth for agent configuration — do not hardcode skill lists
+in step instructions.
+
+For the skill injection mechanism, see the **Skill Injection (Path B — Prompt-Based)**
+section above. Skills are injected via explicit `Read` instructions in agent prompts
+because Claude Code agent frontmatter does not support `skills:` natively.

@@ -16,6 +16,17 @@ build:
   lint: "{{build_lint}}"
   format: "{{build_format}}"
 
+# docs:
+#   managed:
+#     - type: endpoints       # doc type identifier (lowercase, hyphenated)
+#       path: docs/endpoints.md  # project-relative path
+#     - type: components
+#       path: docs/components.md
+#     - type: schema
+#       path: docs/schema.md
+#     - type: env-setup
+#       path: docs/env-setup.md
+
 review_routing: {{review_routing}}
 
 extensions: {{extensions}}

@@ -27,7 +27,7 @@ All paths are project-relative (from repo root). No absolute paths in specs, ski
 |------|-----------|--------|
 | `hooks/post-compact.sh` | C6 | Add handoff prompt injection |
 | `claude/commands/work-deep.md` | C1, C5, C8, C9 | Stream doc format, research protocol, delegation routing |
-| `claude/skills/code-quality/code-quality.md` | C2 | Reference parallel review pattern |
+| `claude/skills/code-quality.md` | C2 | Reference parallel review pattern |
 | `claude/skills/work-harness/references/state-conventions.md` | C4 | Document new state.json fields |
 
 ## 2. State.json Extensions

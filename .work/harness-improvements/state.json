@@ -9,10 +9,11 @@
     {"name": "plan", "status": "completed", "gate_id": "work-harness-6vf"},
     {"name": "spec", "status": "completed", "gate_id": "work-harness-2m0"},
     {"name": "decompose", "status": "completed", "gate_id": "work-harness-kor"},
-    {"name": "implement", "status": "active"},
-    {"name": "review", "status": "not_started"}
+    {"name": "implement", "status": "completed", "gate_id": "work-harness-9xe", "completed_at": "2026-03-18T18:30:00Z"},
+    {"name": "review", "status": "active", "started_at": "2026-03-18T18:30:00Z"}
   ],
-  "current_step": "implement",
+  "current_step": "review",
+  "reviewed_at": "2026-03-18T19:00:00Z",
   "assessment": {
     "scope_spread": 2,
     "design_novelty": 2,
@@ -25,6 +26,6 @@
   "beads_id": "work-harness-t4e",
   "beads_epic_id": "work-harness-65t",
   "created_at": "2026-03-17T00:00:00Z",
-  "updated_at": "2026-03-18T14:00:00Z",
+  "updated_at": "2026-03-18T19:00:00Z",
   "archived_at": null
 }

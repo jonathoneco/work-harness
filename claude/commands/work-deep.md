@@ -15,12 +15,11 @@ build commands) in all subagent prompts and handoff prompts you produce.
 
 ## Step 1: Detect Active Task
 
-Scan `.work/` for `state.json` files where `archived_at` is null.
-
-- **Active Tier 3 task exists**: Resume it. Read `current_step` and jump to the Step Router.
-- **Active task of different tier exists**: "You have an active Tier <N> task '<name>'. Continue with it, or archive it and start a new one?"
+Follow the **task-discovery** skill (`claude/skills/work-harness/task-discovery.md`).
+This command expects Tier 3. Apply tier-specific handling:
+- **Matching tier (Tier 3)**: Resume at `current_step`. Jump to the Step Router.
+- **Different tier**: "You have an active Tier <N> task '<name>'. Continue with it, or archive it and start a new one?"
 - **No active task**: Proceed to assessment.
-- **`$ARGUMENTS` references a beads issue**: Read issue details with `bd show`.
 
 ## Step 2: Assessment (Tier 3 pre-selected)
 
@@ -50,6 +49,7 @@ Apply the 3-factor depth assessment. If assessment agrees (score 4+): proceed. I
    - `.work/<name>/plan/`
    - `.work/<name>/specs/`
    - `.work/<name>/streams/`
+   - `.work/<name>/gates/`
 7. Create `docs/feature/<name>.md` summary file with initial content:
    ```markdown
    # <Title>
@@ -65,54 +65,57 @@ Read `current_step` from state.json and execute the matching section below.
 
 ---
 
+## Step Routing Table
+
+| Step | Agent Type | Skills | Context Sources |
+|------|-----------|--------|-----------------|
+| research | Explore | work-harness, code-quality | beads issues, managed docs |
+| plan | Plan | work-harness, code-quality | research handoff prompt |
+| spec | Plan | work-harness, code-quality | plan handoff prompt, architecture.md |
+| decompose | Plan | work-harness, code-quality | spec handoff prompt, all spec files |
+| implement | general-purpose | work-harness, code-quality | stream doc, relevant specs, managed docs |
+| review | (delegates to /work-review) | code-quality | diff since base_commit |
+
+### Skill Injection (Path B — Prompt-Based)
+
+Claude Code agent YAML frontmatter does not natively support `skills:`. When spawning agents, include explicit skill loading instructions in the prompt. Consult the routing table above for which skills each step requires, then inject them using these fragments:
+
+**research-agent-skills:**
+> Before starting work, read and follow these skills:
+> 1. Read `claude/skills/work-harness.md` for work harness conventions (parent skill with all references).
+> 2. Read `claude/skills/code-quality.md` for quality standards.
+> Then proceed with the research task below.
+
+**plan-agent-skills:**
+> Before starting work, read and follow these skills:
+> 1. Read `claude/skills/work-harness.md` for work harness conventions (parent skill with all references).
+> 2. Read `claude/skills/code-quality.md` for quality standards.
+> Then proceed with the planning task below.
+
+**implement-agent-skills:**
+> Before starting work, read and follow these skills:
+> 1. Read `claude/skills/work-harness.md` for work harness conventions (parent skill with all references).
+> 2. Read `claude/skills/code-quality.md` for quality standards.
+> Then proceed with the implementation task below.
+
+**review-agent-skills:**
+> Before starting work, read and follow these skills:
+> 1. Read `claude/skills/code-quality.md` for quality standards.
+> Then proceed with the review task below.
+
+---
+
 ## Inter-Step Quality Review Protocol
 
-Every step transition runs a two-phase review before auto-advancing. Each auto-advance block below references this protocol.
+Every step transition runs a two-phase review before auto-advancing. Follow the **phase-review** skill (`claude/skills/work-harness/phase-review.md`) for the review framework — agent types, verdict protocol, and retry logic. Each auto-advance block below provides step-specific checklists.
 
-**Phase A — Artifact Validation** (existing): Spawn an Explore agent (read-only) to check structural completeness — files exist, are indexed, follow naming conventions. Each step's checklist defines what to validate.
-
-**Phase B — Quality Review** (NEW): Spawn a step-appropriate agent to evaluate substance. The agent type and checklist vary by transition (see table below). The agent receives `skills: [code-quality]` and reads `.claude/rules/architecture-decisions.md`.
-
-| Transition | Phase B Agent | Quality Focus |
-|-----------|---------------|---------------|
-| research -> plan | Plan agent | Coverage vs task scope, evidence-based findings, alignment with architecture-decisions.md |
-| plan -> spec | Plan agent | Tech choices vs decision rules, component layering, constructor injection, fail-closed |
-| spec -> decompose | Plan agent | Implementability, interface consistency, testable acceptance criteria, edge cases |
-| decompose -> implement | Plan agent | Granularity, stream/code boundary alignment, phase ordering, parallelism |
-| implement phases | Review agent (per `review_routing` in harness.yaml, or `work-review` agent) | Spec compliance, code-quality anti-patterns, test coverage |
-| implement -> review | Review agent (per `review_routing` in harness.yaml, or `work-review` agent) | Pre-screen full diff for obvious issues before formal review |
-
-**Verdicts:**
-- **PASS**: No issues found. Present results and wait for user acknowledgment.
-- **ADVISORY**: Minor notes that don't block progress. Log notes in the gate issue description. Present results and wait for user acknowledgment.
-- **BLOCKING**: Substantive issues that must be fixed. Fix and re-run Phase B (up to 2 attempts). If still blocking after 2 attempts, ask the user for guidance.
-
-**Transition behavior:** Reviews are self-driven — Phase A and Phase B run automatically without user interaction. On PASS or ADVISORY:
-
-1. **Present a detailed summary** to the user:
-   - What the step produced (artifacts, key decisions, component counts)
-   - Review results — Phase A and Phase B verdicts
-   - Full advisory notes (don't just log them — show them to the user)
-   - Deferred questions, open items, or futures discovered
-   - What the next step will involve
-   - End with: "Ready to advance to **<next-step>**? (yes/no)"
-2. **STOP and wait for user acknowledgment.** Do NOT update state.json or create gate issues in the same turn as presenting results. The user may want to discuss findings, review advisory notes, or ask questions before proceeding.
-3. **If the user asks questions or gives feedback** (anything that is not an explicit approval signal): Answer the question or address the feedback, then re-present the confirmation prompt: "Ready to advance to **<next-step>**? (yes/no)". Approval signals are: yes, proceed, approve, approved, looks good, lgtm, go ahead, continue.
-4. **Only after explicit approval**: create the gate issue, update state.json, and apply context compaction.
-
-**Critical ordering**: Do NOT create gate issues or update state.json before the user has given explicit approval. Presenting results is never self-approval. Answering follow-up questions is not approval.
+After reviews complete, follow the **step-transition** skill (`claude/skills/work-harness/step-transition.md`) for the approval ceremony, gate creation, state update, and compaction prompt. Tier 3 adaptations apply: gate issues are required, gate files are required, handoff prompts are required, compaction is required.
 
 ---
 
 ## Context Compaction Protocol
 
-Step transitions are natural compaction boundaries. The completed step's context (research notes, implementation details, review discussion) should not carry over into the next step — the handoff prompt captures everything the next step needs.
-
-**At every step transition, after user acknowledgment:**
-
-1. Confirm the handoff prompt is written and state.json is updated to the new step
-2. Tell the user: **"Step transition complete. Run `/compact` then `/work-deep` to start <next-step> with clean context."**
-3. **Stop.** Do not automatically continue to the next step inline.
+Step transitions are natural compaction boundaries. The **step-transition** skill (`claude/skills/work-harness/step-transition.md`) handles the compaction prompt — for Tier 3, it tells the user to run `/compact` then `/work-deep` and then stops.
 
 When the user runs `/work-deep` after compacting, it detects the active task, reads `current_step`, and routes to the new step with only the handoff prompt as context.
 
@@ -128,44 +131,89 @@ Structured exploration to build understanding before planning.
 
 1. **Read the task context**: Review `$ARGUMENTS`, beads issue details, and any conversation context.
 
-2. **Structured exploration via parallel subagents**: Launch Explore agents to investigate aspects of the task. Spawn with `skills: [work-harness, code-quality]`.
+2. **Read managed docs**: If `harness.yaml` has `docs.managed` entries, read the manifest. Pass all managed doc paths to research agents in a `## Managed Project Docs` section. If `docs.managed` is absent, run auto-detection (see `claude/skills/work-harness/context-docs.md`) and suggest doc types to the user.
 
-3. **Research notes**: For each finding, create a note in `.work/<name>/research/` and index it in `.work/<name>/research/index.md`:
-   ```markdown
-   | Topic | Summary | Status | File |
-   |-------|---------|--------|------|
-   | <topic> | <one-line summary> | <explored|dead-end|future> | `<filename>.md` |
+3. **Plan research topics**: Identify the key areas to investigate. For each topic, assign:
+   - A target file path: `.work/<name>/research/NN-<topic-slug>.md`
+   - An index entry for `research/index.md`
+
+4. **Spawn Explore agents with structured prompts**: Launch one Explore agent per research topic. Each agent receives a prompt containing all five required fields:
+
+   **Research Agent Prompt Template:**
+   ```
+   ## Task Context
+   <2-3 sentence summary of the initiative, current goals, and what has been explored so far>
+
+   ## Topic Scope
+   <Specific area to investigate, bounded by what questions to answer>
+
+   ## Target File Path
+   Write your research note to: `.work/<name>/research/NN-<topic-slug>.md`
+
+   ## Index Entry Format
+   Append this row to `.work/<name>/research/index.md`:
+   | <topic> | <one-line summary> | <explored|dead-end|future> | `NN-<topic-slug>.md` |
+
+   ## Note Format
+   Use this structure for your research note:
+
+   # <Topic Title>
+
+   ## Questions
+   - <What this research set out to answer>
+
+   ## Findings
+   <Structured findings with evidence — code references, file paths, doc citations>
+
+   ## Implications
+   - <How findings affect architecture or implementation decisions>
+
+   ## Open Questions
+   - <Unresolved items that need further investigation or planning input>
    ```
 
-4. **Dead ends**: If an approach fails, document it in `.work/<name>/research/dead-ends.md` (same format as `/work-redirect`). Do NOT re-investigate documented dead ends.
+   **Agent delegation**: Consult the **Step Routing Table** for `research`:
+   - **Agent type**: Explore (read-only)
+   - **Skills**: Inject per the `research-agent-skills` fragment above
+   - **Context**: Provide beads issue details and managed docs (if configured)
 
-5. **Futures**: If research reveals deferred enhancements, append to `.work/<name>/futures.md` with title, horizon (next/quarter/someday), domain, and 2-4 sentence description.
+   **Agent file-writing responsibilities**: Each Explore agent:
+   - Writes its research note to the target file path provided in the prompt
+   - Appends its index entry to `.work/<name>/research/index.md`
+   - If the agent discovers a dead end, appends to `.work/<name>/research/dead-ends.md` (same format as `/work-redirect`) instead of or in addition to writing a note
+   - If the agent discovers a future enhancement, appends to `.work/<name>/futures.md`
 
-6. **Handoff prompt**: When research is sufficient, generate `.work/<name>/research/handoff-prompt.md`:
-   - What this step produced (topic summaries, key findings)
-   - Key artifacts and paths
-   - Decisions made during research
-   - Open questions to address in planning
-   - Instructions for the plan step
+   **Agents write files directly. The lead does NOT transcribe agent findings.** If an agent fails to write its file (e.g., crashes, times out), re-spawn it with the same prompt.
+
+5. **Verify coverage and re-spawn if needed**: After agents complete, the lead:
+   1. **Verify coverage**: Check that all planned topics have notes in `research/` and entries in `index.md`
+   2. **Identify gaps**: If any topic was missed or a note is incomplete, re-spawn the agent
+   3. **Synthesize handoff prompt**: Write `.work/<name>/research/handoff-prompt.md` by reading the agent-written notes and producing:
+      - Cross-references between topics (connections agents could not see individually)
+      - Dependency relationships discovered across notes
+      - Consolidated open questions (deduplicated, prioritized)
+      - Research coverage summary (what was investigated, what was skipped and why)
+   4. The lead does NOT copy findings into the handoff — it **references note file paths** instead of duplicating content
+
+6. **Dead ends and futures**: Dead-end documentation and futures capture are agent responsibilities (see step 4). The lead verifies these files exist and are complete during coverage verification. Do NOT re-investigate documented dead ends.
 
 7. **Auto-advance** (see Inter-Step Quality Review Protocol):
    a. Write the handoff prompt to `.work/<name>/research/handoff-prompt.md`
-   b. **Phase A — Artifact validation** — spawn Explore agent (read-only). Checklist:
+   b. **Phase A — Artifact validation** (see `phase-review` skill) — spawn Explore agent (read-only). Checklist:
       - Are findings indexed in research/index.md?
+      - Do all planned topics have corresponding research notes?
       - Are dead ends documented?
       - Are futures captured in `.work/<name>/futures.md`?
       - Are open questions for planning identified?
-   c. **Phase B — Quality review** — spawn Plan agent (read-only) with `skills: [code-quality]`. Checklist:
+   c. **Phase B — Quality review** (see `phase-review` skill) — spawn Plan agent (read-only). Inject skills per the **Step Routing Table** `review-agent-skills` fragment. Checklist:
       - Do findings cover the full task scope (no major areas uninvestigated)?
       - Are findings evidence-based (references to code, docs, or prior art)?
       - Are findings consistent with `.claude/rules/architecture-decisions.md`?
       - Are open questions specific enough to drive planning decisions?
-   d. Apply verdict: PASS/ADVISORY -> continue to (e). BLOCKING -> fix and re-review (max 2 attempts, then ask user).
-   e. **Present detailed summary to user**: what research found, key artifacts produced, open questions for planning, review results with full advisory notes, what the plan step will involve. End with: "Ready to advance to **plan**? (yes/no)"
-   f. **STOP. Do NOT update state.json or create gate issues in this turn.** Wait for explicit user approval.
-   f'. **If user asks questions or gives feedback**: Answer, then re-present: "Ready to advance to **plan**? (yes/no)"
-   g. **On explicit approval** (yes, proceed, approve, lgtm, go ahead, continue): Create gate issue: `bd create --title="[Gate] <name>: research -> plan" --type=task --priority=2` (log ADVISORY notes in description). Update state.json in a single write: mark research `completed` with `gate_id`, set plan to `active`, set `current_step` to `plan`, update `updated_at`.
-   h. **Context compaction**: Apply the Context Compaction Protocol — tell the user to run `/compact` then `/work-deep` to start **plan** with clean context, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/architecture-decisions.md`, and the handoff prompt.
+      - Does the handoff prompt reference note file paths rather than copying content?
+   d. Apply verdict per the `phase-review` skill verdict protocol.
+   e. **Write gate file**: Write `.work/<name>/gates/research-to-plan.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from review results.
+   f. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark research `completed` with `gate_id` and `gate_file: "gates/research-to-plan.md"`, set plan to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/architecture-decisions.md`, and the handoff prompt.
 
 ---
 
@@ -177,7 +225,9 @@ Synthesize research into an architecture document.
 
 1. **Read research handoff**: Read `.work/<name>/research/handoff-prompt.md` — this is the primary input. Do NOT re-read individual research notes (the handoff is the firewall).
 
-2. **Write architecture document**: Create `.work/<name>/specs/architecture.md`:
+2. **Read managed docs**: If `harness.yaml` has `docs.managed` entries, read the manifest and pass all managed doc paths to any plan subagents in a `## Managed Project Docs` section.
+
+3. **Write architecture document**: Create `.work/<name>/specs/architecture.md`:
    - Problem statement and goals
    - Component map with scope estimates
    - Data flow diagrams (text-based)
@@ -185,35 +235,32 @@ Synthesize research into an architecture document.
    - Open questions resolved from research
    - New questions deferred to spec
 
-3. **Update summary**: Update `docs/feature/<name>.md` — fill in the What section and add a Components list from the architecture.
+4. **Update summary**: Update `docs/feature/<name>.md` — fill in the What section and add a Components list from the architecture.
 
-4. **Handoff prompt**: Generate `.work/<name>/plan/handoff-prompt.md`:
+5. **Handoff prompt**: Generate `.work/<name>/plan/handoff-prompt.md`:
    - What this step produced
    - Architecture document location
    - Component list for spec writing
    - Instructions for spec step
 
-5. **Futures**: If planning reveals deferred enhancements, append to `.work/<name>/futures.md`.
+6. **Futures**: If planning reveals deferred enhancements, append to `.work/<name>/futures.md`.
 
-6. **Auto-advance** (see Inter-Step Quality Review Protocol):
+7. **Auto-advance** (see Inter-Step Quality Review Protocol):
    a. Write the handoff prompt to `.work/<name>/plan/handoff-prompt.md`
-   b. **Phase A — Artifact validation** — spawn Explore agent (read-only). Checklist:
+   b. **Phase A — Artifact validation** (see `phase-review` skill) — spawn Explore agent (read-only). Checklist:
       - Does the architecture cover all goals from the research handoff?
       - Are component boundaries clear (no overlapping responsibilities)?
       - Are technology choices justified?
       - Is the dependency order between components correct?
       - Are scope exclusions explicit?
-   c. **Phase B — Quality review** — spawn Plan agent (read-only) with `skills: [code-quality]`. Checklist:
+   c. **Phase B — Quality review** (see `phase-review` skill) — spawn Plan agent (read-only). Inject skills per the **Step Routing Table** `review-agent-skills` fragment. Checklist:
       - Do technology choices align with decision rules in `.claude/rules/architecture-decisions.md`?
       - Does component layering follow the project's established architecture?
       - Are all services using constructor injection?
       - Do failure modes fail closed (no silent fallbacks)?
-   d. Apply verdict: PASS/ADVISORY -> continue to (e). BLOCKING -> fix and re-review (max 2 attempts, then ask user).
-   e. **Present detailed summary to user**: architecture overview, component count and list, technology choices with rationale, deferred questions for spec, review results with full advisory notes, what the spec step will involve. End with: "Ready to advance to **spec**? (yes/no)"
-   f. **STOP. Do NOT update state.json or create gate issues in this turn.** Wait for explicit user approval.
-   f'. **If user asks questions or gives feedback**: Answer, then re-present: "Ready to advance to **spec**? (yes/no)"
-   g. **On explicit approval** (yes, proceed, approve, lgtm, go ahead, continue): Create gate issue: `bd create --title="[Gate] <name>: plan -> spec" --type=task --priority=2` (log ADVISORY notes in description). Update state.json: mark plan `completed` with `gate_id`, set spec to `active`, set `current_step` to `spec`, update `updated_at`.
-   h. **Context compaction**: Apply the Context Compaction Protocol — tell the user to run `/compact` then `/work-deep` to start **spec** with clean context, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/architecture-decisions.md`, and the handoff prompt.
+   d. Apply verdict per the `phase-review` skill verdict protocol.
+   e. **Write gate file**: Write `.work/<name>/gates/plan-to-spec.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from review results.
+   f. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark plan `completed` with `gate_id` and `gate_file: "gates/plan-to-spec.md"`, set spec to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/architecture-decisions.md`, and the handoff prompt.
 
 ---
 
@@ -250,25 +297,22 @@ Write detailed implementation specifications per component.
 
 8. **Auto-advance** (see Inter-Step Quality Review Protocol):
    a. Write the handoff prompt to `.work/<name>/specs/handoff-prompt.md`
-   b. **Phase A — Artifact validation** — spawn Explore agent (read-only). Checklist:
+   b. **Phase A — Artifact validation** (see `phase-review` skill) — spawn Explore agent (read-only). Checklist:
       - Do all specs reference the cross-cutting contracts (spec 00)?
       - Are path conventions consistent across all specs?
       - Are all state.json fields used in specs declared in spec 00?
       - Do code examples match the described behavior?
       - Are testing strategies concrete?
       - Are edge cases for each rule documented?
-   c. **Phase B — Quality review** — spawn Plan agent (read-only) with `skills: [code-quality]`. Checklist:
+   c. **Phase B — Quality review** (see `phase-review` skill) — spawn Plan agent (read-only). Inject skills per the **Step Routing Table** `review-agent-skills` fragment. Checklist:
       - Are acceptance criteria testable and unambiguous?
       - Are interface contracts consistent across specs (no divergent copies)?
       - Do specs account for error paths and fail-closed behavior?
       - Are implementation steps ordered correctly (dependencies before dependents)?
       - Do specs avoid over-engineering (no premature abstractions)?
-   d. Apply verdict: PASS/ADVISORY -> continue to (e). BLOCKING -> fix and re-review (max 2 attempts, then ask user).
-   e. **Present detailed summary to user**: spec count, component breakdown per spec, key design decisions, resolved deferred questions with their resolutions, review results with full advisory notes, what the decompose step will involve. End with: "Ready to advance to **decompose**? (yes/no)"
-   f. **STOP. Do NOT update state.json or create gate issues in this turn.** Wait for explicit user approval.
-   f'. **If user asks questions or gives feedback**: Answer, then re-present: "Ready to advance to **decompose**? (yes/no)"
-   g. **On explicit approval** (yes, proceed, approve, lgtm, go ahead, continue): Create gate issue: `bd create --title="[Gate] <name>: spec -> decompose" --type=task --priority=2` (log ADVISORY notes in description). Update state.json: mark spec `completed` with `gate_id`, set decompose to `active`, set `current_step` to `decompose`, update `updated_at`.
-   h. **Context compaction**: Apply the Context Compaction Protocol — tell the user to run `/compact` then `/work-deep` to start **decompose** with clean context, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/beads-workflow.md`, and the handoff prompt.
+   d. Apply verdict per the `phase-review` skill verdict protocol.
+   e. **Write gate file**: Write `.work/<name>/gates/spec-to-decompose.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from review results.
+   f. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark spec `completed` with `gate_id` and `gate_file: "gates/spec-to-decompose.md"`, set decompose to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/beads-workflow.md`, and the handoff prompt.
 
 ---
 
@@ -296,36 +340,94 @@ Break specs into executable work items with a concurrency map.
    - Document the DAG and critical path
    - Verify: no file appears in more than one stream within the same phase
 
-4. **Stream execution documents**: For each stream, write a self-contained agent prompt in `.work/<name>/streams/<stream-letter>.md`:
+4. **Stream execution documents**: For each stream, write a self-contained agent prompt in `.work/<name>/streams/<stream-letter>.md` with YAML frontmatter and markdown body:
+
+   **Frontmatter** (between `---` fences):
+   - `stream`: uppercase letter identifier
+   - `phase`: execution phase number (streams in the same phase run in parallel)
+   - `isolation`: execution mode — `inline` (trivial, lead executes directly), `subagent` (single-session, default), or `worktree` (multi-session, git isolation). See isolation mode selection table below.
+   - `agent_type`: `general-purpose` (default for implementation), `Explore` (read-only investigation), `Plan` (design/review), or a custom domain expert name. See agent type selection table below.
+   - `skills`: list of skill slugs the agent needs (e.g., `[work-harness, code-quality]`)
+   - `scope_estimate`: T-shirt size (`S`, `M`, or `L`)
+   - `file_ownership`: list of every file this stream may create or modify (project-relative paths). Verify: no file appears in more than one stream within the same phase.
+
+   **Body** (markdown, after frontmatter):
    - Stream identity and work items (beads IDs)
    - Spec references for each work item
-   - Files to create/modify
-   - Acceptance criteria per work item
+   - Acceptance criteria per work item (reference spec ACs by ID, do not duplicate full text)
    - Dependency constraints (what must complete before this stream starts)
+   - Do NOT inline skill content — reference skills by slug only. Agents receive skill content via the Skill Injection mechanism at spawn time.
 
-5. **Issue manifest**: Create `.work/<name>/streams/manifest.jsonl` mapping work items to beads IDs, streams, and phases.
+   #### Isolation Mode Selection
+
+   | Mode | Use When | Tradeoffs |
+   |------|----------|-----------|
+   | `inline` | Trivial work items (config edits, single-file changes) under scope S. The lead agent executes directly without spawning. | Fastest; no coordination overhead. Blocks the lead while executing. Cannot parallelize. |
+   | `subagent` | Most work items. Single-session, single-concern work that fits in one agent context window. Scope S or M. | Good parallelism; low coordination cost. Agent cannot persist across sessions. Limited to one context window of work. |
+   | `worktree` | Multi-session work requiring git isolation. Scope L, or when the stream modifies files that conflict with other active streams across phases. | Full git isolation; survives session boundaries. High coordination cost; requires manual branch management by the user. |
+
+   **Selection heuristic:**
+   1. If scope is S and touches 1-2 files: `inline`
+   2. If scope is S or M and completable in one session: `subagent`
+   3. If scope is L, or requires git isolation from concurrent work: `worktree`
+   4. When in doubt, prefer `subagent` — it is the most common and has the best effort-to-isolation ratio
+
+   #### Agent Type Selection
+
+   | Agent Type | Use When | Capabilities |
+   |------------|----------|-------------|
+   | `general-purpose` | Default for implementation work. Read-write access to the codebase. | Can create, modify, and delete files. Can run tests and builds. |
+   | `Explore` | Read-only investigation. Tracing call chains, finding usage sites, understanding code structure. | Read-only. Cannot modify files. Lower risk, can run in parallel without file conflicts. |
+   | `Plan` | Architecture and design work. Reviewing specs, evaluating tradeoffs, planning approaches. | Read-only. Produces plans and recommendations, not code changes. |
+   | Custom name | Domain-specific expert (e.g., `database-architect`, `api-designer`). Use when the stream requires specialized knowledge framing. | Same capabilities as `general-purpose` but with a domain-expert identity that primes better reasoning for the domain. |
+
+   **Guidance:**
+   - Implementation streams: `general-purpose` (or a custom domain expert name)
+   - Review/validation streams: `Explore` or `Plan`
+   - Research sub-tasks discovered during implement: `Explore`
+   - Match the agent type to the nature of the work, not to the step name
+
+5. **Issue manifest**: Create `.work/<name>/streams/manifest.jsonl` mapping work items to stream metadata. Each line is a JSON object with these fields:
+   ```json
+   {
+     "work_item": "W-01",
+     "title": "...",
+     "spec": "01",
+     "beads_id": "abc123",
+     "stream": "a",
+     "phase": 1,
+     "isolation": "subagent",
+     "agent_type": "general-purpose",
+     "skills": ["code-quality", "work-harness"],
+     "scope_estimate": "S",
+     "file_ownership": ["path/to/file.go"]
+   }
+   ```
+   All metadata fields mirror the stream doc YAML frontmatter. This enables cross-referencing and scheduling without re-parsing stream docs.
 
 6. **Futures**: If you discover deferred enhancements during decompose, append to `.work/<name>/futures.md`.
 
 7. **Auto-advance** (see Inter-Step Quality Review Protocol):
    a. Write the handoff prompt to `.work/<name>/streams/handoff-prompt.md`
-   b. **Phase A — Artifact validation** — spawn Explore agent (read-only). Checklist:
+   b. **Phase A — Artifact validation** (see `phase-review` skill) — spawn Explore agent (read-only). Checklist:
       - Does every spec component map to at least one work item? (Title must reference spec: `W-NN: ... — spec NN`)
       - Are beads issue dependencies consistent with spec dependency ordering?
       - Can claimed "parallel" streams actually run in parallel (no hidden deps)?
       - Do stream execution docs have acceptance criteria?
       - Is the concurrency map consistent with the dependency graph?
-   c. **Phase B — Quality review** — spawn Plan agent (read-only) with `skills: [code-quality]`. Checklist:
+      - Do stream docs have valid YAML frontmatter with all required fields (`stream`, `phase`, `isolation`, `agent_type`, `skills`, `scope_estimate`, `file_ownership`)?
+      - Do stream doc `skills:` lists reference only slugs that exist in `claude/skills/`?
+      - Does `file_ownership` across streams within the same phase contain no duplicates?
+      - Is every file in the codebase claimed by at most one stream per phase? Cross-check all stream docs' `file_ownership` lists within each phase. Report any file that appears in multiple streams within the same phase as a conflict.
+   c. **Phase B — Quality review** (see `phase-review` skill) — spawn Plan agent (read-only). Inject skills per the **Step Routing Table** `review-agent-skills` fragment. Checklist:
       - Are work items at the right granularity (each completable in one agent session)?
       - Do stream boundaries align with code module boundaries (no file conflicts)?
       - Is phase ordering correct (foundational work before dependent work)?
       - Are parallel streams truly independent (no shared mutable state)?
-   d. Apply verdict: PASS/ADVISORY -> continue to (e). BLOCKING -> fix and re-review (max 2 attempts, then ask user).
-   e. **Present detailed summary to user**: N work items across M streams, concurrency map, phase ordering, critical path, review results with full advisory notes, what the implement step will involve. End with: "Ready to advance to **implement**? (yes/no)"
-   f. **STOP. Do NOT update state.json or create gate issues in this turn.** Wait for explicit user approval.
-   f'. **If user asks questions or gives feedback**: Answer, then re-present: "Ready to advance to **implement**? (yes/no)"
-   g. **On explicit approval** (yes, proceed, approve, lgtm, go ahead, continue): Create gate issue: `bd create --title="[Gate] <name>: decompose -> implement" --type=task --priority=2` (log ADVISORY notes in description). Update state.json: mark decompose `completed` with `gate_id`, set implement to `active`, set `current_step` to `implement`, update `updated_at`.
-   h. **Context compaction**: Apply the Context Compaction Protocol — tell the user to run `/compact` then `/work-deep` to start **implement** with clean context, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/beads-workflow.md`, `.claude/rules/architecture-decisions.md`, and the handoff prompt.
+      - Do file ownership boundaries align with module boundaries? (A stream should not own scattered files across unrelated packages — it should own a cohesive set.)
+   d. Apply verdict per the `phase-review` skill verdict protocol.
+   e. **Write gate file**: Write `.work/<name>/gates/decompose-to-implement.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from review results.
+   f. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark decompose `completed` with `gate_id` and `gate_file: "gates/decompose-to-implement.md"`, set implement to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/beads-workflow.md`, `.claude/rules/architecture-decisions.md`, and the handoff prompt.
 
 ---
 
@@ -339,44 +441,65 @@ Execute the implementation plan from decompose.
 
 1. **Read decompose handoff**: Read `.work/<name>/streams/handoff-prompt.md`.
 
-2. **Parallel agent execution**: Spawn one subagent per independent stream from the streams handoff:
-   - Each subagent receives: its stream execution doc + relevant specs + `skills: [work-harness, code-quality]`
-   - Subagents claim work with `bd update <id> --status=in_progress` and close with `bd close <id>`
-   - Lead agent monitors completion and launches next-phase agents when dependencies clear
+2. **Read managed docs**: If `harness.yaml` has `docs.managed` entries, read the manifest. Pass managed doc paths to implementation agents in a `## Managed Project Docs` section. Pass all paths when relevance to the stream's file scope cannot be determined; otherwise pass only relevant paths.
 
-3. **Phase gating** (enforced — see Inter-Step Quality Review Protocol): After each implementation phase completes:
-   - **Phase A — Artifact validation**: Spawn Explore agent (read-only) to check implementations match spec file lists and acceptance criteria
-   - **Phase B — Quality review**: Spawn review agent (read-only) with `skills: [code-quality]`. If `review_routing` is configured in `harness.yaml`, use the matching agents for the changed file types. Otherwise use the `work-review` agent. Checklist:
+3. **Parallel agent execution**: For each stream in the current phase, read the stream doc YAML frontmatter to determine execution parameters. Consult the **Step Routing Table** for the `implement` step defaults; stream doc frontmatter overrides these defaults when present.
+
+   a. **Agent type selection** (from stream doc `agent_type` field):
+      - `general-purpose`: Spawn with full read/write access (default for implementation)
+      - `Explore`: Spawn read-only (for research/validation streams)
+      - `Plan`: Spawn in plan mode (for design/decomposition streams)
+
+   b. **Skill propagation**: Include all slugs from the stream doc `skills:` field. Inject skills using the `implement-agent-skills` fragment from the Skill Injection section, replacing skill file paths as needed to match the stream's skill list.
+
+   c. **Isolation mode** (from stream doc `isolation` field):
+      - `inline`: Execute the work items directly in the lead agent context. No subagent spawn.
+      - `subagent`: Spawn one subagent with the agent type and skills determined above. Pass the stream doc as the agent prompt.
+      - `worktree`: Notify user that worktree isolation is recommended for this stream. Provide the stream doc path and let the user manage the worktree lifecycle. Do not attempt to create or manage worktrees.
+
+   d. Within each phase, execute `inline` streams sequentially first, then spawn all `subagent` streams in parallel. Wait for all streams in a phase to complete before starting the next phase.
+
+   e. Each subagent receives: its stream execution doc + relevant specs
+   f. Subagents claim work with `bd update <id> --status=in_progress` and close with `bd close <id>`
+   g. Lead agent monitors completion and launches next-phase agents when dependencies clear
+
+4. **Phase gating** (enforced — see Inter-Step Quality Review Protocol and `phase-review` skill): After each implementation phase completes:
+   - **File ownership validation**: Before running reviews, verify no file appears in more than one stream's `file_ownership` list within the completed phase. If conflicts exist, report them as BLOCKING and list the conflicting files and streams.
+   - **Phase A — Artifact validation** (see `phase-review` skill): Spawn Explore agent (read-only) to check implementations match spec file lists and acceptance criteria. Additionally verify:
+     - Each stream's modifications are within its declared `file_ownership` list
+     - No undeclared files were created or modified by a stream agent
+   - **Phase B — Quality review** (see `phase-review` skill): Select review agent using this precedence:
+     1. If `review_routing` is configured in `harness.yaml`: match changed file patterns against routing table to select agents
+     2. If stream docs specify an `agent_type` override for review: use that
+     3. Otherwise: use the `work-review` agent
+   - Inject skills from the union of all completed streams' `skills:` lists, using the **Step Routing Table** `review-agent-skills` fragment as the base. Checklist:
      - Does the implementation comply with the relevant spec's acceptance criteria?
      - Are code-quality anti-patterns absent (error swallowing, fabricated data, fail-open)?
      - Do new tests cover the acceptance criteria?
      - Are constructor injection and error wrapping patterns followed?
    - Write results to `.work/<name>/implement/phase-N-validation.jsonl`
-   - Apply verdict: BLOCKING -> fix and re-review (max 2 attempts, then ask user).
-   - Present review results to user. End with: "Ready to proceed to Phase N+1? (yes/no)". Do NOT start Phase N+1 in the same turn as presenting Phase N results.
-   - If user asks questions or gives feedback: Answer, then re-present: "Ready to proceed to Phase N+1? (yes/no)"
+   - Apply verdict per the `phase-review` skill verdict protocol.
+   - **Write gate file**: Write `.work/<name>/gates/implement-phase-<N>.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from phase validation results.
+   - **Follow the `step-transition` skill** for approval ceremony: Present gate file path and review results. End with: "Ready to proceed to Phase N+1? (yes/no)". Do NOT start Phase N+1 in the same turn as presenting Phase N results. On approval, record `gate_file: "gates/implement-phase-<N>.md"` in step status.
    - Only proceed to Phase N+1 when user gives explicit approval and Phase N validation is PASS or ADVISORY
 
-4. **Checkpoints**: Use `/work-checkpoint` at session boundaries. Multi-session implementation is normal for Tier 3.
+5. **Checkpoints**: Use `/work-checkpoint` at session boundaries. Multi-session implementation is normal for Tier 3.
 
-5. **Verification**: Run the project's test and build commands after each phase or logical unit.
+6. **Verification**: Run the project's test and build commands after each phase or logical unit.
 
-6. **Futures**: If you discover deferred enhancements during implement, append to `.work/<name>/futures.md`.
+7. **Futures**: If you discover deferred enhancements during implement, append to `.work/<name>/futures.md`.
 
-7. **Scope expansion check**: If the user requests changes that would add new components, specs, or work items beyond what was planned, acknowledge the regression.
+8. **Scope expansion check**: If the user requests changes that would add new components, specs, or work items beyond what was planned, acknowledge the regression.
 
-8. **Auto-advance** (when all work items closed — see Inter-Step Quality Review Protocol):
-   a. **Phase B — Quality pre-screen**: Spawn review agent (read-only) with `skills: [code-quality]`. Review full diff (`git diff <base_commit>...HEAD`). Checklist:
+9. **Auto-advance** (when all work items closed — see Inter-Step Quality Review Protocol):
+   a. **Phase B — Quality pre-screen** (see `phase-review` skill): Spawn review agent (read-only). Inject skills per the **Step Routing Table** `review-agent-skills` fragment. Review full diff (`git diff <base_commit>...HEAD`). Checklist:
       - Are there obvious code-quality anti-patterns in the diff?
       - Do all new functions have error handling?
       - Are there any swallowed errors or fabricated defaults?
       - Do tests exist for new functionality?
-   b. Apply verdict: PASS/ADVISORY -> continue to (c). BLOCKING -> fix and re-review (max 2 attempts, then ask user).
-   c. **Present detailed summary to user**: items completed, phases passed, test/build results, review results with full advisory notes, what the review step will involve. End with: "Ready to advance to **review**? (yes/no)"
-   d. **STOP. Do NOT update state.json or create gate issues in this turn.** Wait for explicit user approval.
-   d'. **If user asks questions or gives feedback**: Answer, then re-present: "Ready to advance to **review**? (yes/no)"
-   e. **On explicit approval** (yes, proceed, approve, lgtm, go ahead, continue): Create gate issue: `bd create --title="[Gate] <name>: implement -> review" --type=task --priority=2` (log ADVISORY notes in description). Update state.json: mark implement `completed` with `gate_id`, set review to `active`, set `current_step` to `review`, update `updated_at`.
-   f. **Context compaction**: Apply the Context Compaction Protocol — tell the user to run `/compact` then `/work-deep` to start **review** with clean context, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md` and the latest checkpoint if it exists.
+   b. Apply verdict per the `phase-review` skill verdict protocol.
+   c. **Write gate file**: Write `.work/<name>/gates/implement-to-review.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from review results.
+   d. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark implement `completed` with `gate_id` and `gate_file: "gates/implement-to-review.md"`, set review to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md` and the latest checkpoint if it exists.
 
 ---
 
@@ -402,9 +525,14 @@ Already Tier 3, so escalation is rare. If needed, the user can manually adjust s
 
 ## Skill Propagation
 
-- **Implementation agents**: `skills: [work-harness, code-quality]`
-- **Review agents** (via `/work-review`): `skills: [code-quality]` only
-- **Research agents**: `skills: [work-harness, code-quality]`
+Agent skills are determined by the **Step Routing Table** above. Each step
+specifies the exact skills to propagate. The routing table is the single
+source of truth for agent configuration — do not hardcode skill lists
+in step instructions.
+
+For the skill injection mechanism, see the **Skill Injection (Path B — Prompt-Based)**
+section above. Skills are injected via explicit `Read` instructions in agent prompts
+because Claude Code agent frontmatter does not support `skills:` natively.
 
 ## Session Boundaries
 

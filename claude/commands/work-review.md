@@ -19,8 +19,8 @@ build commands) in all subagent prompts and handoff prompts you produce.
 
 ### Step 1: Detect Task and Scope
 
-1. Find the active task via state discovery: scan `.work/` for `state.json` where `archived_at` is null
-2. If no active task: "No active task found. Run /work to start one." — stop
+1. Follow the **task-discovery** skill (`claude/skills/work-harness/task-discovery.md`) to find the active task
+2. If no active task: "No active task found. Run /work to start one." -- stop
 3. Read `state.json` to get `base_commit`, `issue_id`, `task_name` (the directory name), `tier`
 4. Determine review scope:
    - **Default**: all files changed since task creation:
@@ -91,6 +91,33 @@ For each finding, construct the `findings.jsonl` record:
   "beads_issue_id": null
 }
 ```
+
+### Step 3b: Codex Second-Opinion Review (optional)
+
+If the `codex-review` skill is available (i.e., `which codex` succeeds):
+
+1. **Prepare diff input**: Use the same diff from Step 1 (scope determination)
+2. **Execute Codex**: Run per the codex-review skill's Execution section
+3. **Parse Codex output**: Read the JSONL output. For each finding:
+   a. Verify against the actual code (per Verification Rules in the skill)
+   b. Check against Known Hallucination Patterns
+   c. Classify as CONFIRMED, DISMISSED, or MODIFIED
+4. **Merge confirmed findings**: For each CONFIRMED or MODIFIED finding:
+   - Map to the findings.jsonl schema:
+     - `severity`: map Codex `critical` -> `critical`, `important` -> `important`, `minor` -> `suggestion`
+     - `category`: pass through from Codex output
+     - `found_by`: `codex`
+     - All other fields populated per Step 3's existing schema
+   - Deduplicate against Claude agent findings:
+     - **Same file + same line range (within 5 lines) + same category**: duplicate. Keep the Claude agent finding (it has richer context from the agent's analysis). Mark the Codex finding as deduplicated in the stats.
+     - **Same file + same category but different line**: not a duplicate, include both. Codex may have found a different instance of the same class of issue.
+     - **Same file + different category**: not a duplicate, include both.
+5. **Log Codex stats**: After processing, log:
+   - Total Codex findings: N
+   - Confirmed: N, Dismissed: N, Modified: N
+   - Deduplicated (already found by Claude): N
+
+If `which codex` fails: log "Codex not available, skipping second-opinion review" and continue to Step 4. No error, no warning -- this is expected when Codex is not installed.
 
 ### Step 4: Create Beads Issues for Critical/Important Findings
 

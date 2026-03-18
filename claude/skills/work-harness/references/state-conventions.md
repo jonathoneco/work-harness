@@ -72,7 +72,8 @@ No other transitions are valid:
   "completed_at":   "string|null — set when status becomes 'completed'",
   "skipped_reason": "string|null — one-line reason when status is 'skipped'",
   "handoff_prompt": "string|null — Tier 3 only, path relative to .work/<name>/",
-  "gate_id":        "string|null — beads issue ID for gate review, Tier 3 only"
+  "gate_id":        "string|null — beads issue ID for gate review, Tier 3 only",
+  "gate_file":      "string|null — relative path from .work/<name>/ to the gate review file, Tier 3 only"
 }
 ```
 

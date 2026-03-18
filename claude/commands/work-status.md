@@ -19,12 +19,11 @@ build commands) in all subagent prompts and handoff prompts you produce.
 
 ### Step 1: Discover tasks
 
-Scan `.work/` for subdirectories containing `state.json`.
+Follow the **task-discovery** skill (`claude/skills/work-harness/task-discovery.md`).
 
 - If `$ARGUMENTS` specifies a task name: show `.work/<name>/state.json` (even if archived)
 - If no arguments: show all tasks where `archived_at` is null
-- If `.work/` does not exist or has no tasks: "No active tasks. Run /work to start one."
-- If no active tasks (all archived): "No active tasks. Run /work to start one."
+- If no active tasks: "No active tasks. Run /work to start one."
 
 ### Step 2: Display status for each task
 

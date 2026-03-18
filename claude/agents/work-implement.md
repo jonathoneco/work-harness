@@ -31,6 +31,12 @@ Follow the conventions defined in this project's CLAUDE.md. Common patterns to l
 
 When in doubt, read an existing file in the same layer and follow its patterns exactly.
 
+## Managed Docs
+
+Before starting implementation, check if `harness.yaml` has a `docs.managed` section. If present, read each managed doc listed — these contain project documentation (endpoints, components, schema, etc.) that provide essential context for implementation. Consult them for naming conventions, existing patterns, and architectural constraints.
+
+If managed doc paths are provided in the agent prompt under `## Managed Project Docs`, read those files before writing code.
+
 ## Implementation Workflow
 
 1. **Claim beads issue**: `bd update <id> --status=in_progress`

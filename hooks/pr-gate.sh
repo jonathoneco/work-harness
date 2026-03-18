@@ -5,45 +5,29 @@
 # Matcher: Bash
 set -eu
 
-# Dependency check: jq required for JSON parsing
-command -v jq >/dev/null 2>&1 || { echo "harness: jq required but not found" >&2; exit 2; }
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/common.sh
+. "$SCRIPT_DIR/lib/common.sh"
 
-# Read JSON context from stdin
-INPUT=$(cat)
+harness_require_jq
+harness_read_hook_input
 
 # Extract the command being run — only gate git push
-TOOL=$(printf '%s\n' "$INPUT" | jq -r '.tool_name // empty')
+TOOL=$(printf '%s\n' "$HOOK_INPUT" | jq -r '.tool_name // empty')
 if [ "$TOOL" != "Bash" ]; then
   exit 0
 fi
 
-CMD=$(printf '%s\n' "$INPUT" | jq -r '.tool_input.command // empty')
+CMD=$(printf '%s\n' "$HOOK_INPUT" | jq -r '.tool_input.command // empty')
 
 # Only gate git push commands
 if ! printf '%s\n' "$CMD" | grep -qE '^\s*git\s+push'; then
   exit 0
 fi
 
-CWD=$(printf '%s\n' "$INPUT" | jq -r '.cwd')
+harness_init_config
 
-# Resolve harness directory from this script's location
-HARNESS_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-if command -v yq >/dev/null 2>&1; then
-  . "$HARNESS_DIR/lib/config.sh"
-
-  # Graceful skip: no harness.yaml means project is not harness-enabled
-  if ! harness_has_config "$CWD"; then
-    exit 0
-  fi
-
-  # Validate config parses (R2: malformed = exit 2, not silent skip)
-  if ! harness_validate_config "$CWD"; then
-    echo "harness: .claude/harness.yaml is malformed — fix or remove it" >&2
-    exit 2
-  fi
-fi
-
-cd "$CWD"
+cd "$HOOK_CWD"
 
 # Check if current branch has an active PR — graceful skip if gh not installed
 if ! command -v gh >/dev/null 2>&1; then
@@ -58,9 +42,9 @@ echo "harness: pr-gate: PR detected on this branch — running pre-push checks..
 # Build command checks require yq for config reading
 if command -v yq >/dev/null 2>&1; then
   # Read build commands from harness.yaml
-  format_cmd=$(harness_config_get '.build.format' "$CWD")
-  lint_cmd=$(harness_config_get '.build.lint' "$CWD")
-  build_cmd=$(harness_config_get '.build.build' "$CWD")
+  format_cmd=$(harness_config_get '.build.format' "$HOOK_CWD")
+  lint_cmd=$(harness_config_get '.build.lint' "$HOOK_CWD")
+  build_cmd=$(harness_config_get '.build.build' "$HOOK_CWD")
 
   # If no build commands configured, nothing to check
   if [ -z "$format_cmd" ] && [ -z "$lint_cmd" ] && [ -z "$build_cmd" ]; then

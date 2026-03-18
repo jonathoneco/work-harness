@@ -5,42 +5,20 @@
 # Matcher: (empty)
 set -eu
 
-# Dependency check: jq required for JSON parsing
-command -v jq >/dev/null 2>&1 || { echo "harness: jq required but not found" >&2; exit 2; }
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/common.sh
+. "$SCRIPT_DIR/lib/common.sh"
 
-# Read JSON context from stdin
-INPUT=$(cat)
+harness_require_jq
+harness_read_hook_input
+harness_stop_guard
+harness_init_config
 
-# Prevent infinite loop: if stop hook already fired, allow stop
-STOP_ACTIVE=$(printf '%s\n' "$INPUT" | jq -r '.stop_hook_active // false')
-if [ "$STOP_ACTIVE" = "true" ]; then
+if [ ! -d "$HOOK_CWD/.work" ]; then
   exit 0
 fi
 
-CWD=$(printf '%s\n' "$INPUT" | jq -r '.cwd')
-
-# Resolve harness directory from this script's location
-HARNESS_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-if command -v yq >/dev/null 2>&1; then
-  . "$HARNESS_DIR/lib/config.sh"
-
-  # Graceful skip: no harness.yaml means project is not harness-enabled
-  if ! harness_has_config "$CWD"; then
-    exit 0
-  fi
-
-  # Validate config parses (R2: malformed = exit 2, not silent skip)
-  if ! harness_validate_config "$CWD"; then
-    echo "harness: .claude/harness.yaml is malformed — fix or remove it" >&2
-    exit 2
-  fi
-fi
-
-if [ ! -d "$CWD/.work" ]; then
-  exit 0
-fi
-
-for state_file in "$CWD"/.work/*/state.json; do
+for state_file in "$HOOK_CWD"/.work/*/state.json; do
   [ -f "$state_file" ] || continue
 
   tier=$(jq -r '.tier' "$state_file")
@@ -49,8 +27,7 @@ for state_file in "$CWD"/.work/*/state.json; do
   task_name=$(jq -r '.name' "$state_file")
 
   # Skip legacy format (steps as string array, not object array)
-  steps_type=$(jq -r '.steps[0] | type' "$state_file" 2>/dev/null)
-  if [ "$steps_type" = "string" ]; then
+  if harness_is_legacy_format "$state_file"; then
     continue
   fi
 
@@ -63,8 +40,8 @@ for state_file in "$CWD"/.work/*/state.json; do
     if [ "$has_field" = "true" ]; then
       reviewed=$(jq -r '.reviewed_at // "null"' "$state_file")
       if [ "$reviewed" = "null" ]; then
-        echo "harness: review-verify: task '$task_name' is archived but review was never run" >&2
-        echo "harness: review-verify: run /work-review before archiving." >&2
+        harness_error "task '$task_name' is archived but review was never run"
+        harness_error "run /work-review before archiving."
         exit 2
       fi
     fi
@@ -75,8 +52,8 @@ for state_file in "$CWD"/.work/*/state.json; do
   if [ "$review_status" = "completed" ]; then
     reviewed=$(jq -r '.reviewed_at // "null"' "$state_file")
     if [ "$reviewed" = "null" ]; then
-      echo "harness: review-verify: task '$task_name' review step is 'completed' but reviewed_at is not set" >&2
-      echo "harness: review-verify: run /work-review to set the reviewed_at timestamp." >&2
+      harness_error "task '$task_name' review step is 'completed' but reviewed_at is not set"
+      harness_error "run /work-review to set the reviewed_at timestamp."
       exit 2
     fi
   fi

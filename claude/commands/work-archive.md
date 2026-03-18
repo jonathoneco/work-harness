@@ -19,8 +19,10 @@ build commands) in all subagent prompts and handoff prompts you produce.
 
 ### Step 1: Find the task to archive
 
+Follow the **task-discovery** skill (`claude/skills/work-harness/task-discovery.md`).
+
 - If `$ARGUMENTS` specifies a name: use `.work/<name>/state.json`
-- If no arguments: find active task via state discovery (scan `.work/`, filter `archived_at` null)
+- If no arguments: discover via the skill's algorithm (scan, filter active)
 - If no active tasks: "No active tasks to archive."
 
 ### Step 2: Verify completion

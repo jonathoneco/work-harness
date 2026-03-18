@@ -19,7 +19,7 @@ build commands) in all subagent prompts and handoff prompts you produce.
 
 ### Step 1: Find active task
 
-Scan `.work/` for tasks where `archived_at` is null.
+Follow the **task-discovery** skill (`claude/skills/work-harness/task-discovery.md`).
 
 - If no active task: "No active task. Run /work to start one."
 - Read `state.json` to determine `current_step`

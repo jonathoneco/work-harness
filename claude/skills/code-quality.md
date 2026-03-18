@@ -56,6 +56,17 @@ Do not add migration fallbacks, future-proofing abstractions, or compatibility l
 
 When writing or reviewing code, check against these 8 universal rules. When spawning subagents that will write or review code, include `skills: [code-quality]` in the agent spawn to propagate these rules.
 
+## Parallel Review
+
+For substantial diffs (50+ lines across 3+ files), use the 9-parallel-review-agents
+pattern instead of a single sequential review. Each agent covers one quality dimension
+(correctness, error handling, security, performance, API contract, test coverage,
+maintainability, concurrency, config/infra). A lead agent spawns all 9 in parallel,
+collects findings, deduplicates, and presents a consolidated report.
+
+See `references/parallel-review.md` for the full pattern, agent prompt template,
+and when-to-use guidance.
+
 ## Language-Specific Anti-Patterns
 
 Read `references/<language>-anti-patterns.md` where `<language>` is `stack.language`
@@ -63,3 +74,12 @@ from `.claude/harness.yaml`. If no `harness.yaml` exists or `stack.language` is 
 skip this section.
 
 Adding a new language pack requires only creating one file at `references/<language>-anti-patterns.md` — no changes to this file or any other file are needed.
+
+## Complementary Tools
+
+- **Codex second-opinion review** -- When available, `/work-review` automatically runs Codex as a second reviewer. Codex findings are verified against these same quality rules before inclusion. See the `codex-review` skill for details.
+
+## References
+- **Security Anti-Patterns** -- Common security mistakes in LLM-generated code (path: `references/security-antipatterns.md`)
+- **AI Config Linting** -- Rules for Claude Code and harness configuration files (path: `references/ai-config-linting.md`)
+- **Parallel Review** -- 9-agent concurrent review pattern (path: `references/parallel-review.md`)

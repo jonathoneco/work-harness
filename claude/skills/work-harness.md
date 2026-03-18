@@ -20,8 +20,12 @@ research agents) inherit harness conventions.
 
 - **triage-criteria** — 3-factor depth assessment formula and scoring rubric
 - **review-methodology** — Review gate process, finding lifecycle, severity enforcement
-- **state-conventions** — State model schema, step lifecycle, task discovery
+- **state-conventions** — State model schema, step lifecycle, task discovery (path: `claude/skills/work-harness/references/state-conventions.md`)
 - **depth-escalation** — When and how to escalate from one tier to another
+- **gate-protocol** — Gate file SOP: directory layout, naming, structure, iteration, rollback (path: `claude/skills/work-harness/references/gate-protocol.md`)
+- **task-discovery** — Active task finding, state reading, tier-command mapping (path: `claude/skills/work-harness/task-discovery.md`)
+- **step-transition** — Approval ceremony, gate creation, state update, context compaction (path: `claude/skills/work-harness/step-transition.md`)
+- **phase-review** — Phase A artifact validation + Phase B quality review with verdict handling (path: `claude/skills/work-harness/phase-review.md`)
 
 ## Path Convention
 
@@ -78,6 +82,10 @@ Every step transition runs a two-phase review:
 - **Verdicts**: PASS, ADVISORY (log but don't block), BLOCKING (must fix)
 
 After review completes, present results to user and wait for explicit approval before advancing state.
+
+## Gate Files
+
+Step transitions produce gate files at `.work/<name>/gates/`. These are the primary review artifact -- the user reviews them in their editor rather than scrolling terminal output. See the gate-protocol reference (`claude/skills/work-harness/references/gate-protocol.md`) for naming conventions, file structure, and rollback semantics. Gate files are Tier 3 only.
 
 ## Handoff Prompts
 

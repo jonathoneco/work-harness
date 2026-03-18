@@ -13,12 +13,11 @@ build commands) in all subagent prompts and handoff prompts you produce.
 
 ## Step 1: Detect Active Task
 
-Scan `.work/` for `state.json` files where `archived_at` is null.
-
-- **Active Tier 1 task exists**: Resume it. Read `current_step` and jump to the Step Router.
-- **Active task of different tier exists**: "You have an active Tier <N> task '<name>'. Continue with it, or archive it and start a new one?"
+Follow the **task-discovery** skill (`claude/skills/work-harness/task-discovery.md`).
+This command expects Tier 1. Apply tier-specific handling:
+- **Matching tier (Tier 1)**: Resume at `current_step`. Jump to the Step Router.
+- **Different tier**: "You have an active Tier <N> task '<name>'. Continue with it, or archive it and start a new one?"
 - **No active task**: Proceed to assessment.
-- **`$ARGUMENTS` references a beads issue**: Read issue details with `bd show`.
 
 ## Step 2: Assessment (Tier 1 pre-selected)
 
@@ -59,12 +58,34 @@ User decides — their choice is final. If they switch, escalate per the escalat
 
 ## Step Router
 
+---
+
+## Step Routing Table
+
+| Step | Agent Type | Skills | Context Sources |
+|------|-----------|--------|-----------------|
+| implement | general-purpose | work-harness, code-quality | beads issues |
+| review | inline (no agent spawn) | code-quality | diff since base_commit |
+
+### Skill Injection (Path B — Prompt-Based)
+
+Claude Code agent YAML frontmatter does not natively support `skills:`. When spawning agents, include explicit skill loading instructions in the prompt. Consult the routing table above for which skills each step requires, then inject them using these fragments:
+
+**implement-agent-skills:**
+> Before starting work, read and follow these skills:
+> 1. Read `claude/skills/work-harness.md` for work harness conventions (parent skill with all references).
+> 2. Read `claude/skills/code-quality.md` for quality standards.
+> Then proceed with the implementation task below.
+
+---
+
 ### When current_step = "implement"
 
-1. **Search closed issues for context**:
-   Use a sub-agent to search for prior fixes to similar problems:
+1. **Search closed issues for context**: Consult the **Step Routing Table** for `implement`. Use a sub-agent to search for prior fixes to similar problems. Inject skills per the `implement-agent-skills` fragment:
    ```
-   Agent(subagent_type="Explore", prompt="Search closed beads issues for context about <bug>.
+   Agent(subagent_type="Explore", prompt="<implement-agent-skills injection>
+
+   Search closed beads issues for context about <bug>.
    Run: bd search '<keyword>' --limit 10
    Then bd show each relevant match.
    Return: relevant files, patterns, key decisions.")
@@ -80,11 +101,7 @@ User decides — their choice is final. If they switch, escalate per the escalat
 
 6. **Git commit**: Stage and commit with conventional commit: `fix: <description>`
 
-7. **Present results**: Summarize the fix. End with: "Ready to advance to **review**? (yes/no)". Do NOT update state.json in the same turn.
-
-8. **If user asks questions or gives feedback**: Answer, then re-present: "Ready to advance to **review**? (yes/no)"
-
-9. **On explicit approval**: Update state.json — mark `implement` as `completed`, set `review` to `active`, update `current_step` to `review`.
+7. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`) for implement -> review: Present fix summary. STOP and wait for explicit approval. Tier 1 adaptations apply (no gate issue, no handoff prompt, no compaction prompt). On approval: update state.json in a single write — mark `implement` as `completed`, set `review` to `active`, update `current_step` to `review`.
 
 ### When current_step = "review"
 
@@ -121,5 +138,11 @@ If the user says "escalate to Tier 2" or "escalate to Tier 3" during implementat
 
 ## Skill Propagation
 
-When spawning subagents during implementation:
-- `skills: [work-harness, code-quality]`
+Agent skills are determined by the **Step Routing Table** above. Each step
+specifies the exact skills to propagate. The routing table is the single
+source of truth for agent configuration — do not hardcode skill lists
+in step instructions.
+
+For the skill injection mechanism, see the **Skill Injection (Path B — Prompt-Based)**
+section above. Skills are injected via explicit `Read` instructions in agent prompts
+because Claude Code agent frontmatter does not support `skills:` natively.

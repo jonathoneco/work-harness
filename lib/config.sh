@@ -82,6 +82,25 @@ harness_validate_config() {
       ;;
   esac
 
+  # Validate docs.managed if present
+  hvc_dm=$(yq eval '.docs.managed // ""' "$hvc_file" 2>/dev/null) || true
+  if [ -n "$hvc_dm" ] && [ "$hvc_dm" != "null" ] && [ "$hvc_dm" != "[]" ]; then
+    # Check for non-.md paths
+    hvc_bad_paths=$(yq eval '.docs.managed[].path | select(test("\\.md$") | not)' "$hvc_file" 2>/dev/null) || true
+    if [ -n "$hvc_bad_paths" ]; then
+      echo "harness: docs.managed contains non-.md path: $(echo "$hvc_bad_paths" | head -1)" >&2
+      return 2
+    fi
+
+    # Check for duplicate types
+    hvc_types=$(yq eval '.docs.managed[].type' "$hvc_file" 2>/dev/null) || true
+    hvc_dupes=$(printf '%s\n' "$hvc_types" | sort | uniq -d)
+    if [ -n "$hvc_dupes" ]; then
+      echo "harness: docs.managed has duplicate type: $(echo "$hvc_dupes" | head -1)" >&2
+      return 2
+    fi
+  fi
+
   return 0
 }
 

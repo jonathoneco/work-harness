@@ -19,12 +19,9 @@ build commands) in all subagent prompts and handoff prompts you produce.
 
 ### Step 1: Find task
 
-If `$ARGUMENTS` is provided, use `.work/<name>/state.json`. Otherwise:
+Follow the **task-discovery** skill (`claude/skills/work-harness/task-discovery.md`).
 
-1. Scan `.work/` for tasks where `archived_at` is null
-2. If exactly one active task: use it
-3. If multiple: list them and ask user to specify
-4. If none: "No active tasks. Run /work to start one."
+If `$ARGUMENTS` is provided, use `.work/<name>/state.json` directly. Otherwise, the discovery algorithm finds the active task (handles none, one, or multiple active tasks).
 
 ### Step 2: Read state
 

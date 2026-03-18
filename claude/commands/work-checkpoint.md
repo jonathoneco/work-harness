@@ -19,7 +19,7 @@ build commands) in all subagent prompts and handoff prompts you produce.
 
 ### Step 1: Find active task
 
-Scan `.work/` for tasks where `archived_at` is null.
+Follow the **task-discovery** skill (`claude/skills/work-harness/task-discovery.md`).
 
 - If no active task: "No active task. Run /work to start one."
 - If multiple active tasks: list them and ask user to specify
@@ -76,7 +76,7 @@ On approval:
 
 ### Step 5: If `--step-end` is specified
 
-Perform these additional steps after the checkpoint:
+Follow the **step-transition** skill (`claude/skills/work-harness/step-transition.md`) for the step advancement, with these checkpoint-specific additions:
 
 #### 5a: Generate handoff prompt (Tier 3 only)
 
@@ -108,27 +108,19 @@ Include: what to read first, what to produce, constraints from this step.]
 
 **Present handoff prompt for user approval before advancing step state.**
 
-#### 5b: Advance step
+#### 5b: Advance step via step-transition skill
 
-1. Set current step's `status` to `completed`, set `completed_at` to now
-2. Find next step in `steps` array
-3. Set next step's `status` to `active`, set `started_at` to now
-4. Update `current_step` to the next step name
-5. Update `updated_at`
+On approval, perform the state update as a single atomic write per the `step-transition` skill:
+- Mark current step `completed` with `completed_at`
+- Set next step to `active` with `started_at`
+- Update `current_step` and `updated_at`
+- For Tier 3: create gate issue, record `gate_id` in step status
 
 If this was the last step:
 - Tier 1: auto-archive (set `archived_at`, close beads issue)
 - Tier 2-3: task remains active until `/work-archive`
 
-#### 5c: Create beads gate issue (Tier 3 only)
-
-```bash
-bd create --title="[Gate] <name>: <step> -> <next-step>" --type=task --priority=2
-```
-
-Store the gate issue ID in the completed step's `gate_id` field in step_status.
-
-#### 5d: Git commit
+#### 5c: Git commit
 
 ```bash
 git add .work/<name>/

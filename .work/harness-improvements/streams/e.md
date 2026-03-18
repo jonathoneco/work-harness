@@ -6,6 +6,7 @@ agent_type: general-purpose
 skills: [work-harness, code-quality]
 scope_estimate: M
 file_ownership:
+  - lib/config.sh
   - hooks/lib/common.sh
   - hooks/state-guard.sh
   - hooks/post-compact.sh
