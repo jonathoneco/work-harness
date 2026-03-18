@@ -1,0 +1,12 @@
+{"work_item":"W-01","beads_id":"work-harness-uzd","stream":"A","phase":1,"component":"C1","spec":"01","title":"Stream doc YAML frontmatter"}
+{"work_item":"W-02","beads_id":"work-harness-e2h","stream":"A","phase":1,"component":"C3","spec":"03","title":"Context doc system"}
+{"work_item":"W-03","beads_id":"work-harness-fp6","stream":"A","phase":1,"component":"C5","spec":"05","title":"Research protocol"}
+{"work_item":"W-04","beads_id":"work-harness-xu1","stream":"B","phase":1,"component":"C2","spec":"02","title":"Code quality references"}
+{"work_item":"W-05","beads_id":"work-harness-i41","stream":"C","phase":1,"component":"C4","spec":"04","title":"Gate protocol SOP"}
+{"work_item":"W-06","beads_id":"work-harness-63k","stream":"D","phase":1,"component":"C6","spec":"06","title":"Auto-reground enhancement"}
+{"work_item":"W-07","beads_id":"work-harness-ba9","stream":"E","phase":2,"component":"C7","spec":"07","title":"Hook utilities library"}
+{"work_item":"W-08","beads_id":"work-harness-a4i","stream":"F","phase":2,"component":"C7","spec":"07","title":"Extracted skills + command refs"}
+{"work_item":"W-09","beads_id":"work-harness-ent","stream":"G","phase":3,"component":"C8","spec":"08","title":"Dynamic delegation routing"}
+{"work_item":"W-10","beads_id":"work-harness-eec","stream":"G","phase":3,"component":"C9","spec":"09","title":"Parallel execution v2"}
+{"work_item":"W-11","beads_id":"work-harness-xv5","stream":"H","phase":4,"component":"C10","spec":"10","title":"Codex review integration"}
+{"work_item":"W-12","beads_id":"work-harness-0nd","stream":"I","phase":4,"component":"C11","spec":"11","title":"Memory integration"}
