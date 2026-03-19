@@ -1,7 +1,7 @@
 # Harness Improvements — Research & Triage
 
 **Tier**: 3 (Initiative)
-**Status**: Spec
+**Status**: archived
 **Epic**: work-harness-65t
 
 ## What
@@ -42,3 +42,9 @@ Systematic improvement of the work-harness across 11 components: reducing ~700 l
 - **C8 blocking gate**: `skills:` field verification is a prerequisite for Phase 3 implementation
 - **C6 isolation**: Ships without memory awareness; C11 owns future enrichment path
 - **C10 timing**: Can start as soon as C2 completes, not after all of Phase 1
+
+## Completed
+
+**Archived:** 2026-03-18 | **Findings:** 5 (all fixed) | **Sessions:** 4
+
+Delivered 11 components across 4 phases: 20 new files created (6 skills, 8 references, 1 command, 1 rule, 1 hook library, 3 templates/docs), 28 files modified (9 commands, 8 hooks, 4 skills/refs, install.sh, lib/config.sh, templates). All review findings addressed — schema duality resolved, install.sh hardened, docs corrected.
