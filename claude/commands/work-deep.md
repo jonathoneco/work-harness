@@ -517,7 +517,9 @@ Mandatory full review before archive.
 
 4. **On clean review** (no critical OPEN findings): Mark `review` as `completed`.
 
-5. **Archive**: Task remains active until `/work-archive`. The archive gate requires all critical AND important findings to be FIXED or have `beads_issue_id`.
+5. **Futures**: If review reveals deferred enhancements or architectural improvements, append to `.work/<name>/futures.md`.
+
+6. **Archive**: Task remains active until `/work-archive`. The archive gate requires all critical AND important findings to be FIXED or have `beads_issue_id`.
 
 ## Escalation Handling
 

@@ -1,0 +1,34 @@
+{
+  "name": "w1-quick-wins-hygiene",
+  "title": "W1: Quick Wins & Hygiene",
+  "description": "Batch of 5 small fixes: allowlist commands, clean review findings, docs cleanup, futures save bug, rm -rf permission tuning",
+  "tier": 1,
+  "priority": 2,
+  "base_commit": "1524517b8dac28ed2e98bf270b631b5a85f141ae",
+  "current_step": "review",
+  "steps": [
+    {
+      "name": "assess",
+      "status": "completed"
+    },
+    {
+      "name": "implement",
+      "status": "completed"
+    },
+    {
+      "name": "review",
+      "status": "completed"
+    }
+  ],
+  "assessment": {
+    "scope_spread": 1,
+    "design_novelty": 0,
+    "decomposability": 1,
+    "bulk_modifier": -1,
+    "total": 1,
+    "rationale": "5 independent atomic fixes across config and docs layers. All known patterns."
+  },
+  "created_at": "2026-03-19T00:00:00Z",
+  "archived_at": "2026-03-20T00:00:00Z",
+  "updated_at": "2026-03-20T00:00:00Z"
+}

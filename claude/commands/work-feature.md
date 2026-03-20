@@ -141,7 +141,9 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
 
 3. **On findings**: Address critical and important findings. Re-run `/work-review` after fixes.
 
-4. **Archive**: When ready, run `/work-archive` to close the task. The archive gate requires all critical AND important findings to be FIXED or have `beads_issue_id`.
+4. **Futures**: If review reveals deferred enhancements or improvements, append to `.work/<name>/futures.md`.
+
+5. **Archive**: When ready, run `/work-archive` to close the task. The archive gate requires all critical AND important findings to be FIXED or have `beads_issue_id`.
 
 ## Escalation Handling
 
