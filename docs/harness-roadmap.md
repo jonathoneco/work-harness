@@ -34,18 +34,18 @@ Small fixes that reduce daily friction. Knock these out in a single session.
 
 ## W2: Agent-First Architecture
 
-**Tier**: T3 initiative | **Priority**: P2-P3 | **High impact, foundational**
+**Tier**: T3 initiative | **Priority**: P2-P3 | **High impact, foundational** | **Done**
 
 Core thesis: _The harness should delegate to specialized agents with proper context, not worktrees._
 
-- [ ] **Fix: decompose as agents, not worktrees** — fundamental architecture shift
-- [ ] **Steps as agents** — each workflow phase runs as a named subagent
-- [ ] **Parallelize decomposition** — specific agents for research, planning, spec (current flow is serial)
+- [x] **Fix: decompose as agents, not worktrees** — dispatch blocks in work-deep.md, step-agents.md templates
+- [x] **Steps as agents** — plan, spec, decompose steps dispatch to dedicated agents via step-agents.md
+- [x] **Parallelize decomposition** — Agent Teams for research; phased parallel streams for implement
   - intermediate step for reasoning about what research to do
-- [ ] **`/delegate` command** — auto-routing to the right agent based on task characteristics
-- [ ] **Delegation with proper context as a priority** — agents get seeded with relevant artifacts, not raw dumps
-- [ ] **Subagent delegation audit** — fix current delegation gaps
-- [ ] **Agent Teams integration** — experimental but promising for large parallel work. _Blocked_: requires experimental flag, no session resumption, API may change
+- [x] **`/delegate` command** — keyword-based routing to Explore/Plan/general-purpose agents
+- [x] **Delegation with proper context as a priority** — context-seeding.md protocol, 6-section prompt structure, per-step skill matrix
+- [x] **Subagent delegation audit** — formalized agent prompts in work-fix.md and work-feature.md
+- [x] **Agent Teams integration** — teams-protocol.md for research step; implement step deferred to future work
 
 ---
 
