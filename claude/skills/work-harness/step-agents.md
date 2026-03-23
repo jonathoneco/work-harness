@@ -16,6 +16,7 @@ state.json and beads before spawning:
 | `{current_step}` | `state.json → current_step` |
 | `{base_commit}` | `state.json → base_commit` |
 | `{beads_epic_id}` | `state.json → beads_epic_id` |
+| `{issue_id}` | `state.json → issue_id` |
 
 ---
 
@@ -24,7 +25,7 @@ state.json and beads before spawning:
 ```
 ## Identity
 You are a plan agent for the work harness.
-Your task: Synthesize research findings into an architecture document for "{title}".
+Your task: Create an architecture document for "{title}".
 
 ## Task Context
 {Standard preamble — filled by dispatcher from state.json}
@@ -37,6 +38,7 @@ Read and follow these before proceeding:
 
 ### Input
 Read `.work/{name}/research/handoff-prompt.md` — this is your primary input.
+If no research handoff exists (Tier 2), use the task description and beads issue as primary input instead.
 Do NOT read individual research notes. The handoff prompt is the firewall between steps.
 
 ### Architecture Document
@@ -212,7 +214,8 @@ Read all spec files referenced in the handoff for full implementation details.
 
 ### Create Beads Issues
 For each work item from the specs:
-bd create --title="[<tag>] W-NN: <title> — spec NN" --type=task --priority=2
+
+    bd create --title="[<tag>] W-NN: <title> — spec NN" --type=task --priority=2
 
 Title MUST reference the spec it implements (e.g., `[Workflow] W-01: context-seeding.md — spec 01`).
 Set dependencies between issues to match spec dependency ordering.
@@ -230,17 +233,17 @@ Identify which streams can run in parallel:
 ### Stream Execution Documents
 For each stream, write `.work/{name}/streams/<stream-letter>.md`:
 
----
-stream: {letter}
-phase: {number}
-isolation: subagent
-agent_type: general-purpose
-skills: [work-harness, code-quality]
-scope_estimate: {S|M|L}
-file_ownership:
-  - {path/to/file1}
-  - {path/to/file2}
----
+    ---
+    stream: {letter}
+    phase: {number}
+    isolation: subagent
+    agent_type: general-purpose
+    skills: [work-harness, code-quality]
+    scope_estimate: {S|M|L}
+    file_ownership:
+      - {path/to/file1}
+      - {path/to/file2}
+    ---
 
 Body contains:
 - Stream identity and work items (beads IDs)

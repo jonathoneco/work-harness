@@ -14,8 +14,9 @@
     { "name": "spec", "status": "completed", "gate_id": "work-harness-j6r" },
     { "name": "decompose", "status": "completed", "gate_id": "work-harness-ist" },
     { "name": "implement", "status": "completed", "gate_id": "work-harness-l9c" },
-    { "name": "review", "status": "active" }
+    { "name": "review", "status": "completed" }
   ],
+  "reviewed_at": "2026-03-23T17:00:00Z",
   "assessment": {
     "scope_spread": 2,
     "design_novelty": 2,
@@ -25,6 +26,6 @@
     "rationale": "Foundational architecture shift: new agent delegation subsystem touching commands, skills, subagent prompts, state management. 7 work items across multiple phases."
   },
   "created_at": "2026-03-20T00:00:00Z",
-  "updated_at": "2026-03-23T15:45:00Z",
-  "archived_at": null
+  "updated_at": "2026-03-23T17:15:00Z",
+  "archived_at": "2026-03-23T17:15:00Z"
 }

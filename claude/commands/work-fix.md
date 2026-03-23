@@ -94,7 +94,7 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
    - Title: {title}
    - Step: implement
    - Base commit: {base_commit}
-   - Issue: {beads_issue_id}
+   - Issue: {issue_id}
 
    ## Rules
    Read and follow these before proceeding:

@@ -42,7 +42,7 @@ Core thesis: _The harness should delegate to specialized agents with proper cont
 - [ ] **Steps as agents** — each workflow phase runs as a named subagent
 - [ ] **Parallelize decomposition** — specific agents for research, planning, spec (current flow is serial)
   - intermediate step for reasoning about what research to do
-- [ ] **`/delegate` skill** — auto-routing to the right agent based on task characteristics
+- [ ] **`/delegate` command** — auto-routing to the right agent based on task characteristics
 - [ ] **Delegation with proper context as a priority** — agents get seeded with relevant artifacts, not raw dumps
 - [ ] **Subagent delegation audit** — fix current delegation gaps
 - [ ] **Agent Teams integration** — experimental but promising for large parallel work. _Blocked_: requires experimental flag, no session resumption, API may change

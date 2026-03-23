@@ -62,8 +62,9 @@ Your task: {$ARGUMENTS}
 ## Rules
 Read and follow these before proceeding:
 1. Read `claude/skills/code-quality.md`
-{If active task and route is implementation/research/test: also include}
+{If active task and route is write/create/implement/research/test: also include}
 2. Read `claude/skills/work-harness.md`
+{Plan/design/review routes receive code-quality only, per the spec 00 skill matrix.}
 
 ## Instructions
 {$ARGUMENTS — the user's full description}

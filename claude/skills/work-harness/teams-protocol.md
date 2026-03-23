@@ -50,14 +50,15 @@ Read and follow these before proceeding:
 2. Investigate: {topic-specific questions from task description}
 3. Write findings to: .work/{name}/research/{NN}-{topic-slug}.md
 4. Format: Questions → Findings → Implications → Open Questions
-5. Mark your task complete when the note is written
+5. You own ONLY: .work/{name}/research/{NN}-{topic-slug}.md — do NOT write to any other file. The lead handles index.md and handoff-prompt.md.
 
-## File Ownership
-You own ONLY: .work/{name}/research/{NN}-{topic-slug}.md
-Do NOT write to any other file. The lead handles index.md and handoff-prompt.md.
+## Output Expectations
+Artifact: `.work/{name}/research/{NN}-{topic-slug}.md`
+Format: Questions → Findings → Implications → Open Questions
 
 ## Completion
-Mark your task as complete in the shared task list.
+1. Mark your task as complete in the shared task list.
+2. Return: `Topic: {topic-title} / Status: complete / Artifact: .work/{name}/research/{NN}-{topic-slug}.md / Summary: {1-sentence summary}`
 ```
 
 Variables are filled from state.json: `{name}`, `{title}`, `{topic-title}`,

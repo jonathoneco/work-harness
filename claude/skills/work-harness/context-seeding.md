@@ -86,7 +86,7 @@ artifacts -- it does not copy artifact content inline.
 
 ## 4. Rule File Injection
 
-Every agent reads rule files via the skill injection pattern (spec 00 S3).
+Every agent reads rule files via the skill injection pattern (spec 00, section 3).
 Skills are injected as explicit read instructions in the Rules section:
 
 ```

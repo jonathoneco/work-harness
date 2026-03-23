@@ -93,7 +93,7 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
    - `{tier}` ← state.tier
    - `{current_step}` ← state.current_step
    - `{base_commit}` ← state.base_commit
-   - `{beads_epic_id}` ← state.beads_epic_id
+   - `{beads_epic_id}` ← state.beads_epic_id (if null, omit the Epic line from the preamble)
 
 2. **Spawn agent**:
    ```
@@ -149,7 +149,7 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
    - Title: {title}
    - Step: implement
    - Base commit: {base_commit}
-   - Issue: {beads_issue_id}
+   - Issue: {issue_id}
    ```
 
    If `.claude/harness.yaml` exists, append the stack context block:

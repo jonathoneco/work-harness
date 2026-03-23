@@ -1,6 +1,6 @@
 # W2: Agent-First Architecture
 
-**Status:** active
+**Status:** archived
 **Tier:** 3
 **Priority:** P2
 
@@ -17,7 +17,7 @@ The harness executes plan, spec, and decompose steps inline in the lead agent's 
 | C3 | Step Agent Prompt Templates | Medium | 1 |
 | C4 | Delegation Audit & Fix | Small | 2 |
 | C5 | Agent Teams Integration | Medium | 2 |
-| C6 | `/delegate` Skill | Small | 3 |
+| C6 | `/delegate` Command | Small | 3 |
 
 ## Key Decisions
 
@@ -38,3 +38,9 @@ The harness executes plan, spec, and decompose steps inline in the lead agent's 
 - `claude/skills/work-harness/step-agents.md` — new (C3)
 - `claude/skills/work-harness/teams-protocol.md` — new (C5)
 - `claude/commands/delegate.md` — new (C6)
+
+## Completed
+
+**Archived:** 2026-03-23 | **Findings:** 14 (all fixed) | **Steps:** 7
+
+Shifted the harness from inline step execution to agent-first architecture with formal 6-section prompt templates, context seeding contracts, Agent Teams for parallel research, and a `/delegate` command for ad-hoc delegation.

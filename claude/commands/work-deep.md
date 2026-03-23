@@ -80,6 +80,8 @@ Read `current_step` from state.json and execute the matching section below.
 
 Claude Code agent YAML frontmatter does not natively support `skills:`. When spawning agents, include explicit skill loading instructions in the prompt. Consult the routing table above for which skills each step requires, then inject them using these fragments:
 
+> **Note**: Dispatched steps (plan, spec, decompose) receive skills via templates in `step-agents.md`. Non-dispatched steps (research, implement, review) use the fragments below.
+
 **research-agent-skills:**
 > Before starting work, read and follow these skills:
 > 1. Read `claude/skills/work-harness.md` for work harness conventions (parent skill with all references).
@@ -155,7 +157,7 @@ Structured exploration to build understanding before planning.
       - Expected note format (Questions → Findings → Implications → Open Questions)
       - Managed doc paths (if configured)
    c. Teammates auto-spawn, self-claim topics from the shared task list, and write research notes
-   d. **Teammate prompt**: Each teammate receives the prompt template from the teams protocol, with variables filled from state.json. Teammates get `skills: [work-harness, code-quality]` per the Step Routing Table.
+   d. **Teammate prompt**: Each teammate receives the prompt template from the teams protocol, with variables filled from state.json. Teammates receive skill injection (code-quality + work-harness) via Read instructions in the Rules section, per the Step Routing Table.
 
 5. **Monitor and verify**: The lead monitors the shared task list for completion:
    a. When all tasks complete: read each research note, verify content quality
@@ -180,12 +182,12 @@ Structured exploration to build understanding before planning.
    c. **Phase B — Quality review** (see `phase-review` skill) — spawn Plan agent (read-only). Inject skills per the **Step Routing Table** `review-agent-skills` fragment. Checklist:
       - Do findings cover the full task scope (no major areas uninvestigated)?
       - Are findings evidence-based (references to code, docs, or prior art)?
-      - Are findings consistent with `.claude/rules/architecture-decisions.md`?
+      - Are findings consistent with `.claude/rules/architecture-decisions.md` (if it exists)?
       - Are open questions specific enough to drive planning decisions?
       - Does the handoff prompt reference note file paths rather than copying content?
    d. Apply verdict per the `phase-review` skill verdict protocol.
    e. **Write gate file**: Write `.work/<name>/gates/research-to-plan.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from review results.
-   f. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark research `completed` with `gate_id` and `gate_file: "gates/research-to-plan.md"`, set plan to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/architecture-decisions.md`, and the handoff prompt.
+   f. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark research `completed` with `gate_id` and `gate_file: "gates/research-to-plan.md"`, set plan to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/architecture-decisions.md` (if it exists), and the handoff prompt.
 
 ---
 
@@ -241,13 +243,13 @@ Synthesize research into an architecture document.
       - Is the dependency order between components correct?
       - Are scope exclusions explicit?
    c. **Phase B — Quality review** (see `phase-review` skill) — spawn Plan agent (read-only). Inject skills per the **Step Routing Table** `review-agent-skills` fragment. Checklist:
-      - Do technology choices align with decision rules in `.claude/rules/architecture-decisions.md`?
+      - Do technology choices align with decision rules in `.claude/rules/architecture-decisions.md` (if it exists)?
       - Does component layering follow the project's established architecture?
       - Are all services using constructor injection?
       - Do failure modes fail closed (no silent fallbacks)?
    d. Apply verdict per the `phase-review` skill verdict protocol.
    e. **Write gate file**: Write `.work/<name>/gates/plan-to-spec.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from review results.
-   f. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark plan `completed` with `gate_id` and `gate_file: "gates/plan-to-spec.md"`, set spec to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/architecture-decisions.md`, and the handoff prompt.
+   f. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark plan `completed` with `gate_id` and `gate_file: "gates/plan-to-spec.md"`, set spec to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/architecture-decisions.md` (if it exists), and the handoff prompt.
 
 ---
 
@@ -381,7 +383,7 @@ Break specs into executable work items with a concurrency map.
       - Do file ownership boundaries align with module boundaries? (A stream should not own scattered files across unrelated packages — it should own a cohesive set.)
    d. Apply verdict per the `phase-review` skill verdict protocol.
    e. **Write gate file**: Write `.work/<name>/gates/decompose-to-implement.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from review results.
-   f. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark decompose `completed` with `gate_id` and `gate_file: "gates/decompose-to-implement.md"`, set implement to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/beads-workflow.md`, `.claude/rules/architecture-decisions.md`, and the handoff prompt.
+   f. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark decompose `completed` with `gate_id` and `gate_file: "gates/decompose-to-implement.md"`, set implement to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/beads-workflow.md`, `.claude/rules/architecture-decisions.md` (if it exists), and the handoff prompt.
 
 ---
 
