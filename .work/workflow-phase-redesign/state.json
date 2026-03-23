@@ -1,0 +1,30 @@
+{
+  "name": "workflow-phase-redesign",
+  "title": "W3: Workflow Phase Redesign",
+  "tier": 3,
+  "description": "Rethink how phases work — better exploration, smarter review, research-first paths. Covers explore phase clarity, plan mode redesign, review timing, open question resolution, Phase B finding handling, advisory notes as asks, work-research support, first-class research/design loop, and adversarial-eval improvements.",
+  "base_commit": "9381e6389cbe7995cde8408de8aa38b8b6973f52",
+  "beads_epic": "work-harness-pim",
+  "beads_issue": "work-harness-pn7",
+  "current_step": "plan",
+  "steps": [
+    {"name": "assess", "status": "completed"},
+    {"name": "research", "status": "completed", "completed_at": "2026-03-23T18:45:00Z", "gate_id": "work-harness-0g1", "gate_file": "gates/research-to-plan.md", "handoff_prompt": "research/handoff-prompt.md"},
+    {"name": "plan", "status": "active", "started_at": "2026-03-23T18:45:00Z"},
+    {"name": "spec", "status": "not_started"},
+    {"name": "decompose", "status": "not_started"},
+    {"name": "implement", "status": "not_started"},
+    {"name": "review", "status": "not_started"}
+  ],
+  "assessment": {
+    "scope_spread": 2,
+    "design_novelty": 2,
+    "decomposability": 2,
+    "bulk_modifier": 0,
+    "total": 6,
+    "rationale": "9 distinct work items spanning explore, plan, review, and research phases. New subsystems needed (research loop, explore pushback, plan-mode redesign). Touches command files, step logic, prompt templates, and state schema."
+  },
+  "created_at": "2026-03-23T18:00:00Z",
+  "updated_at": "2026-03-23T18:45:00Z",
+  "archived_at": null
+}
