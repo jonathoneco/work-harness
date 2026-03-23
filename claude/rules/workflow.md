@@ -16,6 +16,7 @@ This project uses the adaptive work harness. Task state is tracked in `.work/` d
 | `/work-reground [name]` | Recover context after a break or compaction |
 | `/work-redirect <reason>` | Record a dead end and pivot |
 | `/work-archive [name]` | Archive a completed task |
+| `/delegate <description>` | Delegate a sub-task to a specialist agent with context seeding |
 
 ## Key Principles
 

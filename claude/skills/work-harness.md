@@ -26,6 +26,9 @@ research agents) inherit harness conventions.
 - **task-discovery** — Active task finding, state reading, tier-command mapping (path: `claude/skills/work-harness/task-discovery.md`)
 - **step-transition** — Approval ceremony, gate creation, state update, context compaction (path: `claude/skills/work-harness/step-transition.md`)
 - **phase-review** — Phase A artifact validation + Phase B quality review with verdict handling (path: `claude/skills/work-harness/phase-review.md`)
+- **context-seeding** — Context seeding protocol for step agent prompts: standard preamble, per-step context table, handoff contract, anti-patterns (path: `claude/skills/work-harness/context-seeding.md`)
+- **step-agents** — Complete prompt templates for plan, spec, and decompose step agents (path: `claude/skills/work-harness/step-agents.md`)
+- **teams-protocol** — Agent Teams usage protocol: naming, task schema, teammate prompts, completion detection, failure handling (path: `claude/skills/work-harness/teams-protocol.md`)
 
 ## Path Convention
 

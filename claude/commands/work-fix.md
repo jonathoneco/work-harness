@@ -81,14 +81,37 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
 
 ### When current_step = "implement"
 
-1. **Search closed issues for context**: Consult the **Step Routing Table** for `implement`. Use a sub-agent to search for prior fixes to similar problems. Inject skills per the `implement-agent-skills` fragment:
-   ```
-   Agent(subagent_type="Explore", prompt="<implement-agent-skills injection>
+1. **Search closed issues for context**: Spawn an Explore agent to search for prior fixes to similar problems. Use the standard prompt structure:
 
+   ```
+   Agent(subagent_type="Explore", prompt="
+   ## Identity
+   You are a research agent for the work harness.
+   Your task: Search closed issues for context about a bug fix.
+
+   ## Task Context
+   - Task: {name} (Tier {tier})
+   - Title: {title}
+   - Step: implement
+   - Base commit: {base_commit}
+   - Issue: {beads_issue_id}
+
+   ## Rules
+   Read and follow these before proceeding:
+   1. Read `claude/skills/code-quality.md`
+   2. Read `claude/skills/work-harness.md`
+
+   ## Instructions
    Search closed beads issues for context about <bug>.
    Run: bd search '<keyword>' --limit 10
    Then bd show each relevant match.
-   Return: relevant files, patterns, key decisions.")
+
+   ## Output Expectations
+   Return a concise summary of: relevant files, patterns, key decisions.
+
+   ## Completion
+   Return your findings as a summary message to the lead.
+   ")
    ```
 
 2. **Locate the problem**: Use error messages, stack traces, and closed issue context to find the relevant source files. Read them to understand the bug.

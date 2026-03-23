@@ -56,8 +56,8 @@ Apply the 3-factor depth assessment against `$ARGUMENTS` and conversation contex
 
 | Step | Agent Type | Skills | Context Sources |
 |------|-----------|--------|-----------------|
-| plan | Explore + Plan | work-harness, code-quality | beads issues, managed docs |
-| implement | general-purpose | work-harness, code-quality | plan document, managed docs |
+| plan | general-purpose | code-quality | beads issues, managed docs |
+| implement | general-purpose | code-quality, work-harness | plan document, managed docs |
 | review | (delegates to /work-review) | code-quality | diff since base_commit |
 
 ### Skill Injection (Path B — Prompt-Based)
@@ -66,8 +66,7 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
 
 **plan-agent-skills:**
 > Before starting work, read and follow these skills:
-> 1. Read `claude/skills/work-harness.md` for work harness conventions (parent skill with all references).
-> 2. Read `claude/skills/code-quality.md` for quality standards.
+> 1. Read `claude/skills/code-quality.md` for quality standards.
 > Then proceed with the planning task below.
 
 **implement-agent-skills:**
@@ -85,31 +84,46 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
 
 ### When current_step = "plan"
 
-1. **Search for context**: Consult the **Step Routing Table** for `plan`. Spawn an Explore agent (read-only) with skills injected per the `plan-agent-skills` fragment. Check closed beads issues and existing code for related work:
+### Dispatch: Plan Agent
+
+1. **Construct prompt**: Read `claude/skills/work-harness/step-agents.md` for the plan agent template.
+   Fill variables from state.json:
+   - `{name}` ← state.name
+   - `{title}` ← state.title
+   - `{tier}` ← state.tier
+   - `{current_step}` ← state.current_step
+   - `{base_commit}` ← state.base_commit
+   - `{beads_epic_id}` ← state.beads_epic_id
+
+2. **Spawn agent**:
    ```
-   Agent(subagent_type="Explore", prompt="<plan-agent-skills injection>
-
-   Search beads issues and code for context about <feature>.
-   Run: bd search '<keyword>' --limit 10
-   Return: related files, patterns, prior decisions.")
+   Agent(
+     description: "plan {name-abbreviated}",
+     prompt: {constructed prompt},
+     mode: "default",
+     subagent_type: "general-purpose"
+   )
    ```
 
-   **If the plan step involves substantial research** (spawning multiple agents, analyzing external data, producing intermediate artifacts): create `.work/<name>/research/` and direct all agents to write outputs there. Agent prompts must include an explicit output path: `"Write results to .work/<name>/research/<filename>.md"`. Never write task artifacts to `/tmp/` — they must be task-scoped and persistent.
+3. **Read return**: Parse the agent's completion signal (see completion format in `claude/skills/work-harness/step-agents.md`).
 
-2. **Write approach document**: Create a lightweight plan (NOT a full architecture doc):
-   - **Files to modify/create** — list with one-line descriptions
-   - **Approach** — 1-2 paragraphs describing the implementation strategy
-   - **Test strategy** — how to verify the feature works
-   - **Subtask breakdown** — if the feature decomposes into 2-3 subtasks, create beads issues:
-     ```bash
-     bd create --title="[Service] <subtask>" --type=task --priority=2
-     bd create --title="[API] <subtask>" --type=task --priority=2
-     bd dep add <api-id> <service-id>  # API depends on Service
-     ```
+4. **Verify artifacts**: Check that expected artifacts exist:
+   - `.work/<name>/specs/architecture.md`
+   - `.work/<name>/plan/handoff-prompt.md`
+   - `docs/feature/<name>.md`
+   If artifacts missing: re-spawn the agent (preserve existing partial artifacts per spec 00 §7).
 
-3. **Futures**: If planning reveals deferred enhancements, append to `.work/<name>/futures.md`.
+5. **Present to user**: Show the agent's summary. Include:
+   - What the agent produced (artifact list with paths)
+   - Key decisions or notable items
+   - Ask: "Review the artifacts, or proceed to validation?"
 
-4. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`) for plan -> implement: Present the plan to the user. STOP and wait for explicit approval. On approval: mark `plan` as `completed`, set `implement` to `active`, update `current_step` in a single state.json write. Tier 2 adaptations apply (gate issue optional, compaction recommended). Tell the user: "Plan complete. Recommend: `/compact` then `/work-feature` to start **implement** with clean context." If user continues without compacting, re-invoke via `Skill('work-feature')`, then proceed normally.
+6. **Handle user feedback**:
+   - If user approves or says "proceed": continue to auto-advance.
+   - If user has feedback: construct re-spawn prompt with a "Previous Attempt" section listing artifacts written and user feedback verbatim, inserted between Rules and Instructions. Re-spawn the agent. Return to step 3.
+   - After 2 re-spawns with unresolved feedback, ask the user how to proceed.
+
+7. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`) for plan -> implement: Present the plan to the user. STOP and wait for explicit approval. On approval: mark `plan` as `completed`, set `implement` to `active`, update `current_step` in a single state.json write. Tier 2 adaptations apply (gate issue optional, compaction recommended). Tell the user: "Plan complete. Recommend: `/compact` then `/work-feature` to start **implement** with clean context." If user continues without compacting, re-invoke via `Skill('work-feature')`, then proceed normally.
 
 ### When current_step = "implement"
 
@@ -123,7 +137,32 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
 
 2. **Context**: Read the plan document. Search closed issues for patterns.
 
-3. **Skill propagation**: Consult the **Step Routing Table** for `implement`. Inject skills per the `implement-agent-skills` fragment when spawning implementation subagents.
+3. **Implementation subagents**: When spawning implementation subagents for subtasks, construct prompts with the standard 6-section structure:
+
+   ```
+   ## Identity
+   You are an implementation agent for the work harness.
+   Your task: {one-line summary of subtask}
+
+   ## Task Context
+   - Task: {name} (Tier {tier})
+   - Title: {title}
+   - Step: implement
+   - Base commit: {base_commit}
+   - Issue: {beads_issue_id}
+   ```
+
+   If `.claude/harness.yaml` exists, append the stack context block:
+
+   ```
+   ## Stack Context
+   - Language: {stack.language}
+   - Framework: {stack.framework}
+   - Database: {stack.database}
+   - Build commands: {stack.build_commands}
+   ```
+
+   Then include Rules (inject skills per the `implement-agent-skills` fragment), Instructions (subtask details + relevant plan sections), Output Expectations, and Completion (standard completion signal format).
 
 4. **Testing**: Run the project's test command after each logical unit. Commit with conventional commits.
 

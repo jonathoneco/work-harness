@@ -69,11 +69,11 @@ Read `current_step` from state.json and execute the matching section below.
 
 | Step | Agent Type | Skills | Context Sources |
 |------|-----------|--------|-----------------|
-| research | Explore | work-harness, code-quality | beads issues, managed docs |
-| plan | Plan | work-harness, code-quality | research handoff prompt |
-| spec | Plan | work-harness, code-quality | plan handoff prompt, architecture.md |
-| decompose | Plan | work-harness, code-quality | spec handoff prompt, all spec files |
-| implement | general-purpose | work-harness, code-quality | stream doc, relevant specs, managed docs |
+| research | Explore | code-quality, work-harness | beads issues, managed docs |
+| plan | general-purpose | code-quality | research handoff prompt |
+| spec | general-purpose | code-quality | plan handoff prompt, architecture.md |
+| decompose | general-purpose | code-quality, work-harness | spec handoff prompt, all spec files |
+| implement | general-purpose | code-quality, work-harness | stream doc, relevant specs, managed docs |
 | review | (delegates to /work-review) | code-quality | diff since base_commit |
 
 ### Skill Injection (Path B — Prompt-Based)
@@ -88,9 +88,19 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
 
 **plan-agent-skills:**
 > Before starting work, read and follow these skills:
-> 1. Read `claude/skills/work-harness.md` for work harness conventions (parent skill with all references).
-> 2. Read `claude/skills/code-quality.md` for quality standards.
+> 1. Read `claude/skills/code-quality.md` for quality standards.
 > Then proceed with the planning task below.
+
+**spec-agent-skills:**
+> Before starting work, read and follow these skills:
+> 1. Read `claude/skills/code-quality.md` for quality standards.
+> Then proceed with the spec task below.
+
+**decompose-agent-skills:**
+> Before starting work, read and follow these skills:
+> 1. Read `claude/skills/code-quality.md` for quality standards.
+> 2. Read `claude/skills/work-harness.md` for work harness conventions (parent skill with all references).
+> Then proceed with the decompose task below.
 
 **implement-agent-skills:**
 > Before starting work, read and follow these skills:
@@ -131,73 +141,35 @@ Structured exploration to build understanding before planning.
 
 1. **Read the task context**: Review `$ARGUMENTS`, beads issue details, and any conversation context.
 
-2. **Read managed docs**: If `harness.yaml` has `docs.managed` entries, read the manifest. Pass all managed doc paths to research agents in a `## Managed Project Docs` section. If `docs.managed` is absent, run auto-detection (see `claude/skills/work-harness/context-docs.md`) and suggest doc types to the user.
+2. **Read managed docs**: If `harness.yaml` has `docs.managed` entries, read the manifest. If `docs.managed` is absent, run auto-detection (see `claude/skills/work-harness/context-docs.md`) and suggest doc types to the user.
 
 3. **Plan research topics**: Identify the key areas to investigate. For each topic, assign:
+   - A topic number and slug: `NN-<topic-slug>`
    - A target file path: `.work/<name>/research/NN-<topic-slug>.md`
-   - An index entry for `research/index.md`
 
-4. **Spawn Explore agents with structured prompts**: Launch one Explore agent per research topic. Each agent receives a prompt containing all five required fields:
+4. **Create research team**: Follow the teams protocol (`claude/skills/work-harness/teams-protocol.md`):
+   a. Create team: `TeamCreate("{step}-{name}")`
+   b. Create shared tasks (one per topic) using the task schema from the teams protocol. Each task description includes:
+      - Topic scope and specific questions to answer
+      - Target output file path
+      - Expected note format (Questions → Findings → Implications → Open Questions)
+      - Managed doc paths (if configured)
+   c. Teammates auto-spawn, self-claim topics from the shared task list, and write research notes
+   d. **Teammate prompt**: Each teammate receives the prompt template from the teams protocol, with variables filled from state.json. Teammates get `skills: [work-harness, code-quality]` per the Step Routing Table.
 
-   **Research Agent Prompt Template:**
-   ```
-   ## Task Context
-   <2-3 sentence summary of the initiative, current goals, and what has been explored so far>
+5. **Monitor and verify**: The lead monitors the shared task list for completion:
+   a. When all tasks complete: read each research note, verify content quality
+   b. If any topic is missing or incomplete: reassign via the task list or investigate inline
+   c. Tear down team: `TeamDelete("{step}-{name}")`
 
-   ## Topic Scope
-   <Specific area to investigate, bounded by what questions to answer>
+6. **Synthesize**: The lead (NOT teammates) generates:
+   - `.work/<name>/research/index.md` — topic index with status
+   - `.work/<name>/research/handoff-prompt.md` — cross-references, consolidated open questions, research coverage summary
+   The lead references note file paths in the handoff — does NOT copy findings inline.
 
-   ## Target File Path
-   Write your research note to: `.work/<name>/research/NN-<topic-slug>.md`
+7. **Dead ends and futures**: If any topic is a dead end, document in `.work/<name>/research/dead-ends.md`. If deferred enhancements discovered, append to `.work/<name>/futures.md`.
 
-   ## Index Entry Format
-   Append this row to `.work/<name>/research/index.md`:
-   | <topic> | <one-line summary> | <explored|dead-end|future> | `NN-<topic-slug>.md` |
-
-   ## Note Format
-   Use this structure for your research note:
-
-   # <Topic Title>
-
-   ## Questions
-   - <What this research set out to answer>
-
-   ## Findings
-   <Structured findings with evidence — code references, file paths, doc citations>
-
-   ## Implications
-   - <How findings affect architecture or implementation decisions>
-
-   ## Open Questions
-   - <Unresolved items that need further investigation or planning input>
-   ```
-
-   **Agent delegation**: Consult the **Step Routing Table** for `research`:
-   - **Agent type**: Explore (read-only)
-   - **Skills**: Inject per the `research-agent-skills` fragment above
-   - **Context**: Provide beads issue details and managed docs (if configured)
-
-   **Agent file-writing responsibilities**: Each Explore agent:
-   - Writes its research note to the target file path provided in the prompt
-   - Appends its index entry to `.work/<name>/research/index.md`
-   - If the agent discovers a dead end, appends to `.work/<name>/research/dead-ends.md` (same format as `/work-redirect`) instead of or in addition to writing a note
-   - If the agent discovers a future enhancement, appends to `.work/<name>/futures.md`
-
-   **Agents write files directly. The lead does NOT transcribe agent findings.** If an agent fails to write its file (e.g., crashes, times out), re-spawn it with the same prompt.
-
-5. **Verify coverage and re-spawn if needed**: After agents complete, the lead:
-   1. **Verify coverage**: Check that all planned topics have notes in `research/` and entries in `index.md`
-   2. **Identify gaps**: If any topic was missed or a note is incomplete, re-spawn the agent
-   3. **Synthesize handoff prompt**: Write `.work/<name>/research/handoff-prompt.md` by reading the agent-written notes and producing:
-      - Cross-references between topics (connections agents could not see individually)
-      - Dependency relationships discovered across notes
-      - Consolidated open questions (deduplicated, prioritized)
-      - Research coverage summary (what was investigated, what was skipped and why)
-   4. The lead does NOT copy findings into the handoff — it **references note file paths** instead of duplicating content
-
-6. **Dead ends and futures**: Dead-end documentation and futures capture are agent responsibilities (see step 4). The lead verifies these files exist and are complete during coverage verification. Do NOT re-investigate documented dead ends.
-
-7. **Auto-advance** (see Inter-Step Quality Review Protocol):
+8. **Auto-advance** (see Inter-Step Quality Review Protocol):
    a. Write the handoff prompt to `.work/<name>/research/handoff-prompt.md`
    b. **Phase A — Artifact validation** (see `phase-review` skill) — spawn Explore agent (read-only). Checklist:
       - Are findings indexed in research/index.md?
@@ -221,29 +193,44 @@ Structured exploration to build understanding before planning.
 
 Synthesize research into an architecture document.
 
-**Process:**
+### Dispatch: Plan Agent
 
-1. **Read research handoff**: Read `.work/<name>/research/handoff-prompt.md` — this is the primary input. Do NOT re-read individual research notes (the handoff is the firewall).
+1. **Construct prompt**: Read `claude/skills/work-harness/step-agents.md` for the plan agent template.
+   Fill variables from state.json:
+   - `{name}` ← state.name
+   - `{title}` ← state.title
+   - `{tier}` ← state.tier
+   - `{current_step}` ← state.current_step
+   - `{base_commit}` ← state.base_commit
+   - `{beads_epic_id}` ← state.beads_epic_id
 
-2. **Read managed docs**: If `harness.yaml` has `docs.managed` entries, read the manifest and pass all managed doc paths to any plan subagents in a `## Managed Project Docs` section.
+2. **Spawn agent**:
+   ```
+   Agent(
+     description: "plan {name-abbreviated}",
+     prompt: {constructed prompt},
+     mode: "default",
+     subagent_type: "general-purpose"
+   )
+   ```
 
-3. **Write architecture document**: Create `.work/<name>/specs/architecture.md`:
-   - Problem statement and goals
-   - Component map with scope estimates
-   - Data flow diagrams (text-based)
-   - Technology choices with rationale
-   - Open questions resolved from research
-   - New questions deferred to spec
+3. **Read return**: Parse the agent's completion signal (see completion format in `claude/skills/work-harness/step-agents.md`).
 
-4. **Update summary**: Update `docs/feature/<name>.md` — fill in the What section and add a Components list from the architecture.
+4. **Verify artifacts**: Check that expected artifacts exist:
+   - `.work/<name>/specs/architecture.md`
+   - `.work/<name>/plan/handoff-prompt.md`
+   - `docs/feature/<name>.md`
+   If artifacts missing: re-spawn the agent (preserve existing partial artifacts per spec 00 §7).
 
-5. **Handoff prompt**: Generate `.work/<name>/plan/handoff-prompt.md`:
-   - What this step produced
-   - Architecture document location
-   - Component list for spec writing
-   - Instructions for spec step
+5. **Present to user**: Show the agent's summary. Include:
+   - What the agent produced (artifact list with paths)
+   - Key decisions or notable items
+   - Ask: "Review the artifacts, or proceed to validation?"
 
-6. **Futures**: If planning reveals deferred enhancements, append to `.work/<name>/futures.md`.
+6. **Handle user feedback**:
+   - If user approves or says "proceed": continue to auto-advance.
+   - If user has feedback: construct re-spawn prompt with a "Previous Attempt" section listing artifacts written and user feedback verbatim, inserted between Rules and Instructions. Re-spawn the agent. Return to step 3.
+   - After 2 re-spawns with unresolved feedback, ask the user how to proceed.
 
 7. **Auto-advance** (see Inter-Step Quality Review Protocol):
    a. Write the handoff prompt to `.work/<name>/plan/handoff-prompt.md`
@@ -268,34 +255,47 @@ Synthesize research into an architecture document.
 
 Write detailed implementation specifications per component.
 
-**Process:**
+### Dispatch: Spec Agent
 
-1. **Read plan handoff**: Read `.work/<name>/plan/handoff-prompt.md`.
+1. **Construct prompt**: Read `claude/skills/work-harness/step-agents.md` for the spec agent template.
+   Fill variables from state.json:
+   - `{name}` ← state.name
+   - `{title}` ← state.title
+   - `{tier}` ← state.tier
+   - `{current_step}` ← state.current_step
+   - `{base_commit}` ← state.base_commit
+   - `{beads_epic_id}` ← state.beads_epic_id
 
-2. **Cross-cutting contracts**: Write `.work/<name>/specs/00-cross-cutting-contracts.md` — shared schemas, interfaces, naming conventions consumed by all specs.
-
-3. **Numbered specs**: For each component from the architecture's component map, write `.work/<name>/specs/NN-<slug>.md`:
-   - Overview and scope
-   - Implementation steps with acceptance criteria
-   - Interface contracts (exposes/consumes)
-   - Files to create/modify
-   - Testing strategy
-
-4. **Spec index**: Track in `.work/<name>/specs/index.md`:
-   ```markdown
-   | Spec | Title | Status | Dependencies |
-   |------|-------|--------|-------------|
-   | 00 | Cross-cutting contracts | complete | — |
-   | 01 | <slug> | complete | 00 |
+2. **Spawn agent**:
+   ```
+   Agent(
+     description: "spec {name-abbreviated}",
+     prompt: {constructed prompt},
+     mode: "default",
+     subagent_type: "general-purpose"
+   )
    ```
 
-5. **Dependency ordering**: Establish which specs can be written in parallel vs sequentially.
+3. **Read return**: Parse the agent's completion signal (see completion format in `claude/skills/work-harness/step-agents.md`).
 
-6. **Update summary**: Update `docs/feature/<name>.md` — add a Key Decisions section from the specs.
+4. **Verify artifacts**: Check that expected artifacts exist:
+   - `.work/<name>/specs/00-cross-cutting-contracts.md`
+   - `.work/<name>/specs/index.md`
+   - `.work/<name>/specs/handoff-prompt.md`
+   - `docs/feature/<name>.md`
+   If artifacts missing: re-spawn the agent (preserve existing partial artifacts per spec 00 §7).
 
-7. **Futures**: If spec writing reveals deferred enhancements, append to `.work/<name>/futures.md`.
+5. **Present to user**: Show the agent's summary. Include:
+   - What the agent produced (artifact list with paths)
+   - Key decisions or notable items
+   - Ask: "Review the artifacts, or proceed to validation?"
 
-8. **Auto-advance** (see Inter-Step Quality Review Protocol):
+6. **Handle user feedback**:
+   - If user approves or says "proceed": continue to auto-advance.
+   - If user has feedback: construct re-spawn prompt with a "Previous Attempt" section listing artifacts written and user feedback verbatim, inserted between Rules and Instructions. Re-spawn the agent. Return to step 3.
+   - After 2 re-spawns with unresolved feedback, ask the user how to proceed.
+
+7. **Auto-advance** (see Inter-Step Quality Review Protocol):
    a. Write the handoff prompt to `.work/<name>/specs/handoff-prompt.md`
    b. **Phase A — Artifact validation** (see `phase-review` skill) — spawn Explore agent (read-only). Checklist:
       - Do all specs reference the cross-cutting contracts (spec 00)?
@@ -322,90 +322,44 @@ Break specs into executable work items with a concurrency map.
 
 **Scope expansion check:** If the user requests changes that would add new components or specs beyond what was planned, acknowledge the regression: "This adds new scope. We're currently in decompose but this requires plan/spec work." Present options: (a) roll back to plan/spec, (b) add as lightweight amendment. Document the scope change in the handoff prompt.
 
-**Process:**
+### Dispatch: Decompose Agent
 
-1. **Read spec handoff**: Read `.work/<name>/specs/handoff-prompt.md`.
+1. **Construct prompt**: Read `claude/skills/work-harness/step-agents.md` for the decompose agent template.
+   Fill variables from state.json:
+   - `{name}` ← state.name
+   - `{title}` ← state.title
+   - `{tier}` ← state.tier
+   - `{current_step}` ← state.current_step
+   - `{base_commit}` ← state.base_commit
+   - `{beads_epic_id}` ← state.beads_epic_id
 
-2. **Create beads issues**: For each work item from specs:
-   ```bash
-   bd create --title="[<tag>] W-NN: <title> — spec NN" --type=task --priority=2
+2. **Spawn agent**:
    ```
-   Title must reference the spec it implements (e.g., `W-01: state-guard.sh — spec 01`). This naming convention is verified by step output review agents.
-   Set dependencies between issues to match spec dependency ordering.
-
-3. **Concurrency map**: Identify which streams can run in parallel:
-   - Group work items into streams (one per independent workstream)
-   - Streams are designed as **parallel agent workloads** — each stream becomes a self-contained agent prompt
-   - Identify phase ordering (which streams must complete before others)
-   - Document the DAG and critical path
-   - Verify: no file appears in more than one stream within the same phase
-
-4. **Stream execution documents**: For each stream, write a self-contained agent prompt in `.work/<name>/streams/<stream-letter>.md` with YAML frontmatter and markdown body:
-
-   **Frontmatter** (between `---` fences):
-   - `stream`: uppercase letter identifier
-   - `phase`: execution phase number (streams in the same phase run in parallel)
-   - `isolation`: execution mode — `inline` (trivial, lead executes directly), `subagent` (single-session, default), or `worktree` (multi-session, git isolation). See isolation mode selection table below.
-   - `agent_type`: `general-purpose` (default for implementation), `Explore` (read-only investigation), `Plan` (design/review), or a custom domain expert name. See agent type selection table below.
-   - `skills`: list of skill slugs the agent needs (e.g., `[work-harness, code-quality]`)
-   - `scope_estimate`: T-shirt size (`S`, `M`, or `L`)
-   - `file_ownership`: list of every file this stream may create or modify (project-relative paths). Verify: no file appears in more than one stream within the same phase.
-
-   **Body** (markdown, after frontmatter):
-   - Stream identity and work items (beads IDs)
-   - Spec references for each work item
-   - Acceptance criteria per work item (reference spec ACs by ID, do not duplicate full text)
-   - Dependency constraints (what must complete before this stream starts)
-   - Do NOT inline skill content — reference skills by slug only. Agents receive skill content via the Skill Injection mechanism at spawn time.
-
-   #### Isolation Mode Selection
-
-   | Mode | Use When | Tradeoffs |
-   |------|----------|-----------|
-   | `inline` | Trivial work items (config edits, single-file changes) under scope S. The lead agent executes directly without spawning. | Fastest; no coordination overhead. Blocks the lead while executing. Cannot parallelize. |
-   | `subagent` | Most work items. Single-session, single-concern work that fits in one agent context window. Scope S or M. | Good parallelism; low coordination cost. Agent cannot persist across sessions. Limited to one context window of work. |
-   | `worktree` | Multi-session work requiring git isolation. Scope L, or when the stream modifies files that conflict with other active streams across phases. | Full git isolation; survives session boundaries. High coordination cost; requires manual branch management by the user. |
-
-   **Selection heuristic:**
-   1. If scope is S and touches 1-2 files: `inline`
-   2. If scope is S or M and completable in one session: `subagent`
-   3. If scope is L, or requires git isolation from concurrent work: `worktree`
-   4. When in doubt, prefer `subagent` — it is the most common and has the best effort-to-isolation ratio
-
-   #### Agent Type Selection
-
-   | Agent Type | Use When | Capabilities |
-   |------------|----------|-------------|
-   | `general-purpose` | Default for implementation work. Read-write access to the codebase. | Can create, modify, and delete files. Can run tests and builds. |
-   | `Explore` | Read-only investigation. Tracing call chains, finding usage sites, understanding code structure. | Read-only. Cannot modify files. Lower risk, can run in parallel without file conflicts. |
-   | `Plan` | Architecture and design work. Reviewing specs, evaluating tradeoffs, planning approaches. | Read-only. Produces plans and recommendations, not code changes. |
-   | Custom name | Domain-specific expert (e.g., `database-architect`, `api-designer`). Use when the stream requires specialized knowledge framing. | Same capabilities as `general-purpose` but with a domain-expert identity that primes better reasoning for the domain. |
-
-   **Guidance:**
-   - Implementation streams: `general-purpose` (or a custom domain expert name)
-   - Review/validation streams: `Explore` or `Plan`
-   - Research sub-tasks discovered during implement: `Explore`
-   - Match the agent type to the nature of the work, not to the step name
-
-5. **Issue manifest**: Create `.work/<name>/streams/manifest.jsonl` mapping work items to stream metadata. Each line is a JSON object with these fields:
-   ```json
-   {
-     "work_item": "W-01",
-     "title": "...",
-     "spec": "01",
-     "beads_id": "abc123",
-     "stream": "a",
-     "phase": 1,
-     "isolation": "subagent",
-     "agent_type": "general-purpose",
-     "skills": ["code-quality", "work-harness"],
-     "scope_estimate": "S",
-     "file_ownership": ["path/to/file.go"]
-   }
+   Agent(
+     description: "decompose {name-abbreviated}",
+     prompt: {constructed prompt},
+     mode: "default",
+     subagent_type: "general-purpose"
+   )
    ```
-   All metadata fields mirror the stream doc YAML frontmatter. This enables cross-referencing and scheduling without re-parsing stream docs.
 
-6. **Futures**: If you discover deferred enhancements during decompose, append to `.work/<name>/futures.md`.
+3. **Read return**: Parse the agent's completion signal (see completion format in `claude/skills/work-harness/step-agents.md`).
+
+4. **Verify artifacts**: Check that expected artifacts exist:
+   - `.work/<name>/streams/manifest.jsonl`
+   - `.work/<name>/streams/handoff-prompt.md`
+   - At least one stream doc in `.work/<name>/streams/`
+   If artifacts missing: re-spawn the agent (preserve existing partial artifacts per spec 00 §7).
+
+5. **Present to user**: Show the agent's summary. Include:
+   - What the agent produced (artifact list with paths)
+   - Key decisions or notable items
+   - Ask: "Review the artifacts, or proceed to validation?"
+
+6. **Handle user feedback**:
+   - If user approves or says "proceed": continue to auto-advance.
+   - If user has feedback: construct re-spawn prompt with a "Previous Attempt" section listing artifacts written and user feedback verbatim, inserted between Rules and Instructions. Re-spawn the agent. Return to step 3.
+   - After 2 re-spawns with unresolved feedback, ask the user how to proceed.
 
 7. **Auto-advance** (see Inter-Step Quality Review Protocol):
    a. Write the handoff prompt to `.work/<name>/streams/handoff-prompt.md`
@@ -454,12 +408,38 @@ Execute the implementation plan from decompose.
 
    c. **Isolation mode** (from stream doc `isolation` field):
       - `inline`: Execute the work items directly in the lead agent context. No subagent spawn.
-      - `subagent`: Spawn one subagent with the agent type and skills determined above. Pass the stream doc as the agent prompt.
+      - `subagent`: Spawn one subagent with the agent type and skills determined above. The agent prompt MUST include the standard preamble and 6-section structure. See substep (e) for prompt construction.
       - `worktree`: Notify user that worktree isolation is recommended for this stream. Provide the stream doc path and let the user manage the worktree lifecycle. Do not attempt to create or manage worktrees.
 
    d. Within each phase, execute `inline` streams sequentially first, then spawn all `subagent` streams in parallel. Wait for all streams in a phase to complete before starting the next phase.
 
-   e. Each subagent receives: its stream execution doc + relevant specs
+   e. **Stream agent prompt construction** (for `subagent` isolation): Each subagent receives a prompt with the standard 6-section structure:
+
+      ```
+      ## Identity
+      You are an implementation agent for the work harness.
+      Your task: {one-line summary from stream doc}
+
+      ## Task Context
+      - Task: {name} (Tier {tier})
+      - Title: {title}
+      - Step: implement (Phase {N}, Stream {letter})
+      - Base commit: {base_commit}
+      - Epic: {beads_epic_id}
+      ```
+
+      If `.claude/harness.yaml` exists, append the stack context block:
+
+      ```
+      ## Stack Context
+      - Language: {stack.language}
+      - Framework: {stack.framework}
+      - Database: {stack.database}
+      - Build commands: {stack.build_commands}
+      ```
+
+      Then include Rules (skill injection per stream doc `skills:` field), Instructions (stream doc body + relevant specs), Output Expectations (from stream doc acceptance criteria), and Completion (standard completion signal format from spec 00 §6).
+
    f. Subagents claim work with `bd update <id> --status=in_progress` and close with `bd close <id>`
    g. Lead agent monitors completion and launches next-phase agents when dependencies clear
 
@@ -472,7 +452,7 @@ Execute the implementation plan from decompose.
      1. If `review_routing` is configured in `harness.yaml`: match changed file patterns against routing table to select agents
      2. If stream docs specify an `agent_type` override for review: use that
      3. Otherwise: use the `work-review` agent
-   - Inject skills from the union of all completed streams' `skills:` lists, using the **Step Routing Table** `review-agent-skills` fragment as the base. Checklist:
+   - Inject skills using the `review-agent-skills` fragment (which always includes `code-quality.md`). Checklist:
      - Does the implementation comply with the relevant spec's acceptance criteria?
      - Are code-quality anti-patterns absent (error swallowing, fabricated data, fail-open)?
      - Do new tests cover the acceptance criteria?
