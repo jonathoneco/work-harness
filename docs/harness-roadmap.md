@@ -51,20 +51,19 @@ Core thesis: _The harness should delegate to specialized agents with proper cont
 
 ## W3: Workflow Phase Redesign
 
-**Tier**: T3 initiative | **Priority**: P3 | **High impact, depends on W2**
+**Tier**: T3 initiative | **Priority**: P3 | **High impact, depends on W2** | **Done**
 
 Core thesis: _Rethink how phases work — better exploration, smarter review, research-first paths._
 
-- [ ] **Explore phase: build clarity** — nail down intention, push back, ask questions before planning
-- [ ] **Plan mode redesign** — inspired by Claude's plan mode: pointed design questions with options, ability to expand
-- [ ] **Phase-aware review** — phased review should change depending on phase (Phase A review != Phase B review)
-- [ ] **Review timing** — phased review only at end of back-and-forth, not mid-conversation
-- [ ] **Open questions: tackle immediately** — "deferred" questions are usually better scoped to resolve now
-- [ ] **Aggressive Phase B finding resolution** — handle findings immediately unless it's a design concern
-- [ ] **Advisory notes -> direct clarification asks** — don't just note, ask
-- [ ] **`work-research` support** — research-only path for pure research tasks (e.g., product-agent-scope)
-- [ ] **First-class research/design loop** — repeated research/design workflow pattern needs formal support
-- [ ] **General adversarial-eval improvements** — flush out perspectives into argued positions
+- [x] **Explore phase: build clarity** — scope validation questionnaires, pushback escalation, re-scoping choices
+- [x] **Plan mode redesign** — plan agent inline research (up to 3 Explore subagents), research handoff validation
+- [x] **Review timing** — risk-based ceremony tiering (high/medium/low), auto-advance for low-risk transitions
+- [x] **Open questions: tackle immediately** — ASK verdicts replace ADVISORY, force user response with max 5 questions
+- [x] **Aggressive Phase B finding resolution** — immediate resolution protocol (in-scope, ≤3 files, max 3 per transition)
+- [x] **Advisory notes -> direct clarification asks** — ADVISORY verdict removed entirely, ASK with Resolved Asks in gate files
+- [x] **`work-research` support** — `/work-research` command, Tier R lifecycle (assess→research→synthesize)
+- [x] **First-class research/design loop** — plan agent inline research + clarity protocols formalize the pattern
+- [x] **General adversarial-eval improvements** — 4-phase debate protocol, 3 built-in framings, custom framings via harness.yaml
 
 ---
 
