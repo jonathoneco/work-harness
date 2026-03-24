@@ -79,7 +79,19 @@ No issues found. Present results in the transition summary and proceed to the ap
 
 ### ASK
 
-Specific questions requiring user response before the transition proceeds. Agent must provide 1-5 questions per Spec 00 format.
+Specific questions requiring user response before the transition proceeds. Agent output format:
+
+```
+**Verdict**: ASK
+
+**Questions**:
+1. [Question text — specific, actionable, answerable in 1-3 sentences]
+2. [Question text]
+
+**Context**: [Why these questions matter for the transition]
+```
+
+Maximum 5 questions per ASK verdict. Questions must reference specific artifacts, decisions, or gaps — not vague concerns. An ASK with 0 questions is invalid — emit PASS instead.
 
 - Present questions to the user under a `## Questions Before Advancing` heading
 - Hard stop — no timeout, no auto-advance
