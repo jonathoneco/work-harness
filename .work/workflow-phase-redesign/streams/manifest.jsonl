@@ -1,0 +1,8 @@
+{"work_item": "W-01", "beads_id": "work-harness-pim.1", "stream": "A", "phase": 1, "spec": "01", "title": "State schema extensions"}
+{"work_item": "W-02", "beads_id": "work-harness-pim.2", "stream": "A", "phase": 1, "spec": "02", "title": "Verdict system redesign"}
+{"work_item": "W-03", "beads_id": "work-harness-pim.3", "stream": "B", "phase": "2a", "spec": "03", "title": "Approval ceremony tiering"}
+{"work_item": "W-04", "beads_id": "work-harness-pim.4", "stream": "C", "phase": "2b", "spec": "04", "title": "Explore phase clarity"}
+{"work_item": "W-05", "beads_id": "work-harness-pim.5", "stream": "C", "phase": "2b", "spec": "05", "title": "Plan agent redesign"}
+{"work_item": "W-06", "beads_id": "work-harness-pim.6", "stream": "B", "phase": "2a", "spec": "06", "title": "Phase B finding resolution"}
+{"work_item": "W-07", "beads_id": "work-harness-pim.7", "stream": "D", "phase": 3, "spec": "07", "title": "work-research command"}
+{"work_item": "W-08", "beads_id": "work-harness-pim.8", "stream": "E", "phase": 3, "spec": "08", "title": "Adversarial eval improvements"}
