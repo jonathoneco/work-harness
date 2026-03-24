@@ -24,7 +24,7 @@ if .work/<name>/ exists: name = name + "-2"   # increment until unique
 ```json
 {
   "name":           "string  — kebab-case task slug",
-  "tier":           "number  — 1, 2, or 3",
+  "tier":           "number|string  — 1, 2, 3, or \"R\"",
   "title":          "string  — human-readable task description",
   "created_at":     "string  — ISO 8601 timestamp",
   "updated_at":     "string  — ISO 8601 timestamp, updated on every state change",
@@ -49,6 +49,9 @@ if .work/<name>/ exists: name = name + "-2"   # increment until unique
 | 1 (Fix) | `assess`, `implement`, `review` |
 | 2 (Feature) | `assess`, `plan`, `implement`, `review` |
 | 3 (Initiative) | `assess`, `research`, `plan`, `spec`, `decompose`, `implement`, `review` |
+| R (Research) | `assess`, `research`, `synthesize` |
+
+Tier R is created by the `work-research` command for research-only investigations that do not proceed to implementation.
 
 ## Step Lifecycle State Machine
 
@@ -102,6 +105,67 @@ To find the active task:
 - Single-session per task
 - Parallel streams (Tier 3) use separate beads issues, not separate tasks
 - No locking mechanism — assumed single-user, single-session at a time
+
+## Verdict Types
+
+Step transitions produce verdicts from phase review agents:
+
+- **PASS**: No issues found. Transition proceeds.
+- **ASK**: Specific questions that must be answered before the transition proceeds. Responses recorded in the gate file.
+- **BLOCKING**: Substantive issues that must be fixed before the transition can proceed.
+
+## Gate File Format
+
+Step transition gate files are stored at `.work/<name>/gates/<from>-to-<to>.md`. The file includes:
+
+1. Verdict summary (Phase A and Phase B results)
+2. `## Resolved Asks` section (when ASK verdicts occurred)
+3. Approval record
+
+### Resolved Asks Section
+
+Present only when ASK verdicts occurred during the transition. Omitted entirely for pure PASS transitions. Placed after the verdict summary, before the approval record.
+
+```markdown
+## Resolved Asks
+
+### Phase A Asks
+
+_(none)_
+
+### Phase B Asks
+
+**Q1**: [Original question text]
+**A1**: [User's response — verbatim or summarized]
+
+**Q2**: [Original question text]
+**A2**: [User's response]
+```
+
+If no ASK items exist for a phase, that subsection shows `_(none)_`. If neither phase has ASKs, the entire section is omitted.
+
+## Ceremony Configuration
+
+The `workflow.ceremony` setting in `.claude/harness.yaml` controls approval ceremony behavior:
+
+```yaml
+workflow:
+  ceremony: auto  # Options: "auto" (default), "always"
+```
+
+- **`auto`** (default): Ceremony behavior is risk-based. Low-risk PASS transitions auto-advance; medium/high-risk transitions require a hard stop approval ceremony.
+- **`always`**: All transitions require a hard stop approval ceremony, regardless of risk level. ASK and BLOCKING behavior is unchanged (already hard stops).
+
+See the risk classification table for per-transition risk levels:
+
+| Transition              | Base Risk | Ceremony on PASS |
+|-------------------------|-----------|------------------|
+| research → plan         | high      | hard stop        |
+| plan → spec             | high      | hard stop        |
+| spec → decompose        | medium    | hard stop        |
+| decompose → implement   | medium    | hard stop        |
+| implement phase N → N+1 | low       | auto-advance     |
+| implement → review      | low       | auto-advance     |
 
 ## Critical Rule for Subagents
 

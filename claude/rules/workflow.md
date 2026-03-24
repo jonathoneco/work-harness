@@ -10,6 +10,7 @@ This project uses the adaptive work harness. Task state is tracked in `.work/` d
 | `/work-fix <description>` | Quick fix — single-session with auto-review |
 | `/work-feature <description>` | Feature — plan, implement, review in 1-2 sessions |
 | `/work-deep <description>` | Initiative — multi-session with research, specs, phased implementation |
+| `/work-research <topic>` | Standalone research — investigate a topic with structured synthesis |
 | `/work-review` | Run specialist review agents, track findings |
 | `/work-status [name]` | Show active task progress and suggested next action |
 | `/work-checkpoint [--step-end]` | Save session progress, optionally advance step |
@@ -22,7 +23,7 @@ This project uses the adaptive work harness. Task state is tracked in `.work/` d
 
 - **Context via files, not memory**: Steps produce handoff prompts and checkpoints for session continuity
 - **Handoff prompts are the firewall**: Never re-read raw research notes — use handoff prompt summaries
-- **3 tiers**: Fix (T1), Feature (T2), Initiative (T3) — auto-detected by triage
+- **4 tiers**: Fix (T1), Feature (T2), Initiative (T3), Research (R) — auto-detected by triage or explicit command
 - **Steps are data**: The `steps` array in state.json defines available phases per tier
 - **Beads integration**: Every task has a beads issue; Tier 3 tasks have an epic
 - **State committed to git**: `.work/` directory is tracked

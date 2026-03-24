@@ -84,6 +84,35 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
 
 ### When current_step = "plan"
 
+#### Task Understanding Check *(optional — not a gate)*
+
+Before dispatching the plan agent, review the task description. If the task scope, success criteria, or constraints are unclear, present a clarity questionnaire to the user:
+
+```
+## Scope Clarification Needed
+
+Before proceeding, I need to understand:
+
+1. **[Topic]**: [Specific question about scope, intent, or constraint]
+2. **[Topic]**: [Specific question]
+...
+
+Please answer these so I can plan the right approach.
+```
+
+**Rules**:
+- Maximum 5 questions per questionnaire
+- Each question must be about scope, intent, constraints, or priorities — not implementation details
+- If no clarification is needed, proceed directly to plan agent dispatch
+- Pass user responses to the plan agent as additional context in its prompt
+
+**Pushback escalation**: If user responses reveal the task needs fundamental re-scoping (e.g., "actually this is two separate features"), present re-scoping choices inline:
+- **Proceed**: Continue with the refined scope as stated
+- **Split**: Break into multiple tasks (create new beads issues, archive or narrow current task)
+- **Escalate tier**: If scope expansion warrants T3 treatment, use the existing escalation protocol in the Escalation Handling section below
+
+Re-scoping is handled inline — no new state or step is created.
+
 ### Dispatch: Plan Agent
 
 1. **Construct prompt**: Read `claude/skills/work-harness/step-agents.md` for the plan agent template.
@@ -95,7 +124,7 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
    - `{base_commit}` ← state.base_commit
    - `{beads_epic_id}` ← state.beads_epic_id (if null, omit the Epic line from the preamble)
 
-2. **Spawn agent**:
+2. **Spawn agent**: The plan agent may spawn up to 3 Explore subagents internally for inline research (see Inline Research in the plan agent template in `step-agents.md`). For Tier 2 (which has no prior research step), all 3 subagent slots are available for initial codebase investigation. The same plan agent template is used for both T2 and T3 — the difference is what input the plan agent receives (task description for T2, research handoff for T3).
    ```
    Agent(
      description: "plan {name-abbreviated}",
@@ -116,6 +145,7 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
 5. **Present to user**: Show the agent's summary. Include:
    - What the agent produced (artifact list with paths)
    - Key decisions or notable items
+   - Any inline research performed (gaps filled via Explore subagents)
    - Ask: "Review the artifacts, or proceed to validation?"
 
 6. **Handle user feedback**:
@@ -123,7 +153,7 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
    - If user has feedback: construct re-spawn prompt with a "Previous Attempt" section listing artifacts written and user feedback verbatim, inserted between Rules and Instructions. Re-spawn the agent. Return to step 3.
    - After 2 re-spawns with unresolved feedback, ask the user how to proceed.
 
-7. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`) for plan -> implement: Present the plan to the user. STOP and wait for explicit approval. On approval: mark `plan` as `completed`, set `implement` to `active`, update `current_step` in a single state.json write. Tier 2 adaptations apply (gate issue optional, compaction recommended). Tell the user: "Plan complete. Recommend: `/compact` then `/work-feature` to start **implement** with clean context." If user continues without compacting, re-invoke via `Skill('work-feature')`, then proceed normally.
+7. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`) for plan → implement: This transition is medium risk per the Risk Classification table — hard stop approval ceremony. Present the plan to the user. STOP and wait for explicit approval. On approval: mark `plan` as `completed`, set `implement` to `active`, update `current_step` in a single state.json write. Tier 2 adaptations apply (gate issue optional, compaction recommended). Tell the user: "Plan complete. Recommend: `/compact` then `/work-feature` to start **implement** with clean context." If user continues without compacting, re-invoke via `Skill('work-feature')`, then proceed normally.
 
 ### When current_step = "implement"
 
@@ -170,7 +200,7 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
 
 6. **Multi-session**: If work spans sessions, suggest `/work-checkpoint` before ending. On resume, `/work-feature` detects the active task and continues.
 
-7. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`) for implement -> review: Present implementation summary. STOP and wait for explicit approval. On approval: mark `implement` as `completed`, set `review` to `active` in a single state.json write. Tell the user: "Implementation complete. Recommend: `/compact` then `/work-feature` to start **review** with clean context." If user continues without compacting, re-invoke via `Skill('work-feature')`, then proceed normally.
+7. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`) for implement → review: This transition is low risk per the Risk Classification table — auto-advance with notification (no user input required). Gate file and gate issue are still created per tier adaptations. On advance: mark `implement` as `completed`, set `review` to `active` in a single state.json write. Tell the user: "Implementation complete. Recommend: `/compact` then `/work-feature` to start **review** with clean context." If user continues without compacting, re-invoke via `Skill('work-feature')`, then proceed normally.
 
 ### When current_step = "review"
 

@@ -41,7 +41,7 @@ This applies to file listings, findings, spec references, and any path written t
 
 ## Key Concepts
 
-- **3 tiers**: Fix (T1), Feature (T2), Initiative (T3)
+- **4 tiers**: Fix (T1), Feature (T2), Initiative (T3), Research (R)
 - **Steps are data**: The `steps` array in state.json defines available phases
 - **Auto-detect**: Commands read `current_step` and present the right interface
 - **Every task has a beads issue**: Created during the assess step
@@ -54,6 +54,7 @@ This applies to file listings, findings, spec references, and any path written t
 | 1 | Fix | assess, implement, review | Single session |
 | 2 | Feature | assess, plan, implement, review | 1-2 sessions |
 | 3 | Initiative | assess, research, plan, spec, decompose, implement, review | Multi-session |
+| R | Research | assess, research, synthesize | 1-2 sessions |
 
 ## State Management
 
@@ -81,7 +82,7 @@ Only one step can be `active` at a time. `current_step` must match the active st
 Every step transition runs a two-phase review:
 - **Phase A**: Artifact validation (structural completeness)
 - **Phase B**: Quality review (substance evaluation)
-- **Verdicts**: PASS, ADVISORY (log but don't block), BLOCKING (must fix)
+- **Verdicts**: PASS, ASK (questions requiring user response), BLOCKING (must fix)
 
 After review completes, present results to user and wait for explicit approval before advancing state.
 

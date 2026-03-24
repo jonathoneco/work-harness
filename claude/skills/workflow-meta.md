@@ -20,7 +20,7 @@ skill documents how to safely modify its components.
 
 ### Commands (`claude/commands/`)
 - Each command is a markdown file with YAML frontmatter (`description`, `user_invocable: true`)
-- All 10 work commands must include the config injection directive
+- All 11 work commands must include the config injection directive
 - After modifying a command, verify `claude/rules/workflow.md` command table still matches
 
 ### Skills (`claude/skills/`)
@@ -76,7 +76,7 @@ Update the `VERSION` file (single line, no `v` prefix, no trailing newline).
 
 ## Sync Points to Verify After Changes
 
-- `workflow.md` command table matches `claude/commands/` inventory
+- `workflow.md` command table matches `claude/commands/` inventory (currently 11 work commands + `/delegate`)
 - `install.sh` file list matches `claude/` directory contents
 - Manifest schema matches what `install.sh` produces
 - Hook registrations match what `install.sh` adds to settings.json

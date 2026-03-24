@@ -33,6 +33,7 @@ Your task: Create an architecture document for "{title}".
 ## Rules
 Read and follow these before proceeding:
 1. Read `claude/skills/code-quality.md`
+2. Read `claude/skills/adversarial-eval.md` (optional — for non-trivial design decisions with meaningful trade-offs, consider invoking the adversarial eval protocol)
 
 ## Instructions
 
@@ -69,7 +70,22 @@ Write `.work/{name}/plan/handoff-prompt.md` following the handoff contract:
 - Architecture summary (core design, components table with spec numbers + dependencies + key files)
 - Design decisions summary (numbered, one line each)
 - Items deferred to spec (numbered list)
+- Inline Research Performed (see format below)
 - Instructions for spec step (reference spec 00 for cross-cutting contracts, dependency order for spec writing)
+
+**Inline Research Performed** section format (appears after "Items Deferred to Spec"):
+```
+## Inline Research Performed
+
+_(none)_
+
+— or —
+
+1. **Gap**: [What was missing from research handoff]
+   **Finding**: [What the Explore subagent discovered]
+   **Impact**: [How this affected the architecture]
+```
+If no inline research was performed, the section shows `_(none)_`.
 
 ### Futures
 If planning reveals deferred enhancements not in scope, append to `.work/{name}/futures.md`:
@@ -77,6 +93,34 @@ If planning reveals deferred enhancements not in scope, append to `.work/{name}/
 **Horizon**: next | quarter | someday
 **Domain**: {domain}
 {2-4 sentence description}
+
+## Inline Research
+
+If you encounter gaps in the research handoff that you cannot resolve from the provided context, you may spawn Explore subagents with targeted questions. Incorporate findings into your architecture document.
+
+**Constraints**:
+
+| Constraint      | Limit                                    |
+|-----------------|------------------------------------------|
+| Max subagents   | 3 per plan agent invocation              |
+| Scope per agent | Single targeted question                 |
+| Return format   | Summary, max 1,500 tokens per agent      |
+| Allowed tools   | Read-only (Glob, Grep, Read, Bash read)  |
+| Prohibited      | Write, Edit, Agent (no nested spawning)  |
+
+**Usage protocol**:
+1. Identify a specific gap in the research handoff
+2. Spawn an Explore subagent with a targeted question
+3. Subagent returns a summary within the token cap
+4. Incorporate findings into the architecture document
+5. Note inline-researched gaps in the handoff prompt under "Inline Research Performed"
+
+**When NOT to use inline research**:
+- Research was fundamentally insufficient (key topics not covered) — the plan-to-spec gate catches this
+- Gap requires user input (business decision, priority call) — emit ASK verdict instead
+- Gap requires external research (web search, API docs) — emit ASK verdict instead
+
+Inline research fills the 10-20% of gaps that only become visible during planning. It is not a substitute for the research step.
 
 ## Output Expectations
 Artifacts:
@@ -111,6 +155,7 @@ Your task: Write detailed implementation specifications for each component in "{
 ## Rules
 Read and follow these before proceeding:
 1. Read `claude/skills/code-quality.md`
+2. Read `claude/skills/adversarial-eval.md` (optional — for non-trivial design decisions with meaningful trade-offs, consider invoking the adversarial eval protocol)
 
 ## Instructions
 

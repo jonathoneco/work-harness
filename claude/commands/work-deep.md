@@ -119,9 +119,14 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
 
 ## Inter-Step Quality Review Protocol
 
-Every step transition runs a two-phase review before auto-advancing. Follow the **phase-review** skill (`claude/skills/work-harness/phase-review.md`) for the review framework — agent types, verdict protocol, and retry logic. Each auto-advance block below provides step-specific checklists.
+Every step transition runs a two-phase review before advancing. Follow the **phase-review** skill (`claude/skills/work-harness/phase-review.md`) for the review framework — agent types, verdict protocol, and retry logic. Each auto-advance block below provides step-specific checklists.
 
-After reviews complete, follow the **step-transition** skill (`claude/skills/work-harness/step-transition.md`) for the approval ceremony, gate creation, state update, and compaction prompt. Tier 3 adaptations apply: gate issues are required, gate files are required, handoff prompts are required, compaction is required.
+After reviews complete, follow the **step-transition** skill (`claude/skills/work-harness/step-transition.md`) for risk-based ceremony routing, gate creation, state update, and compaction prompt. The step-transition skill's **Risk Classification** table determines whether each transition is a hard stop or auto-advance:
+- **Research → plan, plan → spec**: high risk — hard stop approval ceremony
+- **Spec → decompose, decompose → implement**: medium risk — hard stop approval ceremony
+- **Implement phase N → N+1, implement → review**: low risk — auto-advance with notification (no user input)
+
+Tier 3 adaptations apply: gate issues are required, gate files are required, handoff prompts are required, compaction is required.
 
 ---
 
@@ -141,15 +146,43 @@ Structured exploration to build understanding before planning.
 
 **Process:**
 
-1. **Read the task context**: Review `$ARGUMENTS`, beads issue details, and any conversation context.
+1. **Scope Validation** *(optional — not a gate)*: Before dispatching research agents, review the task description and assessment. If the research scope is ambiguous, unclear, or potentially misaligned with the user's intent, present a clarity questionnaire:
 
-2. **Read managed docs**: If `harness.yaml` has `docs.managed` entries, read the manifest. If `docs.managed` is absent, run auto-detection (see `claude/skills/work-harness/context-docs.md`) and suggest doc types to the user.
+   ```
+   ## Scope Clarification Needed
 
-3. **Plan research topics**: Identify the key areas to investigate. For each topic, assign:
+   Before proceeding, I need to understand:
+
+   1. **[Topic]**: [Specific question about scope, intent, or constraint]
+   2. **[Topic]**: [Specific question]
+   ...
+
+   Please answer these so I can research the right topics.
+   ```
+
+   **Rules**:
+   - Maximum 5 questions per questionnaire
+   - Each question must be about scope, intent, constraints, or priorities — not implementation details
+   - If no clarification is needed, proceed directly — do not force a questionnaire
+   - Incorporate user responses into the research scope: restate the refined scope before dispatching research agents
+   - Capture refined scope in the research handoff prompt as a "Scope Refinements" section (only if clarification occurred)
+
+   **Pushback escalation**: If user responses reveal the task needs fundamental re-scoping (e.g., "actually this is two separate features"), present re-scoping choices inline:
+   - **Proceed**: Continue with the refined scope as stated
+   - **Split**: Break into multiple tasks (create new beads issues, archive or narrow current task)
+   - **Escalate tier**: If scope expansion warrants T3 treatment and the task is not already T3, use the existing escalation protocol
+
+   Re-scoping is handled inline — no new state or step is created.
+
+2. **Read the task context**: Review `$ARGUMENTS`, beads issue details, and any conversation context.
+
+3. **Read managed docs**: If `harness.yaml` has `docs.managed` entries, read the manifest. If `docs.managed` is absent, run auto-detection (see `claude/skills/work-harness/context-docs.md`) and suggest doc types to the user.
+
+4. **Plan research topics**: Identify the key areas to investigate. For each topic, assign:
    - A topic number and slug: `NN-<topic-slug>`
    - A target file path: `.work/<name>/research/NN-<topic-slug>.md`
 
-4. **Create research team**: Follow the teams protocol (`claude/skills/work-harness/teams-protocol.md`):
+5. **Create research team**: Follow the teams protocol (`claude/skills/work-harness/teams-protocol.md`):
    a. Create team: `TeamCreate("{step}-{name}")`
    b. Create shared tasks (one per topic) using the task schema from the teams protocol. Each task description includes:
       - Topic scope and specific questions to answer
@@ -159,19 +192,19 @@ Structured exploration to build understanding before planning.
    c. Teammates auto-spawn, self-claim topics from the shared task list, and write research notes
    d. **Teammate prompt**: Each teammate receives the prompt template from the teams protocol, with variables filled from state.json. Teammates receive skill injection (code-quality + work-harness) via Read instructions in the Rules section, per the Step Routing Table.
 
-5. **Monitor and verify**: The lead monitors the shared task list for completion:
+6. **Monitor and verify**: The lead monitors the shared task list for completion:
    a. When all tasks complete: read each research note, verify content quality
    b. If any topic is missing or incomplete: reassign via the task list or investigate inline
    c. Tear down team: `TeamDelete("{step}-{name}")`
 
-6. **Synthesize**: The lead (NOT teammates) generates:
+7. **Synthesize**: The lead (NOT teammates) generates:
    - `.work/<name>/research/index.md` — topic index with status
    - `.work/<name>/research/handoff-prompt.md` — cross-references, consolidated open questions, research coverage summary
    The lead references note file paths in the handoff — does NOT copy findings inline.
 
-7. **Dead ends and futures**: If any topic is a dead end, document in `.work/<name>/research/dead-ends.md`. If deferred enhancements discovered, append to `.work/<name>/futures.md`.
+8. **Dead ends and futures**: If any topic is a dead end, document in `.work/<name>/research/dead-ends.md`. If deferred enhancements discovered, append to `.work/<name>/futures.md`.
 
-8. **Auto-advance** (see Inter-Step Quality Review Protocol):
+9. **Auto-advance** (see Inter-Step Quality Review Protocol):
    a. Write the handoff prompt to `.work/<name>/research/handoff-prompt.md`
    b. **Phase A — Artifact validation** (see `phase-review` skill) — spawn Explore agent (read-only). Checklist:
       - Are findings indexed in research/index.md?
@@ -195,6 +228,32 @@ Structured exploration to build understanding before planning.
 
 Synthesize research into an architecture document.
 
+#### Research Handoff Validation *(optional — not a gate)*
+
+Before dispatching the plan agent, review the research handoff prompt (`.work/<name>/research/handoff-prompt.md`). If key topics are missing or research conclusions are unclear, present a clarity questionnaire to the user:
+
+```
+## Scope Clarification Needed
+
+Before proceeding, I need to understand:
+
+1. **[Topic]**: [Specific question about research gaps or unclear conclusions]
+2. **[Topic]**: [Specific question]
+...
+
+Please answer these so I can plan the right approach.
+```
+
+**Rules**:
+- Maximum 5 questions per questionnaire
+- Questions must be about scope, intent, constraints, or priorities — not implementation details
+- If no clarification is needed, proceed directly to plan agent dispatch
+- Pass user responses to the plan agent as supplementary context in its prompt
+
+**Important distinction**: Clarity questions go to the *user* — they address gaps in understanding that require human judgment. This is separate from the plan agent's inline research capability (which sends targeted questions to *Explore subagents* for codebase-level fact gathering). The ordering is: (1) clarity questionnaire (user-facing, optional), then (2) plan agent dispatch with inline research capability (agent-internal).
+
+A gap requiring user judgment (business decision, priority call, scope question) should always surface as a clarity question or ASK verdict — never as an inline research subagent query.
+
 ### Dispatch: Plan Agent
 
 1. **Construct prompt**: Read `claude/skills/work-harness/step-agents.md` for the plan agent template.
@@ -206,7 +265,7 @@ Synthesize research into an architecture document.
    - `{base_commit}` ← state.base_commit
    - `{beads_epic_id}` ← state.beads_epic_id
 
-2. **Spawn agent**:
+2. **Spawn agent**: The plan agent may spawn up to 3 Explore subagents internally for gap-filling (see Inline Research in the plan agent template). No additional dispatcher logic is needed — the plan agent handles subagent spawning per the constraints in `step-agents.md`.
    ```
    Agent(
      description: "plan {name-abbreviated}",
@@ -227,6 +286,7 @@ Synthesize research into an architecture document.
 5. **Present to user**: Show the agent's summary. Include:
    - What the agent produced (artifact list with paths)
    - Key decisions or notable items
+   - Any inline research performed (gaps filled via Explore subagents)
    - Ask: "Review the artifacts, or proceed to validation?"
 
 6. **Handle user feedback**:
@@ -459,11 +519,12 @@ Execute the implementation plan from decompose.
      - Are code-quality anti-patterns absent (error swallowing, fabricated data, fail-open)?
      - Do new tests cover the acceptance criteria?
      - Are constructor injection and error wrapping patterns followed?
+   - **Finding resolution**: Phase B findings during implementation phases may be resolved immediately per the Immediate Finding Resolution protocol in `phase-review.md`. The protocol defines criteria for which findings can be fixed inline (in-scope, localized, no architectural changes, not design concerns) vs deferred to the review step. Maximum 3 immediate resolutions per transition.
    - Write results to `.work/<name>/implement/phase-N-validation.jsonl`
    - Apply verdict per the `phase-review` skill verdict protocol.
    - **Write gate file**: Write `.work/<name>/gates/implement-phase-<N>.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from phase validation results.
-   - **Follow the `step-transition` skill** for approval ceremony: Present gate file path and review results. End with: "Ready to proceed to Phase N+1? (yes/no)". Do NOT start Phase N+1 in the same turn as presenting Phase N results. On approval, record `gate_file: "gates/implement-phase-<N>.md"` in step status.
-   - Only proceed to Phase N+1 when user gives explicit approval and Phase N validation is PASS or ADVISORY
+   - **Follow the `step-transition` skill** for ceremony routing: Implementation phase transitions are low risk — auto-advance with notification per the Risk Classification table in step-transition.md. Gate file and gate issue are still created. On advance, record `gate_file: "gates/implement-phase-<N>.md"` in step status. Do NOT start Phase N+1 in the same turn as presenting Phase N results (the auto-advance notification is emitted first, then state is updated).
+   - Only proceed to Phase N+1 when Phase N validation is PASS (auto-advanced) or user gives explicit approval after a hard stop (when `ceremony: always` is set)
 
 5. **Checkpoints**: Use `/work-checkpoint` at session boundaries. Multi-session implementation is normal for Tier 3.
 
@@ -474,7 +535,7 @@ Execute the implementation plan from decompose.
 8. **Scope expansion check**: If the user requests changes that would add new components, specs, or work items beyond what was planned, acknowledge the regression.
 
 9. **Auto-advance** (when all work items closed — see Inter-Step Quality Review Protocol):
-   a. **Phase B — Quality pre-screen** (see `phase-review` skill): Spawn review agent (read-only). Inject skills per the **Step Routing Table** `review-agent-skills` fragment. Review full diff (`git diff <base_commit>...HEAD`). Checklist:
+   a. **Phase B — Quality pre-screen** (see `phase-review` skill): Spawn review agent (read-only). Inject skills per the **Step Routing Table** `review-agent-skills` fragment. Review full diff (`git diff <base_commit>...HEAD`). Previously-resolved findings from implementation phase gate files are considered resolved — the pre-screen focuses on new issues. Checklist:
       - Are there obvious code-quality anti-patterns in the diff?
       - Do all new functions have error handling?
       - Are there any swallowed errors or fabricated defaults?
