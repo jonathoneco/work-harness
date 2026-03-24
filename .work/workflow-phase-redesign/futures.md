@@ -21,3 +21,13 @@ W3 supports plan→research loop-back only. Future work could extend loops to ot
 **Horizon**: someday
 **Domain**: adversarial-eval
 Track adversarial eval outcomes across tasks to identify patterns in decision quality. Over time, the system could suggest framings based on decision type and recommend positions based on historical outcomes in similar contexts.
+
+## Automated Adversarial Eval Framing Selection
+**Horizon**: next
+**Domain**: adversarial-eval
+Agent manually selects framing based on decision type. Future work: automatic selection based on decision classification (e.g., dependency decisions → build-vs-buy, timing decisions → ship-vs-polish). Discovered during spec 08.
+
+## Tier R to T2/T3 Escalation
+**Horizon**: next
+**Domain**: workflow
+If a `work-research` task reveals implementation need, the user must currently start a new T2/T3 task. Direct escalation from Tier R (adding plan/spec/implement steps in-place) would reduce friction. Discovered during spec 07.

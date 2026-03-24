@@ -1,6 +1,6 @@
 # W3: Workflow Phase Redesign
 
-**Status**: Plan
+**Status**: Spec
 **Tier**: T3 Initiative
 **Epic**: work-harness-pim
 
@@ -12,7 +12,7 @@ The work harness's phase system is forward-only — agents cannot push back, adv
 
 | ID | Component | Scope | Phase |
 |----|-----------|-------|-------|
-| C01 | Step Lifecycle Extension | Small | 1 |
+| C01 | State Schema Extensions | Small | 1 |
 | C02 | Verdict System Redesign | Medium | 1 |
 | C03 | Approval Ceremony Tiering | Medium | 2 |
 | C04 | Explore Phase Clarity | Medium | 2 |
@@ -30,6 +30,18 @@ The work harness's phase system is forward-only — agents cannot push back, adv
 - Adversarial eval is optional during plan/spec, not a mandatory step; supports pluggable framings
 - Changes apply to T2 and T3; T1 (work-fix) is unaffected
 - All 9 items ship as one initiative in 3 dependency-ordered phases
+
+### Resolved During Spec (new)
+
+- C01 renamed to "State Schema Extensions" — lifecycle is unchanged (DD-7); component is about schema docs
+- ASK verdict UX: max 5 questions, numbered list, hard stop, responses in gate file only (no state.json fields)
+- Risk classification is static (transition type table), dynamic risk deferred
+- Explore clarity is a within-step protocol (not a separate step), optional if agent has no questions
+- Clarity questions → user (Spec 04); inline research → Explore subagents (Spec 05) — distinct mechanisms
+- Finding resolution criteria: in-scope, non-architectural, ≤3 files, not design concern; max 3 per transition
+- Tier R has no inter-step review gates (lightweight lifecycle)
+- Adversarial eval Phase 0 (position elicitation) is skippable
+- T2 risk mappings: plan→implement = medium (hard stop), implement→review = low (auto-advance)
 
 ## Key Files
 
