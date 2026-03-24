@@ -13,7 +13,7 @@ research agents) inherit harness conventions.
 ## When This Activates
 
 - `.work/` directory exists with at least one active task
-- Running work commands (`/work`, `/work-fix`, `/work-feature`, `/work-deep`)
+- Running work commands (`/work`, `/work-fix`, `/work-feature`, `/work-deep`, `/work-research`)
 - Running state commands (`/work-status`, `/work-checkpoint`, etc.)
 
 ## References
@@ -60,7 +60,7 @@ This applies to file listings, findings, spec references, and any path written t
 
 Each task's state lives at `.work/<name>/state.json`:
 - `name`: kebab-case task slug (max 40 chars)
-- `tier`: 1, 2, or 3
+- `tier`: 1, 2, 3, or "R"
 - `current_step`: must be a value in the steps array
 - `steps`: ordered array of step objects (`[{name, status, started_at, completed_at, gate_id, gate_file}, ...]`)
 - `assessment`: triage scoring (null until assess step completes)

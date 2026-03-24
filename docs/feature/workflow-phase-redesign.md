@@ -1,6 +1,6 @@
 # W3: Workflow Phase Redesign
 
-**Status**: Spec
+**Status**: Review
 **Tier**: T3 Initiative
 **Epic**: work-harness-pim
 
@@ -56,16 +56,16 @@ The work harness's phase system is forward-only — agents cannot push back, adv
 
 ## Work Items
 
-- [ ] Explore phase: build clarity — nail down intention, push back, ask questions before planning
-- [ ] Plan mode redesign — pointed design questions with options, ability to expand
-- [ ] Review timing — phased review only at end of back-and-forth, not mid-conversation
-- [ ] Open questions: tackle immediately when possible
-- [ ] Aggressive Phase B finding resolution — handle findings immediately unless design concern
-- [ ] Advisory notes -> direct clarification asks
-- [ ] `work-research` support — research-only path for pure research tasks
-- [ ] First-class research/design loop — formal support for repeated research/design pattern
-- [ ] General adversarial-eval improvements — flush out perspectives into argued positions
+- [x] Explore phase: build clarity — nail down intention, push back, ask questions before planning
+- [x] Plan mode redesign — pointed design questions with options, ability to expand
+- [x] Review timing — phased review only at end of back-and-forth, not mid-conversation
+- [x] Open questions: tackle immediately when possible
+- [x] Aggressive Phase B finding resolution — handle findings immediately unless design concern
+- [x] Advisory notes -> direct clarification asks
+- [x] `work-research` support — research-only path for pure research tasks
+- [x] First-class research/design loop — formal support for repeated research/design pattern
+- [x] General adversarial-eval improvements — flush out perspectives into argued positions
 
 ## Implementation Notes
 
-_(to be populated during implementation)_
+All 8 work items implemented across 5 streams in 4 phases. Changes span 10 modified files and 2 new files (+434/-91 lines in implementation files). Key artifacts: `work-research.md` (Tier R command), `adversarial-eval.md` (4-phase debate protocol with pluggable framings), risk-based ceremony tiering in `step-transition.md`, ASK verdict system in `phase-review.md`, explore clarity protocols in command files, and inline research capability in plan agent template.

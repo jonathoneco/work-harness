@@ -32,14 +32,24 @@ Every gate file has these sections in order:
 ## Review Results
 
 ### Phase A -- Artifact Validation
-**Verdict**: PASS | ADVISORY | BLOCKING
+**Verdict**: PASS | ASK | BLOCKING
 
 <Checklist results. Each item: pass/fail with one-line detail.>
 
 ### Phase B -- Quality Review
-**Verdict**: PASS | ADVISORY | BLOCKING
+**Verdict**: PASS | ASK | BLOCKING
 
-<Quality findings. Each item: pass/advisory/blocking with detail.>
+<Quality findings. Each item: pass/ask/blocking with detail.>
+
+## Resolved Asks
+<!-- Omit this section entirely if neither phase had ASK verdicts. -->
+
+### Phase A Asks
+_(none)_
+
+### Phase B Asks
+**Q1**: [Original question text]
+**A1**: [User's response — verbatim or summarized]
 
 ## Advisory Notes
 <Numbered advisory notes carried forward. Empty section if none.>
@@ -57,7 +67,7 @@ Every gate file has these sections in order:
 -->
 ```
 
-The seven required sections are: Summary, Review Results (containing Phase A and Phase B sub-sections), Advisory Notes, Deferred Items, Next Step, and Your Response.
+The required sections are: Summary, Review Results (containing Phase A and Phase B sub-sections), Resolved Asks (only when ASK verdicts occurred), Advisory Notes, Deferred Items, Next Step, and Your Response.
 
 ## 4. Iteration Protocol
 
