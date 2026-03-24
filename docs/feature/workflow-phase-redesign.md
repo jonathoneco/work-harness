@@ -1,6 +1,6 @@
 # W3: Workflow Phase Redesign
 
-**Status**: Review
+**Status**: archived
 **Tier**: T3 Initiative
 **Epic**: work-harness-pim
 
@@ -69,3 +69,7 @@ The work harness's phase system is forward-only — agents cannot push back, adv
 ## Implementation Notes
 
 All 8 work items implemented across 5 streams in 4 phases. Changes span 10 modified files and 2 new files (+434/-91 lines in implementation files). Key artifacts: `work-research.md` (Tier R command), `adversarial-eval.md` (4-phase debate protocol with pluggable framings), risk-based ceremony tiering in `step-transition.md`, ASK verdict system in `phase-review.md`, explore clarity protocols in command files, and inline research capability in plan agent template.
+
+## Completed
+
+Archived 2026-03-24. 7 steps across 5+ sessions. 6 review findings (all fixed). 14 files changed (+925/-89). Delivered: ASK verdict system replacing ADVISORY, risk-based ceremony tiering, explore clarity protocols, plan agent inline research, immediate finding resolution, `/work-research` command (Tier R), and adversarial eval with pluggable framings.
