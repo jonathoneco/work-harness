@@ -1,0 +1,16 @@
+{"work_item": "W-01", "beads_id": "work-harness-alc.1", "stream": "A", "phase": 1, "spec": "01", "title": "Metadata tagging — 32 files"}
+{"work_item": "W-02", "beads_id": "work-harness-alc.2", "stream": "C", "phase": 2, "spec": "01", "title": "Skill lifecycle + update command"}
+{"work_item": "W-03", "beads_id": "work-harness-alc.3", "stream": "D", "phase": 2, "spec": "02", "title": "Pack discovery extension"}
+{"work_item": "W-04", "beads_id": "work-harness-alc.4", "stream": "E", "phase": 2, "spec": "06", "title": "AMA skill enrichment"}
+{"work_item": "W-05", "beads_id": "work-harness-alc.5", "stream": "F", "phase": 2, "spec": "07", "title": "Codex-review enrichment"}
+{"work_item": "W-06", "beads_id": "work-harness-alc.6", "stream": "G", "phase": 2, "spec": "08", "title": "Context-docs enrichment"}
+{"work_item": "W-07", "beads_id": "work-harness-alc.7", "stream": "H", "phase": 3, "spec": "03", "title": "Python anti-patterns pack"}
+{"work_item": "W-08", "beads_id": "work-harness-alc.8", "stream": "I", "phase": 3, "spec": "03", "title": "TypeScript anti-patterns pack"}
+{"work_item": "W-09", "beads_id": "work-harness-alc.9", "stream": "J", "phase": 3, "spec": "03", "title": "Rust anti-patterns pack"}
+{"work_item": "W-10", "beads_id": "work-harness-alc.10", "stream": "K", "phase": 3, "spec": "04", "title": "React anti-patterns pack"}
+{"work_item": "W-11", "beads_id": "work-harness-alc.11", "stream": "L", "phase": 3, "spec": "04", "title": "Next.js anti-patterns pack"}
+{"work_item": "W-12", "beads_id": "work-harness-alc.12", "stream": "B", "phase": 1, "spec": "05", "title": "Go pack standard format"}
+{"work_item": "W-13", "beads_id": "work-harness-alc.13", "stream": "M", "phase": 3, "spec": "09-11", "title": "New commands (workflow-meta, dev-update, work-dump)"}
+{"work_item": "W-16", "beads_id": "work-harness-52s", "stream": "O", "phase": 3, "spec": "12", "title": "PR state machine rewrite"}
+{"work_item": "W-14", "beads_id": "work-harness-alc.14", "stream": "N", "phase": 4, "spec": "13", "title": "Agency-agents curation"}
+{"work_item": "W-15", "beads_id": "work-harness-alc.15", "stream": "N", "phase": 4, "spec": "14", "title": "install.sh + VERSION + workflow.md"}
