@@ -3,8 +3,8 @@ name: codex-review
 description: "Optional Codex integration for second-opinion code review. Activates during /work-review when Codex CLI is available."
 meta:
   stack: ["all"]
-  version: 1
-  last_reviewed: 2026-03-24
+  version: 2
+  last_reviewed: 2026-03-25
 ---
 
 # Codex Review
@@ -28,8 +28,12 @@ Run Codex in read-only sandbox mode with structured output:
     codex exec \
       --output-schema '{"type":"array","items":{"type":"object","properties":{"severity":{"type":"string","enum":["critical","important","minor"]},"category":{"type":"string","enum":["security","performance","correctness","style"]},"file":{"type":"string"},"line":{"type":"integer"},"message":{"type":"string"},"suggestion":{"type":"string"}},"required":["severity","category","file","message"]}}' \
       --sandbox read-only \
-      "Review the following code changes for bugs, security issues, performance problems, and correctness errors. Focus on real issues, not style preferences. For each issue found, provide severity, category, file, line number, message, and suggested fix." \
-      < <diff-input>
+      "Review the following code changes for bugs, security issues, performance problems, and correctness errors. Focus on real issues, not style preferences. For each issue found, provide severity, category, file, line number, message, and suggested fix."
+
+Pipe the diff into codex via stdin:
+```bash
+git diff <base>..HEAD | codex exec --output-schema '...' --sandbox read-only "Review..."
+```
 
 ## Diff Preparation
 

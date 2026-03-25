@@ -3,8 +3,8 @@ description: "Run a comprehensive health check on the harness installation and p
 user_invocable: true
 meta:
   stack: ["all"]
-  version: 1
-  last_reviewed: 2026-03-24
+  version: 2
+  last_reviewed: 2026-03-25
 ---
 
 # /harness-doctor -- Health Check
@@ -192,7 +192,7 @@ Present the results in a structured report:
 - **Read-only**: Never modify any files.
 - **Run all checks**: Do not stop at first failure -- run everything and report all issues.
 - **Actionable output**: Every WARN and FAIL must include a specific remediation command or action.
-- **Continue on degradation**: If check 1 fails (no config), still run checks 3, 4, 6, and 7. Skip checks 2 and 5 that depend on config data, noting the skip reason.
+- **Continue on degradation**: If check 1 fails (no config), still run checks 3, 4, 6, and 7. Skip checks 2, 5, and 8 that depend on config data, noting the skip reason.
 
 **Config injection**: If `.claude/harness.yaml` exists in the current project directory, read it and include a "Project Stack Context" section (language, framework, database, build commands) in all subagent prompts and handoff prompts you produce.
 
@@ -200,8 +200,8 @@ Present the results in a structured report:
 
 | Scenario | Handling |
 |----------|----------|
-| harness.yaml missing | Check 1 FAIL. Checks 2 and 5 degrade (skip). Other checks still run. |
-| harness.yaml malformed | Check 1 FAIL with parse error. Checks 2 and 5 skip. |
+| harness.yaml missing | Check 1 FAIL. Checks 2, 5, and 8 degrade (skip). Other checks still run. |
+| harness.yaml malformed | Check 1 FAIL with parse error. Checks 2, 5, and 8 skip. |
 | Manifest missing | Checks 3 and 5 degrade to WARN (cannot verify). Other checks still run. |
 | Manifest malformed JSON | Same as missing -- degrade checks 3 and 5 with error message. |
 | `bd` not installed | Check 6 FAIL for bd. Check 4 degrades (skip `bd list` verification, only check directory). |

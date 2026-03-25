@@ -421,7 +421,7 @@ fn process_lines(input: &str) -> Vec<String> {
         buffer.clear(); // reuse without reallocating
         buffer.push_str("PREFIX: ");
         buffer.push_str(line);
-        results.push(buffer.clone()); // clone only for the output
+        results.push(buffer.clone()); // clone allocates for output, but buffer retains capacity — avoids repeated growth
     }
     results
 }
@@ -460,20 +460,21 @@ Adding `#[allow(clippy::...)]` attributes to silence Clippy warnings without a c
 #[allow(clippy::needless_return)]
 #[allow(clippy::redundant_clone)]
 #[allow(clippy::unwrap_used)]
-fn process(data: &str) -> String {
-    let result = data.to_string().clone();
-    return result.unwrap();
+fn process(data: &str) -> Result<String, serde_json::Error> {
+    let parsed: serde_json::Value = serde_json::from_str(data)?;
+    let result = parsed.to_string().clone();
+    return Ok(result);
 }
 ```
 
 ```rust
 // GOOD
-// Clippy flags this as redundant, but the trait bound requires an owned String
+// Clippy flags redundant_clone here, but the trait bound requires an owned String
 // and the input may alias the output buffer in concurrent contexts.
 #[allow(clippy::redundant_clone)]
-fn process(data: &str) -> String {
-    let result = data.to_string().clone();
-    result
+fn process(data: &str) -> Result<String, serde_json::Error> {
+    let parsed: serde_json::Value = serde_json::from_str(data)?;
+    Ok(parsed.to_string())
 }
 ```
 

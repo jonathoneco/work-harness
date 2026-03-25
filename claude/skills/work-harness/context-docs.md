@@ -3,8 +3,8 @@ name: context-docs
 description: "Manifest-driven system for injecting project documentation into agent context"
 meta:
   stack: ["all"]
-  version: 1
-  last_reviewed: 2026-03-24
+  version: 2
+  last_reviewed: 2026-03-25
 ---
 
 # Context Doc System

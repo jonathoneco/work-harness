@@ -3,8 +3,8 @@ name: work-harness
 description: "Adaptive work harness conventions — state model, triage, review gates, escalation. Activates when .work/ directory exists with active tasks (state.json where archived_at is null). Propagate to implementation and review subagents via skills: [work-harness] frontmatter."
 meta:
   stack: ["all"]
-  version: 1
-  last_reviewed: 2026-03-24
+  version: 2
+  last_reviewed: 2026-03-25
 ---
 
 # Work Harness
@@ -36,6 +36,8 @@ research agents) inherit harness conventions.
 - **skill-lifecycle** — Staleness detection rules and metadata conventions (path: `claude/skills/work-harness/skill-lifecycle.md`)
 - **dev-update** — Status update generation conventions (path: `claude/skills/work-harness/dev-update.md`)
 - **agency-curation** — Per-stack agent recommendations for review routing (path: `claude/skills/work-harness/agency-curation.md`)
+- **codex-review** — Optional Codex CLI second-opinion review integration (path: `claude/skills/work-harness/codex-review.md`)
+- **context-docs** — Manifest-driven project doc injection into agent context (path: `claude/skills/work-harness/context-docs.md`)
 
 ## Path Convention
 

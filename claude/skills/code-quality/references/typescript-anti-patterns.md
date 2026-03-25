@@ -352,38 +352,35 @@ function checkRole(role: "admin" | "user" | "guest") { /* ... */ }
 checkRole(ROLES.ADMIN); // works — ROLES.ADMIN is type "admin"
 ```
 
-## Performance: Avoid Unnecessary Re-renders from Object Literals in Props
-**Severity**: warn
+## Performance: Avoid enum at Runtime
+**Severity**: info
 
-Creating new object or array literals directly in JSX props causes unnecessary re-renders because each render creates a new reference, breaking shallow equality checks in `React.memo` and `useMemo`.
+Using TypeScript `enum` declarations instead of `const enum` or union types. Regular enums generate runtime JavaScript objects with reverse mappings, adding bundle size and indirection. AI agents default to `enum` because it looks like other languages' enums.
 
-**Why**: React's reconciliation relies on referential equality for props. Inline object/array literals are new references every render, so memoized children always re-render. This defeats the purpose of `React.memo` and degrades performance in large component trees.
+**Why**: TypeScript enums compile to IIFE objects with bidirectional string-to-number mappings. This adds runtime overhead and bundle size. Union types (`"admin" | "user"`) are zero-cost at runtime — they exist only at compile time. `const enum` inlines values but has limitations with `--isolatedModules`.
 
 ```typescript
 // BAD
-function ParentComponent({ items }: { items: Item[] }) {
-  return (
-    <ChildComponent
-      config={{ sortBy: "name", order: "asc" }}
-      filters={[]}
-    />
-  );
+enum Status {
+  Active = "active",
+  Inactive = "inactive",
+  Pending = "pending",
+}
+// Compiles to: var Status; (function(Status) { ... })(Status || (Status = {}));
+
+function isActive(status: Status): boolean {
+  return status === Status.Active;
 }
 ```
 
 ```typescript
 // GOOD
-const DEFAULT_CONFIG = { sortBy: "name", order: "asc" } as const;
-const EMPTY_FILTERS: Filter[] = [];
+type Status = "active" | "inactive" | "pending";
 
-function ParentComponent({ items }: { items: Item[] }) {
-  return (
-    <ChildComponent
-      config={DEFAULT_CONFIG}
-      filters={EMPTY_FILTERS}
-    />
-  );
+function isActive(status: Status): boolean {
+  return status === "active";
 }
+// Zero runtime cost — Status is erased at compile time
 ```
 
 ## Security: Validate External Data at Runtime, Not Just Compile-Time

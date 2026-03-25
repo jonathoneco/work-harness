@@ -528,6 +528,8 @@ function App() {
 
 ```tsx
 // GOOD
+// Note: Error boundaries currently require class components.
+// Libraries like `react-error-boundary` provide a function-component-friendly wrapper.
 class DashboardErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean }

@@ -3,8 +3,8 @@ description: "Ask anything about this project — architecture, codebase, infra,
 user_invocable: true
 meta:
   stack: ["all"]
-  version: 1
-  last_reviewed: 2026-03-24
+  version: 2
+  last_reviewed: 2026-03-25
 ---
 
 # Project AMA

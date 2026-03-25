@@ -80,7 +80,7 @@ Update the `VERSION` file (single line, no `v` prefix, no trailing newline).
 
 ## Sync Points to Verify After Changes
 
-- `workflow.md` command table matches `claude/commands/` inventory (currently 11 work commands + `/delegate`)
+- `workflow.md` command table matches `claude/commands/` inventory (currently 16 table entries)
 - `install.sh` file list matches `claude/` directory contents
 - Manifest schema matches what `install.sh` produces
 - Hook registrations match what `install.sh` adds to settings.json

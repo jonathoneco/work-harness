@@ -80,7 +80,7 @@ Files: [likely files to modify, based on project structure]
 
 Present the dependency ordering:
 
-```markdown
+~~~markdown
 ## Dependency Graph
 
 ```
@@ -94,7 +94,7 @@ Present the dependency ordering:
 **Parallel tracks**:
 - Track 1: [DB] -> [API] -> [Service]
 - Track 2: [UX] (independent after API exists)
-```
+~~~
 
 ## Step 5: Output Plan
 

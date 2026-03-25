@@ -1,3 +1,10 @@
+---
+meta:
+  stack: ["go"]
+  version: 2
+  last_reviewed: 2026-03-25
+---
+
 # Go Anti-Patterns
 
 These rules exist because agent-generated code repeatedly introduced these anti-patterns, causing silent production bugs. Every rule has a concrete BAD/GOOD example.
@@ -297,4 +304,284 @@ fmt.Println("processing document", docID)
 ```go
 // GOOD
 slog.Info("processing document", "document_id", docID, "stage", "extraction")
+```
+
+## Anti-pattern: Goroutine leak from unbuffered channel
+**Severity**: error
+
+Do not spawn a goroutine that sends to a channel when there is no guaranteed receiver. If the receiver exits early (due to context cancellation, timeout, or error), the sender goroutine blocks forever, leaking memory and a stack.
+
+**Why**: Leaked goroutines accumulate silently. Each holds its stack (~8 KB minimum) and any heap objects it references. Under load, thousands of leaked goroutines cause OOM crashes with no obvious cause in metrics.
+
+```go
+// BAD
+// if ctx is cancelled before result is read, the goroutine hangs forever
+func fetchData(ctx context.Context, url string) (*Result, error) {
+    ch := make(chan *Result)
+    go func() {
+        r, _ := http.Get(url)
+        defer r.Body.Close()
+        var result Result
+        json.NewDecoder(r.Body).Decode(&result)
+        ch <- &result // blocks forever if nobody reads
+    }()
+    select {
+    case <-ctx.Done():
+        return nil, ctx.Err()
+    case result := <-ch:
+        return result, nil
+    }
+}
+```
+
+```go
+// GOOD
+// buffered channel lets the goroutine complete even if the receiver is gone
+func fetchData(ctx context.Context, url string) (*Result, error) {
+    ch := make(chan *Result, 1)
+    go func() {
+        r, err := http.Get(url)
+        if err != nil {
+            return
+        }
+        defer r.Body.Close()
+        var result Result
+        if err := json.NewDecoder(r.Body).Decode(&result); err != nil {
+            return
+        }
+        ch <- &result // never blocks: buffer size 1
+    }()
+    select {
+    case <-ctx.Done():
+        return nil, ctx.Err()
+    case result := <-ch:
+        return result, nil
+    }
+}
+```
+
+## Anti-pattern: Nil pointer on interface value
+**Severity**: error
+
+An interface value is only `nil` when both its type and value are nil. If you assign a typed nil pointer to an interface, `interface != nil` evaluates to true, but calling methods on the underlying pointer still panics.
+
+**Why**: This is one of Go's most common gotchas. AI agents frequently return a typed nil pointer from a function with an interface return type, then callers check `if err != nil` or `if result != nil` and proceed, hitting a nil dereference panic at runtime.
+
+```go
+// BAD
+// returns (*MyError)(nil) which is NOT a nil interface
+func validate(input string) error {
+    var err *MyError
+    if len(input) == 0 {
+        err = &MyError{Msg: "empty input"}
+    }
+    return err // caller sees err != nil even when input is valid
+}
+```
+
+```go
+// GOOD
+// return an explicit nil interface value on the success path
+func validate(input string) error {
+    if len(input) == 0 {
+        return &MyError{Msg: "empty input"}
+    }
+    return nil
+}
+```
+
+## Anti-pattern: Context cancellation not propagated
+**Severity**: warn
+
+Always pass the parent context through to downstream calls. Do not create a new `context.Background()` or `context.TODO()` inside a function that already receives a context parameter. This breaks the cancellation chain.
+
+**Why**: When a caller cancels its context (e.g., HTTP request disconnects), downstream work should stop promptly. Using `context.Background()` inside the call chain means the downstream operation runs to completion even after the caller is gone, wasting resources and potentially writing stale results.
+
+```go
+// BAD
+// parent cancellation is ignored; the DB query runs to completion
+func (s *Service) GetReport(ctx context.Context, id uuid.UUID) (*Report, error) {
+    rows, err := s.pool.Query(context.Background(), "SELECT ...", id)
+    if err != nil {
+        return nil, fmt.Errorf("query report: %w", err)
+    }
+    defer rows.Close()
+    return scanReport(rows)
+}
+```
+
+```go
+// GOOD
+// parent context flows through; cancellation propagates to the DB driver
+func (s *Service) GetReport(ctx context.Context, id uuid.UUID) (*Report, error) {
+    rows, err := s.pool.Query(ctx, "SELECT ...", id)
+    if err != nil {
+        return nil, fmt.Errorf("query report: %w", err)
+    }
+    defer rows.Close()
+    return scanReport(rows)
+}
+```
+
+## Anti-pattern: Defer in loop
+**Severity**: warn
+
+Do not use `defer` inside a `for` loop. Deferred calls execute when the enclosing *function* returns, not when the loop iteration ends. Resources opened in the loop pile up until the function exits.
+
+**Why**: In a loop processing thousands of items, each iteration opens a resource (file, connection, response body) and defers its close. None close until the loop finishes. This causes file descriptor exhaustion, memory spikes, or connection pool starvation.
+
+```go
+// BAD
+// all file handles stay open until processAll returns
+func processAll(paths []string) error {
+    for _, path := range paths {
+        f, err := os.Open(path)
+        if err != nil {
+            return fmt.Errorf("open %s: %w", path, err)
+        }
+        defer f.Close() // deferred until function returns, not loop iteration
+        if err := process(f); err != nil {
+            return fmt.Errorf("process %s: %w", path, err)
+        }
+    }
+    return nil
+}
+```
+
+```go
+// GOOD
+// extract loop body into a function so defer runs each iteration
+func processAll(paths []string) error {
+    for _, path := range paths {
+        if err := processOne(path); err != nil {
+            return err
+        }
+    }
+    return nil
+}
+
+func processOne(path string) error {
+    f, err := os.Open(path)
+    if err != nil {
+        return fmt.Errorf("open %s: %w", path, err)
+    }
+    defer f.Close()
+    if err := process(f); err != nil {
+        return fmt.Errorf("process %s: %w", path, err)
+    }
+    return nil
+}
+```
+
+## Anti-pattern: Slice append aliasing
+**Severity**: warn
+
+When a function receives a slice parameter and appends to it, the append may or may not allocate a new backing array depending on capacity. If it does not, the caller's underlying array is silently mutated. Do not append to slice parameters unless the function clearly owns the slice.
+
+**Why**: Slice aliasing bugs are extremely hard to diagnose. The behavior depends on the slice's current length vs. capacity, which changes at runtime. Tests pass with small inputs (triggers reallocation) but production data with pre-allocated capacity causes silent data corruption.
+
+```go
+// BAD
+// if items has spare capacity, caller's backing array is corrupted
+func addDefaults(items []Item) []Item {
+    items = append(items, Item{Name: "default-timeout", Value: "30s"})
+    items = append(items, Item{Name: "default-retries", Value: "3"})
+    return items
+}
+```
+
+```go
+// GOOD
+// copy into a new slice to avoid aliasing the caller's backing array
+func addDefaults(items []Item) []Item {
+    result := make([]Item, len(items), len(items)+2)
+    copy(result, items)
+    result = append(result, Item{Name: "default-timeout", Value: "30s"})
+    result = append(result, Item{Name: "default-retries", Value: "3"})
+    return result
+}
+```
+
+## Anti-pattern: init() function abuse
+**Severity**: warn
+
+Do not put complex logic, I/O operations, or side effects in `init()` functions. Use `init()` only for simple variable registration (e.g., `flag.StringVar`, driver registration). Everything else belongs in explicit constructors or setup functions.
+
+**Why**: `init()` runs before `main()` with no way to pass arguments, return errors, or control execution order across packages. Complex init logic makes tests non-deterministic (global state set before TestMain), prevents dependency injection, and turns import order into a hidden dependency graph.
+
+```go
+// BAD
+// init connects to a real database; tests import this package and fail
+func init() {
+    var err error
+    db, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
+    if err != nil {
+        log.Fatal(err)
+    }
+    if err := db.Ping(); err != nil {
+        log.Fatal(err)
+    }
+    if err := runMigrations(db); err != nil {
+        log.Fatal(err)
+    }
+}
+```
+
+```go
+// GOOD
+// explicit setup function that can be called with test config
+func NewDB(dsn string) (*sql.DB, error) {
+    db, err := sql.Open("postgres", dsn)
+    if err != nil {
+        return nil, fmt.Errorf("open database: %w", err)
+    }
+    if err := db.Ping(); err != nil {
+        return nil, fmt.Errorf("ping database: %w", err)
+    }
+    if err := runMigrations(db); err != nil {
+        return nil, fmt.Errorf("run migrations: %w", err)
+    }
+    return db, nil
+}
+```
+
+## Anti-pattern: Shadow variable with :=
+**Severity**: warn
+
+Do not use `:=` in an inner scope when you intend to assign to an outer variable. The short declaration creates a new variable that shadows the outer one, leaving the outer variable unchanged. This is especially dangerous with `err`.
+
+**Why**: Variable shadowing with `:=` is the most common source of "impossible" bugs in Go. The code compiles and runs, but the outer `err` remains nil while the inner `err` captures the real error. The function then proceeds as if no error occurred, leading to nil pointer panics or corrupt data downstream.
+
+```go
+// BAD
+// the outer err stays nil; the function returns (result, nil) even on failure
+func loadConfig(path string) (*Config, error) {
+    var cfg *Config
+    var err error
+    if path != "" {
+        cfg, err := parseFile(path) // shadows outer cfg and err
+        if err != nil {
+            return nil, fmt.Errorf("parse config: %w", err)
+        }
+        cfg.Source = path // assigns to inner cfg, lost after this block
+    }
+    return cfg, err // returns (nil, nil) -- caller thinks success
+}
+```
+
+```go
+// GOOD
+// use = to assign to the already-declared outer variables
+func loadConfig(path string) (*Config, error) {
+    var cfg *Config
+    var err error
+    if path != "" {
+        cfg, err = parseFile(path) // assigns to outer cfg and err
+        if err != nil {
+            return nil, fmt.Errorf("parse config: %w", err)
+        }
+        cfg.Source = path
+    }
+    return cfg, err
+}
 ```

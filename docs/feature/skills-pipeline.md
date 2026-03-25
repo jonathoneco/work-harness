@@ -1,6 +1,6 @@
 # W4: Skills Pipeline
 
-**Status**: Spec
+**Status**: Review
 **Tier**: 3 (Initiative)
 **Epic**: work-harness-alc
 **Issue**: work-harness-bn1

@@ -153,7 +153,7 @@ If no force flag is present, run these checks in order. The **first matching sta
    If `state == "MERGED"` → state is `MERGED`
 
 3. **`CLOSED` — PR was closed without merging**:
-   If `state == "CLOSED"` → report "PR #N was closed without merging" and stop.
+   If `state == "CLOSED"` → report "PR #N was closed without merging. To create a new PR for this branch, re-run with `--create-only`." and stop.
 
 4. **`DRAFT` — PR is a draft**:
    If `isDraft == true` → state is `DRAFT`
@@ -165,13 +165,14 @@ If no force flag is present, run these checks in order. The **first matching sta
    If any run has `conclusion == "failure"` and `headSha` matches the current HEAD → state is `CI_FAIL`
 
 6. **`NO_DESC` — PR description is empty or placeholder**:
-   If `body` is empty or fewer than 20 characters, or `labels` is empty → state is `NO_DESC`
+   If `body` is empty or fewer than 20 characters → state is `NO_DESC`. (If labels are empty but body is adequate, note missing labels as advisory in the action output.)
 
 7. **`STALE_DESC` — PR description doesn't match current diff**:
+   Using the `baseRefName` from the Step 8 initial query, compare commit history:
    ```bash
-   git log $(gh pr view --json baseRefName -q '.baseRefName')..HEAD --oneline
+   git log <baseRefName>..HEAD --oneline
    ```
-   Compare commit count and changed files against what the PR description covers. If there are commits not reflected in the description (heuristic: description mentions fewer files than the diff touches) → state is `STALE_DESC`
+   If there are commits after the PR was last updated (compare `updatedAt` from the initial query against latest commit timestamp), or the commit count has changed significantly since the description was written → state is `STALE_DESC`
 
 8. **`NEEDS_REVIEWERS` — No reviewers assigned**:
    If `reviewRequests` is empty → state is `NEEDS_REVIEWERS`

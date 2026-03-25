@@ -88,8 +88,8 @@ async def send_notification(client, msg):
     await client.post("/notify", json=msg)
 ```
 
-## Anti-pattern: String Concatenation in Loop
-**Severity**: warn
+## Performance: String Concatenation in Loop
+**Severity**: info
 
 Building strings by concatenating with `+` or `+=` inside a loop creates a new string object on every iteration, resulting in O(n^2) time complexity for n concatenations.
 
