@@ -1,6 +1,6 @@
 # W4: Skills Pipeline
 
-**Status**: Review
+**Status**: Archived
 **Tier**: 3 (Initiative)
 **Epic**: work-harness-alc
 **Issue**: work-harness-bn1
@@ -76,3 +76,9 @@ The work harness has 42 skill+command files but the skill layer hasn't kept pace
 9. Language-specific packs -- library of anti-patterns, good practices, idiomatic recommendations
 10. Agency-agents deep integration -- curated agent subset per stack in harness.yaml
 11. Multi-language project support -- deferred to schema v2 (review_routing workaround suffices)
+
+## Completed
+
+**Archived:** 2026-03-25 | **Findings:** 23 (22 fixed, 1 dismissed) | **Duration:** ~13.5 hours across 7 sessions
+
+Delivered 6 anti-pattern packs (99 entries), 5 new commands, 5 new skills, metadata tagging on all 48 harness files, and a pr-prep state machine refactor. VERSION bumped 0.1.0 to 0.2.0. 11 future enhancements captured in `docs/futures/skills-pipeline.md`.
