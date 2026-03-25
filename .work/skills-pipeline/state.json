@@ -1,0 +1,32 @@
+{
+  "name": "skills-pipeline",
+  "tier": 3,
+  "title": "W4: Skills Pipeline",
+  "created_at": "2026-03-24T21:00:00Z",
+  "updated_at": "2026-03-24T23:30:00Z",
+  "issue_id": "work-harness-bn1",
+  "current_step": "spec",
+  "steps": [
+    {"name": "assess", "status": "completed", "started_at": "2026-03-24T21:00:00Z", "completed_at": "2026-03-24T21:00:00Z", "handoff_prompt": null, "gate_id": null, "gate_file": null},
+    {"name": "research", "status": "completed", "started_at": "2026-03-24T21:00:00Z", "completed_at": "2026-03-24T21:54:00Z", "handoff_prompt": "research/handoff-prompt.md", "gate_id": "work-harness-3q6", "gate_file": "gates/research-to-plan.md"},
+    {"name": "plan", "status": "completed", "started_at": "2026-03-24T21:54:00Z", "completed_at": "2026-03-24T23:30:00Z", "handoff_prompt": "plan/handoff-prompt.md", "gate_id": "work-harness-q9v", "gate_file": "gates/plan-to-spec.md"},
+    {"name": "spec", "status": "active", "started_at": "2026-03-24T23:30:00Z", "completed_at": null, "handoff_prompt": null, "gate_id": null, "gate_file": null},
+    {"name": "decompose", "status": "not_started", "started_at": null, "completed_at": null, "handoff_prompt": null, "gate_id": null, "gate_file": null},
+    {"name": "implement", "status": "not_started", "started_at": null, "completed_at": null, "handoff_prompt": null, "gate_id": null, "gate_file": null},
+    {"name": "review", "status": "not_started", "started_at": null, "completed_at": null, "handoff_prompt": null, "gate_id": null, "gate_file": null}
+  ],
+  "assessment": {
+    "scope_spread": 1,
+    "design_novelty": 1,
+    "decomposability": 2,
+    "bulk_modifier": 0,
+    "total": 4,
+    "rationale": "11 independent skill work items spanning skills, commands, and harness.yaml config. Each skill is substantively different (no bulk discount). Score 4 — Tier 3 initiative."
+  },
+  "docs_path": "docs/feature/skills-pipeline.md",
+  "beads_epic_id": "work-harness-alc",
+  "sessions": [],
+  "base_commit": "7ff960f9e960e706972d6be23688f89b2c8320b6",
+  "findings_file": ".review/findings.jsonl",
+  "archived_at": null
+}
