@@ -121,7 +121,7 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
 
 Every step transition runs a two-phase review before advancing. Follow the **phase-review** skill (`claude/skills/work-harness/phase-review.md`) for the review framework — agent types, verdict protocol, and retry logic. Each auto-advance block below provides step-specific checklists.
 
-After reviews complete, follow the **step-transition** skill (`claude/skills/work-harness/step-transition.md`) for risk-based ceremony routing, gate creation, state update, and compaction prompt. The step-transition skill's **Risk Classification** table determines whether each transition is a hard stop or auto-advance:
+After reviews complete, follow the **step-transition** protocol (`claude/skills/work-harness/step-transition.md`) for risk-based ceremony routing, gate creation, state update, and compaction prompt. The step-transition protocol's **Risk Classification** table determines whether each transition is a hard stop or auto-advance:
 - **Research → plan, plan → spec**: high risk — hard stop approval ceremony
 - **Spec → decompose, decompose → implement**: medium risk — hard stop approval ceremony
 - **Implement phase N → N+1, implement → review**: low risk — auto-advance with notification (no user input)
@@ -132,7 +132,7 @@ Tier 3 adaptations apply: gate issues are required, gate files are required, han
 
 ## Context Compaction Protocol
 
-Step transitions are natural compaction boundaries. The **step-transition** skill (`claude/skills/work-harness/step-transition.md`) handles the compaction prompt — for Tier 3, it tells the user to run `/compact` then `/work-deep` and then stops.
+Step transitions are natural compaction boundaries. The **step-transition** protocol (`claude/skills/work-harness/step-transition.md`) handles the compaction prompt — for Tier 3, it tells the user to run `/compact` then `/work-deep` and then stops.
 
 When the user runs `/work-deep` after compacting, it detects the active task, reads `current_step`, and routes to the new step with only the handoff prompt as context.
 
@@ -220,7 +220,7 @@ Structured exploration to build understanding before planning.
       - Does the handoff prompt reference note file paths rather than copying content?
    d. Apply verdict per the `phase-review` skill verdict protocol.
    e. **Write gate file**: Write `.work/<name>/gates/research-to-plan.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from review results.
-   f. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark research `completed` with `gate_id` and `gate_file: "gates/research-to-plan.md"`, set plan to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/architecture-decisions.md` (if it exists), and the handoff prompt.
+   f. **Follow the step-transition protocol** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark research `completed` with `gate_id` and `gate_file: "gates/research-to-plan.md"`, set plan to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/architecture-decisions.md` (if it exists), and the handoff prompt.
 
 ---
 
@@ -309,7 +309,7 @@ A gap requiring user judgment (business decision, priority call, scope question)
       - Do failure modes fail closed (no silent fallbacks)?
    d. Apply verdict per the `phase-review` skill verdict protocol.
    e. **Write gate file**: Write `.work/<name>/gates/plan-to-spec.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from review results.
-   f. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark plan `completed` with `gate_id` and `gate_file: "gates/plan-to-spec.md"`, set spec to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/architecture-decisions.md` (if it exists), and the handoff prompt.
+   f. **Follow the step-transition protocol** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark plan `completed` with `gate_id` and `gate_file: "gates/plan-to-spec.md"`, set spec to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/architecture-decisions.md` (if it exists), and the handoff prompt.
 
 ---
 
@@ -374,7 +374,7 @@ Write detailed implementation specifications per component.
       - Do specs avoid over-engineering (no premature abstractions)?
    d. Apply verdict per the `phase-review` skill verdict protocol.
    e. **Write gate file**: Write `.work/<name>/gates/spec-to-decompose.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from review results.
-   f. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark spec `completed` with `gate_id` and `gate_file: "gates/spec-to-decompose.md"`, set decompose to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/beads-workflow.md`, and the handoff prompt.
+   f. **Follow the step-transition protocol** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark spec `completed` with `gate_id` and `gate_file: "gates/spec-to-decompose.md"`, set decompose to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/beads-workflow.md`, and the handoff prompt.
 
 ---
 
@@ -443,7 +443,7 @@ Break specs into executable work items with a concurrency map.
       - Do file ownership boundaries align with module boundaries? (A stream should not own scattered files across unrelated packages — it should own a cohesive set.)
    d. Apply verdict per the `phase-review` skill verdict protocol.
    e. **Write gate file**: Write `.work/<name>/gates/decompose-to-implement.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from review results.
-   f. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark decompose `completed` with `gate_id` and `gate_file: "gates/decompose-to-implement.md"`, set implement to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/beads-workflow.md`, `.claude/rules/architecture-decisions.md` (if it exists), and the handoff prompt.
+   f. **Follow the step-transition protocol** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark decompose `completed` with `gate_id` and `gate_file: "gates/decompose-to-implement.md"`, set implement to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/beads-workflow.md`, `.claude/rules/architecture-decisions.md` (if it exists), and the handoff prompt.
 
 ---
 
@@ -523,7 +523,7 @@ Execute the implementation plan from decompose.
    - Write results to `.work/<name>/implement/phase-N-validation.jsonl`
    - Apply verdict per the `phase-review` skill verdict protocol.
    - **Write gate file**: Write `.work/<name>/gates/implement-phase-<N>.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from phase validation results.
-   - **Follow the `step-transition` skill** for ceremony routing: Implementation phase transitions are low risk — auto-advance with notification per the Risk Classification table in step-transition.md. Gate file and gate issue are still created. On advance, record `gate_file: "gates/implement-phase-<N>.md"` in step status. Do NOT start Phase N+1 in the same turn as presenting Phase N results (the auto-advance notification is emitted first, then state is updated).
+   - **Follow the step-transition protocol** for ceremony routing: Implementation phase transitions are low risk — auto-advance with notification per the Risk Classification table in step-transition.md. Gate file and gate issue are still created. On advance, record `gate_file: "gates/implement-phase-<N>.md"` in step status. Do NOT start Phase N+1 in the same turn as presenting Phase N results (the auto-advance notification is emitted first, then state is updated).
    - Only proceed to Phase N+1 when Phase N validation is PASS (auto-advanced) or user gives explicit approval after a hard stop (when `ceremony: always` is set)
 
 5. **Checkpoints**: Use `/work-checkpoint` at session boundaries. Multi-session implementation is normal for Tier 3.
@@ -542,7 +542,7 @@ Execute the implementation plan from decompose.
       - Do tests exist for new functionality?
    b. Apply verdict per the `phase-review` skill verdict protocol.
    c. **Write gate file**: Write `.work/<name>/gates/implement-to-review.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from review results.
-   d. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark implement `completed` with `gate_id` and `gate_file: "gates/implement-to-review.md"`, set review to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md` and the latest checkpoint if it exists.
+   d. **Follow the step-transition protocol** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark implement `completed` with `gate_id` and `gate_file: "gates/implement-to-review.md"`, set review to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md` and the latest checkpoint if it exists.
 
 ---
 

@@ -75,7 +75,7 @@ If quality issues require the user's judgment (e.g., trade-off decisions, scope 
 
 ### PASS
 
-No issues found. Present results in the transition summary and proceed to the approval ceremony (see `step-transition` skill).
+No issues found. Present results in the transition summary and proceed to the approval ceremony (see step-transition protocol).
 
 ### ASK
 
@@ -203,7 +203,7 @@ For example, the research-to-plan transition checklist in `work-deep.md` include
 ## Self-Driven Reviews
 
 Reviews are self-driven -- Phase A and Phase B run automatically without user interaction. The user is only involved when:
-- Results are presented for acknowledgment (approval ceremony, handled by `step-transition` skill)
+- Results are presented for acknowledgment (approval ceremony, handled by step-transition protocol)
 - BLOCKING verdicts persist after 2 retry attempts (escalation)
 
 ## References

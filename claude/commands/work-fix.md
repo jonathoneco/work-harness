@@ -124,7 +124,7 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
 
 6. **Git commit**: Stage and commit with conventional commit: `fix: <description>`
 
-7. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`) for implement -> review: Present fix summary. STOP and wait for explicit approval. Tier 1 adaptations apply (no gate issue, no handoff prompt, no compaction prompt). On approval: update state.json in a single write — mark `implement` as `completed`, set `review` to `active`, update `current_step` to `review`.
+7. **Follow the step-transition protocol** (`claude/skills/work-harness/step-transition.md`) for implement -> review: Present fix summary. STOP and wait for explicit approval. Tier 1 adaptations apply (no gate issue, no handoff prompt, no compaction prompt). On approval: update state.json in a single write — mark `implement` as `completed`, set `review` to `active`, update `current_step` to `review`.
 
 ### When current_step = "review"
 

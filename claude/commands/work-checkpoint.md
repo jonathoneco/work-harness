@@ -76,7 +76,7 @@ On approval:
 
 ### Step 5: If `--step-end` is specified
 
-Follow the **step-transition** skill (`claude/skills/work-harness/step-transition.md`) for the step advancement, with these checkpoint-specific additions:
+Follow the **step-transition** protocol (`claude/skills/work-harness/step-transition.md`) for the step advancement, with these checkpoint-specific additions:
 
 #### 5a: Generate handoff prompt (Tier 3 only)
 
@@ -108,9 +108,9 @@ Include: what to read first, what to produce, constraints from this step.]
 
 **Present handoff prompt for user approval before advancing step state.**
 
-#### 5b: Advance step via step-transition skill
+#### 5b: Advance step via step-transition protocol
 
-On approval, perform the state update as a single atomic write per the `step-transition` skill:
+On approval, perform the state update as a single atomic write per the step-transition protocol:
 - Mark current step `completed` with `completed_at`
 - Set next step to `active` with `started_at`
 - Update `current_step` and `updated_at`

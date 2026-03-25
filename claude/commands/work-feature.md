@@ -153,7 +153,7 @@ Re-scoping is handled inline — no new state or step is created.
    - If user has feedback: construct re-spawn prompt with a "Previous Attempt" section listing artifacts written and user feedback verbatim, inserted between Rules and Instructions. Re-spawn the agent. Return to step 3.
    - After 2 re-spawns with unresolved feedback, ask the user how to proceed.
 
-7. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`) for plan → implement: This transition is medium risk per the Risk Classification table — hard stop approval ceremony. Present the plan to the user. STOP and wait for explicit approval. On approval: mark `plan` as `completed`, set `implement` to `active`, update `current_step` in a single state.json write. Tier 2 adaptations apply (gate issue optional, compaction recommended). Tell the user: "Plan complete. Recommend: `/compact` then `/work-feature` to start **implement** with clean context." If user continues without compacting, re-invoke via `Skill('work-feature')`, then proceed normally.
+7. **Follow the step-transition protocol** (`claude/skills/work-harness/step-transition.md`) for plan → implement: This transition is medium risk per the Risk Classification table — hard stop approval ceremony. Present the plan to the user. STOP and wait for explicit approval. On approval: mark `plan` as `completed`, set `implement` to `active`, update `current_step` in a single state.json write. Tier 2 adaptations apply (gate issue optional, compaction recommended). Tell the user: "Plan complete. Recommend: `/compact` then `/work-feature` to start **implement** with clean context." If user continues without compacting, re-invoke via `Skill('work-feature')`, then proceed normally.
 
 ### When current_step = "implement"
 
@@ -200,7 +200,7 @@ Re-scoping is handled inline — no new state or step is created.
 
 6. **Multi-session**: If work spans sessions, suggest `/work-checkpoint` before ending. On resume, `/work-feature` detects the active task and continues.
 
-7. **Follow the `step-transition` skill** (`claude/skills/work-harness/step-transition.md`) for implement → review: This transition is low risk per the Risk Classification table — auto-advance with notification (no user input required). Gate file and gate issue are still created per tier adaptations. On advance: mark `implement` as `completed`, set `review` to `active` in a single state.json write. Tell the user: "Implementation complete. Recommend: `/compact` then `/work-feature` to start **review** with clean context." If user continues without compacting, re-invoke via `Skill('work-feature')`, then proceed normally.
+7. **Follow the step-transition protocol** (`claude/skills/work-harness/step-transition.md`) for implement → review: This transition is low risk per the Risk Classification table — auto-advance with notification (no user input required). Gate file and gate issue are still created per tier adaptations. On advance: mark `implement` as `completed`, set `review` to `active` in a single state.json write. Tell the user: "Implementation complete. Recommend: `/compact` then `/work-feature` to start **review** with clean context." If user continues without compacting, re-invoke via `Skill('work-feature')`, then proceed normally.
 
 ### When current_step = "review"
 

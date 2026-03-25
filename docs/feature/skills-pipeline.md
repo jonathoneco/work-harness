@@ -1,13 +1,13 @@
 # W4: Skills Pipeline
 
-**Status**: Plan
+**Status**: Spec
 **Tier**: 3 (Initiative)
 **Epic**: work-harness-alc
 **Issue**: work-harness-bn1
 
 ## What
 
-The work harness has 42 skill+command files but the skill layer hasn't kept pace with W1-W3's workflow machinery. The skills pipeline addresses three gaps: (1) building a research-informed **language pack library** covering anti-patterns, good practices, and idiomatic recommendations per language -- starting with Python, TypeScript, and Rust as baseline entries alongside the existing Go pack; (2) creating new commands for workflow-meta, dev-update, dump, and state-driven PR lifecycle handling; (3) establishing skill lifecycle management with metadata on all 23 existing skills, staleness detection, and an update command.
+The work harness has 42 skill+command files but the skill layer hasn't kept pace with W1-W3's workflow machinery. The skills pipeline addresses three gaps: (1) building a research-informed **language pack library** covering anti-patterns, good practices, and idiomatic recommendations per language -- starting with Python, TypeScript, and Rust as baseline entries alongside the existing Go pack; (2) creating new commands for workflow-meta, dev-update, dump, and state-driven PR lifecycle handling; (3) establishing skill lifecycle management with metadata on all 32 existing skills/commands, staleness detection, and an update command.
 
 ## Components
 
@@ -33,9 +33,13 @@ The work harness has 42 skill+command files but the skill layer hasn't kept pace
 - Language and framework packs written from scratch, curated from authoritative sources with AI-specific focus (DD-1)
 - Dev updates output markdown, no external integrations (DD-2)
 - `/work-dump` outputs plan, no auto-create beads issues (DD-3)
-- Skill metadata added to ALL 23 existing skills now -- no tech debt (DD-4)
+- Skill metadata added to ALL 32 existing skills/commands now -- no tech debt (DD-4)
 - PR handling is state-driven -- infers action from PR state, no explicit flags (DD-5)
 - Config injection consolidation deferred -- tracked in futures (DD-6)
+- Single anti-patterns file per language for V1, categories as H2 sections within (DD-7, spec step)
+- `/workflow-meta` command loads existing skill via `skills:` frontmatter -- no content duplication (DD-8, spec step)
+- PR state machine uses priority-ordered detection -- first match wins (DD-9, spec step)
+- harness-doctor grows from 7 to 8 checks with stack-aware agency-agents check (DD-10, spec step)
 
 ## Key Files
 
@@ -54,8 +58,10 @@ The work harness has 42 skill+command files but the skill layer hasn't kept pace
 - `claude/skills/work-harness/agency-curation.md` (new)
 - `claude/skills/work-harness/skill-lifecycle.md` (new)
 - `claude/skills/work-harness/dev-update.md` (new)
-- `install.sh` (modified)
-- All 23 existing skill/command files (metadata addition)
+- `install.sh` (no code changes -- auto-discovery)
+- `VERSION` (minor version bump)
+- `claude/rules/workflow.md` (add 4 new commands to table)
+- All 32 existing skill/command files (metadata addition)
 
 ## Work Items
 
