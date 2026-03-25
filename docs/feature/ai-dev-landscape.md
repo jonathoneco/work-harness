@@ -14,5 +14,12 @@ Evaluate the AI-assisted development landscape — agent frameworks, MCP ecosyst
 1. Install ccost (Go binary) for cost visibility — 10 minutes, zero deps
 2. Install Lasso security hooks — PostToolUse scanning, 50+ patterns
 3. Build /capture-lesson skill for CLAUDE.md flywheel automation
+## Addendum: Anthropic Repos Survey
+- **Feature-dev plugin**: 7-phase workflow with 3 mandatory user gates; dedicated clarification phase we lack
+- **Hookify**: Auto-generates behavioral rules from frustration signals — the automated CLAUDE.md flywheel
+- **Agent SDK**: `can_use_tool` rewrites inputs (not just allow/deny); `UserPromptSubmit` invisibly injects context
+- **MCP Go SDK**: Production-ready (v1.4.1); building harness-state server is 1-2 day project
+- **No canonical local skill spec**: Our format is fine; MCP roadmap hints at future Skills primitive
 ## Deliverable
-See `.work/ai-dev-landscape/research/deliverable.md` for the full research report.
+- Main report: `.work/ai-dev-landscape/research/deliverable.md`
+- Anthropic addendum: `.work/ai-dev-landscape/research/addendum/deliverable.md`
