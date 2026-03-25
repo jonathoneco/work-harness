@@ -136,12 +136,12 @@ Any other response is NOT approval -- treat it as a question or feedback.
 
 On explicit approval, perform gate creation according to the tier:
 
-### Gate Issue (Beads)
+### Gate Issue (Beans)
 
-Create a beads gate issue to record the transition:
+Create a beans gate issue to record the transition:
 
 ```bash
-bd create --title="[Gate] <name>: <from> -> <to>" --type=task --priority=2
+bn create --title="[Gate] <name>: <from> -> <to>" --type=task --priority=2
 ```
 
 If there are ASK verdicts, include the resolved questions and responses in the issue description.
@@ -186,7 +186,7 @@ Perform the state.json update as a **single atomic write** (read the full object
 Update these fields in one write:
 
 1. Current step's status object: set `status` to `"completed"`, set `completed_at` to current ISO 8601 timestamp
-2. Current step's `gate_id`: set to the beads gate issue ID (if gate issue was created)
+2. Current step's `gate_id`: set to the beans gate issue ID (if gate issue was created)
 3. Current step's `gate_file`: set to relative path from `.work/<name>/` (e.g., `"gates/research-to-plan.md"`) -- Tier 3 only
 4. Current step's `handoff_prompt`: set to relative path if a handoff prompt was written -- Tier 3 only
 5. Next step's status object: set `status` to `"active"`, set `started_at` to current ISO 8601 timestamp
@@ -211,7 +211,7 @@ If the user continues without compacting (Tier 2-3): re-invoke via `Skill('work-
 
 | Aspect | Tier 1 (Fix) | Tier 2 (Feature) | Tier 3 (Initiative) |
 |--------|-------------|------------------|---------------------|
-| Gate issue (beads) | Not created | Optional | Required |
+| Gate issue (beans) | Not created | Optional | Required |
 | Gate file | Not created | Not created | Required |
 | Handoff prompt | Not created | Optional | Required |
 | Compaction prompt | Not shown | Recommended | Required (then stop) |

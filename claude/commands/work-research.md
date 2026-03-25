@@ -45,15 +45,15 @@ Tier R does not use the 3-factor depth assessment. Instead, confirm the topic is
    - `created_at`: current ISO 8601 timestamp
    - `updated_at`: same as `created_at`
    - `archived_at`: `null`
-6. Create beads issue (NOT an epic — Tier R is lightweight):
+6. Create beans issue (NOT an epic — Tier R is lightweight):
    ```bash
-   bd create --title="[Research] <topic>" --type=task --priority=2
-   bd update <id> --status=in_progress
+   bn create --title="[Research] <topic>" --type=task --priority=2
+   bn update <id> --status=in_progress
    ```
 7. Create `docs/feature/<name>.md` summary file:
    ```markdown
    # <Topic Title>
-   **Status:** Research | **Tier:** R | **Beads:** <issue-id>
+   **Status:** Research | **Tier:** R | **Beans:** <issue-id>
    ## What
    <2-3 sentence description of the research question>
    ```
@@ -69,7 +69,7 @@ Read `current_step` from state.json and execute the matching section below.
 
 | Step | Agent Type | Skills | Context Sources |
 |------|-----------|--------|-----------------|
-| research | Explore | code-quality, work-harness | beads issues, managed docs |
+| research | Explore | code-quality, work-harness | beans issues, managed docs |
 | synthesize | general-purpose | code-quality | research handoff prompt |
 
 ### Skill Injection (Path B — Prompt-Based)
@@ -116,11 +116,11 @@ Structured exploration to build understanding of the research topic.
 
    **Pushback escalation**: If user responses reveal the topic needs fundamental re-scoping (e.g., "actually I need to compare three different approaches"), present re-scoping choices inline:
    - **Proceed**: Continue with the refined scope as stated
-   - **Split**: Break into multiple research tasks (create new beads issues, archive or narrow current task)
+   - **Split**: Break into multiple research tasks (create new beans issues, archive or narrow current task)
 
    Re-scoping is handled inline — no new state or step is created.
 
-2. **Read the task context**: Review `$ARGUMENTS`, beads issue details, and any conversation context.
+2. **Read the task context**: Review `$ARGUMENTS`, beans issue details, and any conversation context.
 
 3. **Read managed docs**: If `harness.yaml` has `docs.managed` entries, read the manifest. If `docs.managed` is absent, run auto-detection (see `claude/skills/work-harness/context-docs.md`) and suggest doc types to the user.
 
@@ -201,7 +201,7 @@ Read the research handoff and produce a structured deliverable.
 3. **Update docs summary**: Update `docs/feature/<name>.md` with key findings:
    ```markdown
    # <Topic Title>
-   **Status:** Complete | **Tier:** R | **Beads:** <issue-id>
+   **Status:** Complete | **Tier:** R | **Beans:** <issue-id>
    ## What
    <2-3 sentence description of the research question>
    ## Key Findings
@@ -210,9 +210,9 @@ Read the research handoff and produce a structured deliverable.
    See `.work/<name>/research/deliverable.md` for the full research report.
    ```
 
-4. **Close beads issue**:
+4. **Close beans issue**:
    ```bash
-   bd close <issue-id> --reason="Research complete — deliverable at .work/<name>/research/deliverable.md"
+   bn close <issue-id> --reason="Research complete — deliverable at .work/<name>/research/deliverable.md"
    ```
 
 5. **Mark synthesize complete**: Update state.json in a single atomic write:

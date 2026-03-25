@@ -24,7 +24,7 @@ Scan `.work/` for `state.json` files where `archived_at` is null.
 - **Active task exists, `$ARGUMENTS` provided**: Ask: "You have an active task '<name>'. Continue with it, or archive it and start a new one?"
 - **Multiple active tasks**: Present a list with tier and current step. Ask user to choose.
 - **No active tasks** (all archived): Proceed to Step 2.
-- **`$ARGUMENTS` references a beads issue** (e.g., "rag-1234"): Read issue details with `bd show` and use as context for assessment.
+- **`$ARGUMENTS` references a beans issue** (e.g., "rag-1234"): Read issue details with `bn show` and use as context for assessment.
 
 ## Step 2: Assessment
 
@@ -78,8 +78,8 @@ Handle user response:
    - `current_step`: `assess`
    - `assessment`: null (populated after assessment completes)
    - All other fields per state conventions
-5. Create or claim beads issue:
-   - T1-T2: `bd create --title="<title>" --type=task --priority=2` then `bd update <id> --status=in_progress`
+5. Create or claim beans issue:
+   - T1-T2: `bn create --title="<title>" --type=task --priority=2` then `bn update <id> --status=in_progress`
    - T3: Create epic + initial issue
 6. T2-T3: Create `docs/feature/<name>.md` summary file
 7. T3: Create `.work/<name>/research/`, `plan/`, `specs/`, `streams/` directories
@@ -105,7 +105,7 @@ If during any step the task reveals higher complexity:
 
 1. User says "escalate to Tier 2/3" (or the agent recognizes the need)
 2. Follow escalation protocol: update `tier`, insert new steps before `implement` in canonical order, reset `implement`/`review` to `not_started`, set `current_step` to first new step
-3. Create beads epic if escalating to T3, create `docs/feature/<name>.md` if escalating to T2-3
+3. Create beans epic if escalating to T3, create `docs/feature/<name>.md` if escalating to T2-3
 4. Append note to `assessment.rationale`
 5. Re-read state and route to new `current_step`
 

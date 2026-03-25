@@ -10,7 +10,7 @@ meta:
 
 # /work-dump $ARGUMENTS
 
-Decompose a work description into well-scoped beads issues with dependencies and tags. Outputs a markdown plan for human review — does not auto-create issues.
+Decompose a work description into well-scoped beans issues with dependencies and tags. Outputs a markdown plan for human review — does not auto-create issues.
 
 **Config injection**: If `.claude/harness.yaml` exists in the current project directory,
 read it and include a "Project Stack Context" section (language, framework, database,
@@ -23,7 +23,7 @@ build commands) in all subagent prompts and handoff prompts you produce.
 Read project context to inform decomposition:
 - `.claude/harness.yaml` for stack configuration (language, framework, database)
 - `CLAUDE.md` for project conventions
-- `bd list --status=open` for existing open issues (avoid duplicates)
+- `bn list --status=open` for existing open issues (avoid duplicates)
 
 ## Step 2: Identify Domains
 
@@ -119,10 +119,10 @@ Present the full decomposition plan:
 
 When ready, create issues with:
 ```bash
-bd create --title="[DB] ..." --type=task --priority=2
-bd create --title="[API] ..." --type=task --priority=2
+bn create --title="[DB] ..." --type=task --priority=2
+bn create --title="[API] ..." --type=task --priority=2
 # ... etc
-bd dep add <api-id> <db-id>
+bn dep add <api-id> <db-id>
 # ... etc
 ```
 ```
@@ -130,7 +130,7 @@ bd dep add <api-id> <db-id>
 ## Step 6: User Review
 
 Present the plan and wait for user feedback. The user may:
-- Approve and create issues manually using the provided `bd create` commands
+- Approve and create issues manually using the provided `bn create` commands
 - Request changes to scope, dependencies, or issue count
 - Dismiss the decomposition entirely
 

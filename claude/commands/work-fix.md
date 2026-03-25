@@ -53,10 +53,10 @@ User decides — their choice is final. If they switch, escalate per the escalat
    - `created_at`: current ISO 8601 timestamp
    - `updated_at`: same as `created_at`
    - `reviewed_at`: `null`
-5. Create or claim beads issue:
+5. Create or claim beans issue:
    ```bash
-   bd create --title="[Bug] <title>" --type=bug --priority=2
-   bd update <id> --status=in_progress
+   bn create --title="[Bug] <title>" --type=bug --priority=2
+   bn update <id> --status=in_progress
    ```
 6. Store `issue_id` in state.json
 
@@ -68,7 +68,7 @@ User decides — their choice is final. If they switch, escalate per the escalat
 
 | Step | Agent Type | Skills | Context Sources |
 |------|-----------|--------|-----------------|
-| implement | general-purpose | work-harness, code-quality | beads issues |
+| implement | general-purpose | work-harness, code-quality | beans issues |
 | review | inline (no agent spawn) | code-quality | diff since base_commit |
 
 ### Skill Injection (Path B — Prompt-Based)
@@ -106,9 +106,9 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
    2. Read `claude/skills/work-harness.md`
 
    ## Instructions
-   Search closed beads issues for context about <bug>.
-   Run: bd search '<keyword>' --limit 10
-   Then bd show each relevant match.
+   Search closed beans issues for context about <bug>.
+   Run: bn search '<keyword>'
+   Then bn show each relevant match.
 
    ## Output Expectations
    Return a concise summary of: relevant files, patterns, key decisions.
@@ -141,9 +141,9 @@ Claude Code agent YAML frontmatter does not natively support `skills:`. When spa
 
 2. Check for critical anti-patterns from the code-quality skill. Verify error handling is correct, no swallowed errors, no fabricated data, both branches handled.
 
-3. **On clean review**: Mark `review` as `completed`. Auto-archive: set `archived_at` to current timestamp. Close beads issue:
+3. **On clean review**: Mark `review` as `completed`. Auto-archive: set `archived_at` to current timestamp. Close beans issue:
    ```bash
-   bd close <issue_id> --reason="Fixed: <what was wrong and what was changed>"
+   bn close <issue_id> --reason="Fixed: <what was wrong and what was changed>"
    ```
 
 4. **On findings**: Report findings to user with file paths and suggested fixes. After user fixes, re-check the diff. Repeat until clean.
@@ -159,7 +159,7 @@ If the user says "escalate to Tier 2" or "escalate to Tier 3" during implementat
 3. Reset `implement` and `review` to `not_started`
 4. Set `current_step` to first new step (`plan` for T2, `research` for T3)
 5. Create `docs/feature/<name>.md` summary file
-6. If T3: create beads epic, set `beads_epic_id`
+6. If T3: create beans epic, set `epic_id`
 7. Append to `assessment.rationale`: "Escalated from Tier 1 to Tier <N> during implementation"
 8. Re-read state and present the new step's interface
 

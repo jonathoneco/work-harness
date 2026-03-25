@@ -42,11 +42,11 @@ Apply the 3-factor depth assessment. If assessment agrees (score 4+): proceed. I
    - `created_at`: current ISO 8601 timestamp
    - `updated_at`: same as `created_at`
    - `reviewed_at`: `null`
-5. Create beads epic and initial issue:
+5. Create beans epic and initial issue:
    ```bash
-   bd create --title="<title>" --type=epic --priority=1
-   bd create --title="[Research] <title>" --type=task --priority=2
-   bd update <research-id> --status=in_progress
+   bn create --title="<title>" --type=epic --priority=1
+   bn create --title="[Research] <title>" --type=task --priority=2
+   bn update <research-id> --status=in_progress
    ```
 6. Create directories:
    - `.work/<name>/research/`
@@ -57,11 +57,11 @@ Apply the 3-factor depth assessment. If assessment agrees (score 4+): proceed. I
 7. Create `docs/feature/<name>.md` summary file with initial content:
    ```markdown
    # <Title>
-   **Status:** active | **Tier:** 3 | **Beads:** <epic-id>
+   **Status:** active | **Tier:** 3 | **Beans:** <epic-id>
    ## What
    <2-3 sentence description — filled in during plan step>
    ```
-8. Store `beads_epic_id`, `issue_id` in state.json
+8. Store `epic_id`, `issue_id` in state.json
 
 ## Step Router
 
@@ -73,7 +73,7 @@ Read `current_step` from state.json and execute the matching section below.
 
 | Step | Agent Type | Skills | Context Sources |
 |------|-----------|--------|-----------------|
-| research | Explore | code-quality, work-harness | beads issues, managed docs |
+| research | Explore | code-quality, work-harness | beans issues, managed docs |
 | plan | general-purpose | code-quality | research handoff prompt |
 | spec | general-purpose | code-quality | plan handoff prompt, architecture.md |
 | decompose | general-purpose | code-quality, work-harness | spec handoff prompt, all spec files |
@@ -173,12 +173,12 @@ Structured exploration to build understanding before planning.
 
    **Pushback escalation**: If user responses reveal the task needs fundamental re-scoping (e.g., "actually this is two separate features"), present re-scoping choices inline:
    - **Proceed**: Continue with the refined scope as stated
-   - **Split**: Break into multiple tasks (create new beads issues, archive or narrow current task)
+   - **Split**: Break into multiple tasks (create new beans issues, archive or narrow current task)
    - **Escalate tier**: If scope expansion warrants T3 treatment and the task is not already T3, use the existing escalation protocol
 
    Re-scoping is handled inline — no new state or step is created.
 
-2. **Read the task context**: Review `$ARGUMENTS`, beads issue details, and any conversation context.
+2. **Read the task context**: Review `$ARGUMENTS`, beans issue details, and any conversation context.
 
 3. **Read managed docs**: If `harness.yaml` has `docs.managed` entries, read the manifest. If `docs.managed` is absent, run auto-detection (see `claude/skills/work-harness/context-docs.md`) and suggest doc types to the user.
 
@@ -267,7 +267,7 @@ A gap requiring user judgment (business decision, priority call, scope question)
    - `{tier}` ← state.tier
    - `{current_step}` ← state.current_step
    - `{base_commit}` ← state.base_commit
-   - `{beads_epic_id}` ← state.beads_epic_id
+   - `{epic_id}` ← state.epic_id
 
 2. **Spawn agent**: The plan agent may spawn up to 3 Explore subagents internally for gap-filling (see Inline Research in the plan agent template). No additional dispatcher logic is needed — the plan agent handles subagent spawning per the constraints in `step-agents.md`.
    ```
@@ -330,7 +330,7 @@ Write detailed implementation specifications per component.
    - `{tier}` ← state.tier
    - `{current_step}` ← state.current_step
    - `{base_commit}` ← state.base_commit
-   - `{beads_epic_id}` ← state.beads_epic_id
+   - `{epic_id}` ← state.epic_id
 
 2. **Spawn agent**:
    ```
@@ -378,7 +378,7 @@ Write detailed implementation specifications per component.
       - Do specs avoid over-engineering (no premature abstractions)?
    d. Apply verdict per the `phase-review` skill verdict protocol.
    e. **Write gate file**: Write `.work/<name>/gates/spec-to-decompose.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from review results.
-   f. **Follow the step-transition protocol** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark spec `completed` with `gate_id` and `gate_file: "gates/spec-to-decompose.md"`, set decompose to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/beads-workflow.md`, and the handoff prompt.
+   f. **Follow the step-transition protocol** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark spec `completed` with `gate_id` and `gate_file: "gates/spec-to-decompose.md"`, set decompose to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/beans-workflow.md`, and the handoff prompt.
 
 ---
 
@@ -397,7 +397,7 @@ Break specs into executable work items with a concurrency map.
    - `{tier}` ← state.tier
    - `{current_step}` ← state.current_step
    - `{base_commit}` ← state.base_commit
-   - `{beads_epic_id}` ← state.beads_epic_id
+   - `{epic_id}` ← state.epic_id
 
 2. **Spawn agent**:
    ```
@@ -431,7 +431,7 @@ Break specs into executable work items with a concurrency map.
    a. Write the handoff prompt to `.work/<name>/streams/handoff-prompt.md`
    b. **Phase A — Artifact validation** (see `phase-review` skill) — spawn Explore agent (read-only). Checklist:
       - Does every spec component map to at least one work item? (Title must reference spec: `W-NN: ... — spec NN`)
-      - Are beads issue dependencies consistent with spec dependency ordering?
+      - Are beans issue dependencies consistent with spec dependency ordering?
       - Can claimed "parallel" streams actually run in parallel (no hidden deps)?
       - Do stream execution docs have acceptance criteria?
       - Is the concurrency map consistent with the dependency graph?
@@ -447,7 +447,7 @@ Break specs into executable work items with a concurrency map.
       - Do file ownership boundaries align with module boundaries? (A stream should not own scattered files across unrelated packages — it should own a cohesive set.)
    d. Apply verdict per the `phase-review` skill verdict protocol.
    e. **Write gate file**: Write `.work/<name>/gates/decompose-to-implement.md` following the gate protocol SOP (`claude/skills/work-harness/references/gate-protocol.md`). Populate all sections from review results.
-   f. **Follow the step-transition protocol** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark decompose `completed` with `gate_id` and `gate_file: "gates/decompose-to-implement.md"`, set implement to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/beads-workflow.md`, `.claude/rules/architecture-decisions.md` (if it exists), and the handoff prompt.
+   f. **Follow the step-transition protocol** (`claude/skills/work-harness/step-transition.md`): Present gate file path and transition summary. STOP and wait for explicit approval. On approval: create gate issue, write state.json in a single atomic update (mark decompose `completed` with `gate_id` and `gate_file: "gates/decompose-to-implement.md"`, set implement to `active`, update `current_step` and `updated_at`). Apply context compaction — tell user to run `/compact` then `/work-deep`, then stop. If user continues without compacting, re-invoke via `Skill('work-deep')`, then re-read `.claude/rules/code-quality.md`, `.claude/rules/beans-workflow.md`, `.claude/rules/architecture-decisions.md` (if it exists), and the handoff prompt.
 
 ---
 
@@ -491,7 +491,7 @@ Execute the implementation plan from decompose.
       - Title: {title}
       - Step: implement (Phase {N}, Stream {letter})
       - Base commit: {base_commit}
-      - Epic: {beads_epic_id}
+      - Epic: {epic_id}
       ```
 
       If `.claude/harness.yaml` exists, append the stack context block:
@@ -506,7 +506,7 @@ Execute the implementation plan from decompose.
 
       Then include Rules (skill injection per stream doc `skills:` field), Instructions (stream doc body + relevant specs), Output Expectations (from stream doc acceptance criteria), and Completion (standard completion signal format from spec 00 §6).
 
-   f. Subagents claim work with `bd update <id> --status=in_progress` and close with `bd close <id>`
+   f. Subagents claim work with `bn update <id> --status=in_progress` and close with `bn close <id>`
    g. Lead agent monitors completion and launches next-phase agents when dependencies clear
 
 4. **Phase gating** (enforced — see Inter-Step Quality Review Protocol and `phase-review` skill): After each implementation phase completes:
@@ -558,7 +558,7 @@ Mandatory full review before archive.
 
 1. **Run `/work-review`**: This is mandatory for Tier 3. The review command spawns specialist agents, collects findings, and writes to `.work/<name>/review/findings.jsonl`.
 
-2. **Address findings**: All critical findings must be fixed. Important findings must be fixed or have beads issues created for deferred resolution.
+2. **Address findings**: All critical findings must be fixed. Important findings must be fixed or have beans issues created for deferred resolution.
 
 3. **Re-review**: After fixes, re-run `/work-review` to reconcile.
 
@@ -566,7 +566,7 @@ Mandatory full review before archive.
 
 5. **Futures**: If review reveals deferred enhancements or architectural improvements, append to `.work/<name>/futures.md`.
 
-6. **Archive**: Task remains active until `/work-archive`. The archive gate requires all critical AND important findings to be FIXED or have `beads_issue_id`.
+6. **Archive**: Task remains active until `/work-archive`. The archive gate requires all critical AND important findings to be FIXED or have `tracking_issue_id`.
 
 ## Escalation Handling
 

@@ -46,10 +46,10 @@ Read all artifact sources per the dev-update skill's priority order:
    find .work -name '*.md' -path '*/checkpoints/*' -newer <cutoff>
    ```
 
-4. Get beads status:
+4. Get beans status:
    ```bash
-   bd list --status=in_progress
-   bd list --status=closed --limit 10
+   bn list --status=in_progress
+   bn list --status=closed
    ```
 
 5. Find handoff prompts for completed steps (optional, for richer context).
@@ -58,10 +58,10 @@ Read all artifact sources per the dev-update skill's priority order:
 
 Using the dev-update skill's update structure template, generate the status update:
 
-1. **Completed**: Map closed beads issues and completed step transitions within the time window
+1. **Completed**: Map closed beans issues and completed step transitions within the time window
 2. **In Progress**: Map active tasks with their current step and progress
 3. **Blocked**: Identify tasks where the current step has been active for longer than expected, or where checkpoint notes mention blockers
-4. **Next**: Infer from task state — the next step in the workflow, or the next `bd ready` item
+4. **Next**: Infer from task state — the next step in the workflow, or the next `bn ready` item
 
 ## Step 4: Output
 

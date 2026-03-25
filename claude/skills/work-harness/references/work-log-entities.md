@@ -9,7 +9,7 @@ Entity types, relations, and observation conventions for the `work-log` MCP Know
 | `WorkSession` | `session-YYYY-MM-DD-<project>` | date, project, summary |
 | `Decision` | `decision-<short-slug>` | what, why, alternatives_considered, decided_at |
 | `Blocker` | `blocker-<short-slug>` | what, status (active/resolved), resolution, reported_at, resolved_at |
-| `Accomplishment` | `accomplishment-<short-slug>` | what, beads_ids (comma-separated), completed_at |
+| `Accomplishment` | `accomplishment-<short-slug>` | what, beans_ids (comma-separated), completed_at |
 
 ### WorkSession
 
@@ -51,7 +51,7 @@ A completed work item or significant progress milestone.
 - **Name pattern**: `accomplishment-<short-slug>` (e.g., `accomplishment-handoff-command`)
 - **Observations**:
   - `what`: Description of what was accomplished (one sentence)
-  - `beads_ids`: Comma-separated beads issue IDs if applicable (e.g., `work-harness-0nd`)
+  - `beans_ids`: Comma-separated beans issue IDs if applicable (e.g., `work-harness-0nd`)
   - `completed_at`: ISO 8601 timestamp
 
 ## Relation Types

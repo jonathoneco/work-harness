@@ -25,7 +25,7 @@ Permission mode: `plan` — all actions are reviewed before execution.
 
 ## Research Workflow
 
-1. **Search closed beads first**: `bd search '<keyword>' --limit 10` then `bd show <id>` for relevant matches
+1. **Search closed beans first**: `bn search '<keyword>'` then `bn show <id>` for relevant matches
 2. **Explore codebase**: Use Glob and Grep to find relevant code patterns, file paths, test coverage
 3. **Web research**: Use WebSearch/WebFetch for external best practices, library docs, API references
 4. **Trace code paths**: Follow the project's layering conventions to understand existing patterns
@@ -44,7 +44,7 @@ Return findings as structured research notes:
 ## Relevant Code
 - `<source>/path/to/file:NN` — [what it does, pattern to follow]
 
-## Prior Art (from beads)
+## Prior Art (from beans)
 - <issue-id>: [relevant closed issue summary and key decisions]
 
 ## Implications for Design

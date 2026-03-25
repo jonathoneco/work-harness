@@ -25,8 +25,8 @@ Collect session context from multiple sources:
 
 1. **Active task** (if any): Read `.work/*/state.json` for active task name, current step, tier
 2. **Git activity**: `git log --oneline --since="8 hours ago"` for recent commits
-3. **Beads activity**: `bd list --status=in_progress` for claimed issues, `bd list --status=closed --since=today` for completed issues (if `bd` supports `--since`, otherwise skip)
-4. **User input**: If `$ARGUMENTS` is provided (and is not "quick" or "q"), use as additional context. If not provided, synthesize from git and beads data.
+3. **Beans activity**: `bn list --status=in_progress` for claimed issues, `bn list --status=closed` for completed issues
+4. **User input**: If `$ARGUMENTS` is provided (and is not "quick" or "q"), use as additional context. If not provided, synthesize from git and beans data.
 
 ### Step 2: Create Session Entity
 
@@ -58,7 +58,7 @@ mcp__work_log__create_entities([{
   "entityType": "Accomplishment",
   "observations": [
     "what: <description>",
-    "beads_ids: <comma-separated IDs if applicable>",
+    "beans_ids: <comma-separated IDs if applicable>",
     "completed_at: <timestamp>"
   ]
 }])

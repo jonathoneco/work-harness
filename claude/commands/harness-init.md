@@ -9,7 +9,7 @@ meta:
 
 # /harness-init -- Project Setup
 
-Initialize this project for the work harness. This command walks through an interactive prompt sequence to gather stack information, generates `.claude/harness.yaml`, initializes beads, and optionally scaffolds architecture rules and domain agent files.
+Initialize this project for the work harness. This command walks through an interactive prompt sequence to gather stack information, generates `.claude/harness.yaml`, initializes beans, and optionally scaffolds architecture rules and domain agent files.
 
 ## Pre-flight Checks
 
@@ -17,7 +17,7 @@ Before starting the interactive flow, perform these checks:
 
 1. **Harness installed:** Verify `~/.claude/.harness-manifest.json` exists. If not found, tell the user: "Harness not installed. Run `./install.sh` from the harness repo first." and stop.
 2. **Existing config:** Check if `.claude/harness.yaml` already exists. If so, ask: "harness.yaml already exists. Overwrite? [y/N]". If the user declines, stop without modifying anything.
-3. **Beads available:** Check if `bd` is available by running `which bd`. If missing, note it -- beads initialization will be skipped later with a warning.
+3. **Beans available:** Check if `bn` is available by running `which bn`. If missing, note it -- beans initialization will be skipped later with a warning.
 
 ## Interactive Setup
 
@@ -210,9 +210,9 @@ Once confirmed, create files in this order:
      - other: `[]`
    - `anti_patterns: []` (starts empty, users add project-specific patterns later)
 
-3. **Write `.claude/rules/beads-workflow.md`** from the template at `templates/beads-workflow.md.template` in the harness repo. This contains the standard beads workflow rules with an empty deprecated approaches table for the project to fill in.
+3. **Write `.claude/rules/beans-workflow.md`** from the template at `templates/beans-workflow.md.template` in the harness repo. This contains the standard beans workflow rules with an empty deprecated approaches table for the project to fill in.
 
-4. **Initialize beads:** Run `bd init` if `.beads/` does not already exist. If it exists, skip with: "Beads already initialized, skipping." If `bd` is not installed, skip with: "bd not found -- skipping beads initialization. Install beads and run `bd init` manually."
+4. **Initialize beans:** Run `bn init` if `.beans/` does not already exist. If it exists, skip with: "Beans already initialized, skipping." If `bn` is not installed, skip with: "bn not found -- skipping beans initialization. Install beans and run `bn init` manually."
 
 5. **Prompt for optional files:**
 
@@ -243,8 +243,8 @@ Report success with a summary of all files created:
 
 N files created:
   - .claude/harness.yaml
-  - .claude/rules/beads-workflow.md
-  - .beads/ (bd init)
+  - .claude/rules/beans-workflow.md
+  - .beans/ (bn init)
   [- .claude/rules/architecture-decisions.md]
   [- .claude/agents/<domain>-expert.md]
 
@@ -254,7 +254,7 @@ Run /harness-doctor to verify full setup.
 ## Rules
 
 - **Never create** commands, skills, workflow agents, or hooks -- those are global (installed by `install.sh`).
-- **Idempotent beads:** Skip `bd init` if `.beads/` already exists.
+- **Idempotent beans:** Skip `bn init` if `.beans/` already exists.
 - **No silent overwrites:** Always prompt before replacing existing files.
 - **User cancellation:** If the user cancels at any point during the interactive flow, exit cleanly without writing any files.
 
@@ -266,10 +266,10 @@ Run /harness-doctor to verify full setup.
 |----------|----------|
 | Harness not installed (no manifest) | Pre-flight check fails. Direct user to run `install.sh`. |
 | `.claude/harness.yaml` already exists | Prompt to overwrite. Never silently replace. |
-| `.beads/` already exists | Skip `bd init`, inform user. |
+| `.beans/` already exists | Skip `bn init`, inform user. |
 | Invalid project name entered | Re-prompt with validation explanation. |
 | No language markers found | Default to `other`, inform user they can set it manually later. |
 | Multiple language markers (go.mod + package.json) | Use priority order: go.mod > Cargo.toml > package.json > requirements.txt/pyproject.toml. Inform user of detection and allow override. |
-| `bd` not installed | Warn but continue (skip beads init, note it in output). |
+| `bn` not installed | Warn but continue (skip beans init, note it in output). |
 | User cancels mid-flow | No files written. Clean exit. |
 | `.claude/` directory doesn't exist | Create it (and `.claude/rules/` subdirectory). |

@@ -73,7 +73,7 @@ fi
 
 harness_check_deps() {
   _hcd_missing=""
-  for _hcd_dep in jq yq git bd; do
+  for _hcd_dep in jq yq git; do
     if ! command -v "$_hcd_dep" >/dev/null 2>&1; then
       _hcd_missing="$_hcd_missing $_hcd_dep"
     fi
@@ -93,7 +93,7 @@ harness_hook_entries() {
 [
   {"event":"PostToolUse","matcher":"Write|Edit","command":"$_hhe_dir/hooks/state-guard.sh"},
   {"event":"Stop","matcher":"","command":"$_hhe_dir/hooks/work-check.sh"},
-  {"event":"Stop","matcher":"","command":"$_hhe_dir/hooks/beads-check.sh"},
+  {"event":"Stop","matcher":"","command":"$_hhe_dir/hooks/beans-check.sh"},
   {"event":"Stop","matcher":"","command":"$_hhe_dir/hooks/review-gate.sh"},
   {"event":"Stop","matcher":"","command":"$_hhe_dir/hooks/artifact-gate.sh"},
   {"event":"Stop","matcher":"","command":"$_hhe_dir/hooks/review-verify.sh"},
@@ -403,6 +403,11 @@ $_hi_rel"
   _hi_hook_count=$(printf '%s' "$_hi_hooks_json" | jq 'length')
   echo "harness: registered $_hi_hook_count hooks in settings.json" >&2
 
+  # Symlink bn to ~/.local/bin/
+  mkdir -p "$HOME/.local/bin"
+  ln -sf "$HARNESS_DIR/bin/bn" "$HOME/.local/bin/bn"
+  echo "harness: symlinked bn to ~/.local/bin/bn" >&2
+
   # Update CLAUDE.md
   harness_update_claude_md
   echo "harness: appended harness block to CLAUDE.md" >&2
@@ -533,6 +538,11 @@ $_hu_rel"
   harness_merge_hooks "$SETTINGS" "$_hu_new_hooks"
   echo "harness: hooks updated" >&2
 
+  # Symlink bn to ~/.local/bin/
+  mkdir -p "$HOME/.local/bin"
+  ln -sf "$HARNESS_DIR/bin/bn" "$HOME/.local/bin/bn"
+  echo "harness: symlinked bn to ~/.local/bin/bn" >&2
+
   # Update CLAUDE.md
   harness_update_claude_md
   echo "harness: CLAUDE.md block up to date" >&2
@@ -605,6 +615,10 @@ harness_uninstall() {
   # Remove CLAUDE.md block
   harness_remove_claude_md
   echo "harness: removed harness block from CLAUDE.md" >&2
+
+  # Remove bn symlink
+  rm -f "$HOME/.local/bin/bn"
+  echo "harness: removed bn symlink" >&2
 
   # Remove manifest
   rm -f "$MANIFEST"

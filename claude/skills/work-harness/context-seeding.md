@@ -28,7 +28,7 @@ time from `state.json`:
 - Title: {title}
 - Step: {current_step}
 - Base commit: {base_commit}
-- Epic: {beads_epic_id}
+- Epic: {epic_id}
 ```
 
 ### Stack Context Block (conditional)
@@ -118,9 +118,9 @@ Read and follow these before proceeding:
 
 **Why plan/spec/review skip `work-harness`**: These agents produce design
 artifacts (architecture docs, specs, review findings) -- they don't need to
-understand harness conventions like state management, step transitions, or beads
+understand harness conventions like state management, step transitions, or beans
 workflows. Only steps that interact with harness infrastructure (decompose
-creates beads issues, implement follows stream conventions, research writes to
+creates beans issues, implement follows stream conventions, research writes to
 harness-structured directories) need the `work-harness` skill.
 
 ---

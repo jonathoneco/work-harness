@@ -39,19 +39,18 @@ If managed doc paths are provided in the agent prompt under `## Managed Project 
 
 ## Implementation Workflow
 
-1. **Claim beads issue**: `bd update <id> --status=in_progress`
+1. **Claim beans issue**: `bn update <id> --status=in_progress`
 2. **Read context**: Stream doc, spec doc, existing code referenced in "Existing Code Context"
 3. **Implement in order**: Follow the "Internal Work Item Ordering" from stream doc
 4. **Verify each step**: Run project verification commands after each significant change
-5. **Close issue**: `bd close <id> --reason="<what was done>"`
-6. **Sync beads**: `bd sync`
+5. **Close issue**: `bn close <id> --reason="<what was done>"`
 
 ## Stop Hook Verification
 
 Before completing, verify:
 - [ ] Project tests pass
 - [ ] Project builds successfully
-- [ ] Beads issue was claimed before starting
+- [ ] Beans issue was claimed before starting
 - [ ] All acceptance criteria from spec/stream doc are met
 - [ ] No debug code or print statements left in
 - [ ] Error handling follows project conventions

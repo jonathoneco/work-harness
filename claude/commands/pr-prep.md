@@ -244,11 +244,11 @@ Based on the detected state from Step 8, execute the corresponding action.
    git pull
    git branch -d <merged-branch>
    ```
-3. Close associated beads issue if one exists:
+3. Close associated beans issue if one exists:
    ```bash
-   bd close <issue-id> --reason="PR #N merged"
+   bn close <issue-id> --reason="PR #N merged"
    ```
-   If no beads issue is associated, skip.
+   If no beans issue is associated, skip.
 4. Report cleanup results.
 
 ### DRAFT — Work in Progress

@@ -35,8 +35,8 @@ Read `.work/<name>/state.json`. Extract `tier`, `current_step`, `issue_id`, `tit
 
 | Tier | What to Read |
 |------|-------------|
-| 1 | state.json + beads issue details (`bd show <issue_id>`) |
-| 2 | state.json + plan document (if exists in `.work/<name>/`) + beads issue |
+| 1 | state.json + beans issue details (`bn show <issue_id>`) |
+| 2 | state.json + plan document (if exists in `.work/<name>/`) + beans issue |
 | 3 | state.json + current step's handoff prompt (if exists at `.work/<name>/<prev-step>/handoff-prompt.md`) + latest checkpoint resumption prompt |
 
 For Tier 3, determine the previous step's handoff prompt path:
@@ -65,7 +65,7 @@ Keep the summary brief. The user can read individual files for more detail.
 
 ### Step 6: No state changes
 
-This command is purely a context-loading operation. It does not modify state.json, create files, or update beads issues.
+This command is purely a context-loading operation. It does not modify state.json, create files, or update beans issues.
 
 ## Key principles
 

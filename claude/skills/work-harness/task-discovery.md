@@ -48,7 +48,7 @@ If exactly one active task is found: use it. Extract the following fields:
 - `tier` -- 1, 2, or 3
 - `title` -- human-readable description
 - `current_step` -- which step is active
-- `issue_id` -- beads issue ID
+- `issue_id` -- beans issue ID
 - `steps` -- ordered step array with status per step
 
 ### 6. No Active Tasks
@@ -76,12 +76,12 @@ After discovery identifies the active task, extract state for the calling comman
 
 See `claude/skills/work-harness/references/state-conventions.md` for the full step status object schema including `gate_id`, `gate_file`, `handoff_prompt`, and other fields.
 
-## Beads Issue Detection
+## Beans Issue Detection
 
 When `$ARGUMENTS` is provided to a work command:
 
-1. Check if the argument matches a beads issue ID pattern (e.g., `work-harness-abc`, `rag-1234`)
-2. If it matches: run `bd show <issue_id>` to load issue details (title, description, status, dependencies)
+1. Check if the argument matches a beans issue ID pattern (e.g., `work-harness-abc`, `rag-1234`)
+2. If it matches: run `bn show <issue_id>` to load issue details (title, description, status, dependencies)
 3. Use the issue details to enrich the task context for assessment or resumption
 
 ## Error Cases
@@ -92,7 +92,7 @@ When `$ARGUMENTS` is provided to a work command:
 | `state.json` unparseable | Log warning, skip entry. Continue with remaining tasks. |
 | Multiple active tasks | List all, ask user to specify. Do not guess. |
 | Active task of wrong tier | Report the mismatch. Let the calling command decide (ask user to continue or archive). |
-| `$ARGUMENTS` looks like an issue ID but `bd show` fails | Log warning, proceed without issue context. |
+| `$ARGUMENTS` looks like an issue ID but `bn show` fails | Log warning, proceed without issue context. |
 
 ## References
 

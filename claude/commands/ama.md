@@ -29,19 +29,19 @@ Before exploring code, load the project's self-description:
 - **`docs/feature/`** — feature documentation produced by the work harness
 - **`docs/futures/`** — deferred enhancements from archived tasks
 
-### 2. Search closed beads issues
+### 2. Search closed beans issues
 
 Closed issues are the best source of truth for *what was built, why, and where*. Always search them before exploring code.
 
 ```bash
-bd search '<keyword>' --limit 10
+bn search '<keyword>'
 ```
 
-Then `bd show <id>` for each relevant match. Extract: files changed, approach taken, key decisions.
+Then `bn show <id>` for each relevant match. Extract: files changed, approach taken, key decisions.
 
 Also check open issues for planned/in-progress work:
 ```bash
-bd list --status=open | grep -i <keyword>
+bn list --status=open | grep -i <keyword>
 ```
 
 Check active and archived work harness tasks for context:
@@ -61,7 +61,7 @@ Use Glob and Grep to find relevant code. Spin up parallel Explore agents for bro
 - Be specific — cite file paths, issue IDs, or doc sections when possible
 - If you're not sure, say so and suggest where to look
 - For "how does X work" questions, trace the code path through the relevant layers
-- For "why was X done this way" questions, check closed beads issues for decision context
+- For "why was X done this way" questions, check closed beans issues for decision context
 - For architecture questions, reference project documentation, CLAUDE.md, and harness.yaml stack info
 - For build/dev questions, reference harness.yaml build commands and any setup scripts
 - Keep answers concise but complete — provide actionable information, not essays
@@ -71,25 +71,25 @@ Use Glob and Grep to find relevant code. Spin up parallel Explore agents for bro
 ### Architecture Questions
 1. Read `harness.yaml` for stack context
 2. Check `CLAUDE.md` and `docs/feature/` for documented decisions
-3. Search closed beads for architecture-related issues
+3. Search closed beans for architecture-related issues
 4. If still unclear, trace the code's module structure
 5. Present: stack overview, key abstractions, data flow, design rationale
 
 ### "How does X work?" Questions
-1. Search beads for issues mentioning X
+1. Search beans for issues mentioning X
 2. Find the entry point (command, handler, function)
 3. Trace the call chain through 2-3 layers maximum
 4. Present: entry point → processing → output, with file paths at each step
 
 ### "Why was X done this way?" Questions
-1. Search closed beads for decision context (most reliable source)
+1. Search closed beans for decision context (most reliable source)
 2. Check git log for commits touching the relevant files
 3. Look for comments or docs explaining the rationale
 4. If no recorded rationale exists, analyze the code and offer a reasoned hypothesis, clearly labeled as inference
 
 ### "What's the status of X?" Questions
 1. Check `.work/` for active tasks related to X
-2. Search open beads issues for X
+2. Search open beans issues for X
 3. Check `docs/feature/` for completed feature summaries
 4. Present: current state, any open work, what's been completed
 
@@ -111,7 +111,7 @@ When in doubt, start with a medium-depth answer and ask "Would you like me to go
 If you cannot find the answer after checking all sources:
 
 1. **Say so explicitly**: "I could not find documentation or issue history for this."
-2. **Share what you did find**: "The closest related code is in X, and the nearest beads issue is Y."
-3. **Suggest next steps**: "The person who last modified this file (check `git log`) may know, or this might be worth creating a beads question issue."
+2. **Share what you did find**: "The closest related code is in X, and the nearest beans issue is Y."
+3. **Suggest next steps**: "The person who last modified this file (check `git log`) may know, or this might be worth creating a beans question issue."
 
 Never fabricate an answer. A clear "I don't know, here's what I found" is always better than a confident but wrong answer.

@@ -29,7 +29,7 @@ This project uses the adaptive work harness. Task state is tracked in `.work/` d
 - **Handoff prompts are the firewall**: Never re-read raw research notes — use handoff prompt summaries
 - **4 tiers**: Fix (T1), Feature (T2), Initiative (T3), Research (R) — auto-detected by triage or explicit command
 - **Steps are data**: The `steps` array in state.json defines available phases per tier
-- **Beads integration**: Every task has a beads issue; Tier 3 tasks have an epic
+- **Beans integration**: Every task has a beans issue; Tier 3 tasks have an epic
 - **State committed to git**: `.work/` directory is tracked
 
 ## Sync Contract

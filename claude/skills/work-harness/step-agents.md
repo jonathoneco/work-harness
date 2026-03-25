@@ -15,7 +15,7 @@ templates, fills variables from state.json, and spawns the agent.
 ## Variable Convention
 
 Placeholders use `{name}` syntax. The dispatcher substitutes these from
-state.json and beads before spawning:
+state.json and beans before spawning:
 
 | Variable | Source |
 |----------|--------|
@@ -24,7 +24,7 @@ state.json and beads before spawning:
 | `{tier}` | `state.json → tier` |
 | `{current_step}` | `state.json → current_step` |
 | `{base_commit}` | `state.json → base_commit` |
-| `{beads_epic_id}` | `state.json → beads_epic_id` |
+| `{epic_id}` | `state.json → epic_id` |
 | `{issue_id}` | `state.json → issue_id` |
 
 ---
@@ -48,7 +48,7 @@ Read and follow these before proceeding:
 
 ### Input
 Read `.work/{name}/research/handoff-prompt.md` — this is your primary input.
-If no research handoff exists (Tier 2), use the task description and beads issue as primary input instead.
+If no research handoff exists (Tier 2), use the task description and beans issue as primary input instead.
 Do NOT read individual research notes. The handoff prompt is the firewall between steps.
 
 ### Architecture Document
@@ -266,10 +266,10 @@ Read and follow these before proceeding:
 Read `.work/{name}/specs/handoff-prompt.md` — this is your primary input.
 Read all spec files referenced in the handoff for full implementation details.
 
-### Create Beads Issues
+### Create Beans Issues
 For each work item from the specs:
 
-    bd create --title="[<tag>] W-NN: <title> — spec NN" --type=task --priority=2
+    bn create --title="[<tag>] W-NN: <title> — spec NN" --type=task --priority=2
 
 Title MUST reference the spec it implements (e.g., `[Workflow] W-01: context-seeding.md — spec 01`).
 Set dependencies between issues to match spec dependency ordering.
@@ -300,7 +300,7 @@ For each stream, write `.work/{name}/streams/<stream-letter>.md`:
     ---
 
 Body contains:
-- Stream identity and work items (beads IDs)
+- Stream identity and work items (beans IDs)
 - Spec references for each work item
 - Files to create/modify (must match file_ownership)
 - Acceptance criteria per work item (reference specs, don't duplicate)
@@ -308,7 +308,7 @@ Body contains:
 
 ### Issue Manifest
 Create `.work/{name}/streams/manifest.jsonl` — one JSON object per line:
-{"work_item": "W-01", "beads_id": "{id}", "stream": "A", "phase": 1, "spec": "01", "title": "{title}"}
+{"work_item": "W-01", "beans_id": "{id}", "stream": "A", "phase": 1, "spec": "01", "title": "{title}"}
 
 ### Handoff Prompt
 Write `.work/{name}/streams/handoff-prompt.md` following the handoff contract:
@@ -322,7 +322,7 @@ If decompose reveals deferred enhancements, append to `.work/{name}/futures.md`.
 
 ## Output Expectations
 Artifacts:
-- Beads issues created (one per work item)
+- Beans issues created (one per work item)
 - `.work/{name}/streams/<letter>.md` — one per stream
 - `.work/{name}/streams/manifest.jsonl` — issue-to-stream mapping
 - `.work/{name}/streams/handoff-prompt.md` — handoff for implement step
@@ -332,7 +332,7 @@ Return:
 Step: decompose
 Status: complete
 Artifacts:
-- N beads issues created under epic {beads_epic_id}
+- N beans issues created under epic {epic_id}
 - M stream execution documents (.work/{name}/streams/A.md through {last}.md)
 - .work/{name}/streams/manifest.jsonl: Issue manifest
 - .work/{name}/streams/handoff-prompt.md: Handoff for implement step

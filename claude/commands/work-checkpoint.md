@@ -121,7 +121,7 @@ On approval, perform the state update as a single atomic write per the step-tran
 - For Tier 3: create gate issue, record `gate_id` in step status
 
 If this was the last step:
-- Tier 1: auto-archive (set `archived_at`, close beads issue)
+- Tier 1: auto-archive (set `archived_at`, close beans issue)
 - Tier 2-3: task remains active until `/work-archive`
 
 #### 5c: Git commit

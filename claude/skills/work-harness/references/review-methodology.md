@@ -68,8 +68,8 @@ Stack-tracer triggers when ANY of:
 
 | Severity | Gate Behavior | Auto-Issue |
 |----------|--------------|------------|
-| `critical` | Blocks session end (review-gate.sh exit 2) | Yes — creates beads issue automatically |
-| `important` | Warns at session end (review-gate.sh stderr) | Yes — creates beads issue automatically |
+| `critical` | Blocks session end (review-gate.sh exit 2) | Yes — creates beans issue automatically |
+| `important` | Warns at session end (review-gate.sh stderr) | Yes — creates beans issue automatically |
 | `suggestion` | No gate enforcement | No |
 
 ## Findings Format
@@ -92,7 +92,7 @@ Findings are stored in `.review/findings.jsonl` (append-only, one finding per li
 | `found_by` | string | Agent kebab-case name (e.g., `go-reviewer`) |
 | `resolved_at` | string/null | ISO 8601 when status changed from OPEN |
 | `resolution` | string/null | One-line description of the fix |
-| `beads_issue_id` | string/null | Populated for critical/important findings |
+| `tracking_issue_id` | string/null | Populated for critical/important findings |
 
 **ID allocation**: The review command collects raw findings from all agents, then assigns sequential IDs. Agents do NOT write to findings.jsonl directly.
 

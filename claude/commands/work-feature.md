@@ -44,10 +44,10 @@ Apply the 3-factor depth assessment against `$ARGUMENTS` and conversation contex
    - `created_at`: current ISO 8601 timestamp
    - `updated_at`: same as `created_at`
    - `reviewed_at`: `null`
-5. Create beads issue:
+5. Create beans issue:
    ```bash
-   bd create --title="[Feature] <title>" --type=feature --priority=2
-   bd update <id> --status=in_progress
+   bn create --title="[Feature] <title>" --type=feature --priority=2
+   bn update <id> --status=in_progress
    ```
 6. Create `docs/feature/<name>.md` summary file
 7. Store `issue_id` in state.json
@@ -60,7 +60,7 @@ Apply the 3-factor depth assessment against `$ARGUMENTS` and conversation contex
 
 | Step | Agent Type | Skills | Context Sources |
 |------|-----------|--------|-----------------|
-| plan | general-purpose | code-quality | beads issues, managed docs |
+| plan | general-purpose | code-quality | beans issues, managed docs |
 | implement | general-purpose | code-quality, work-harness | plan document, managed docs |
 | review | (delegates to /work-review) | code-quality | diff since base_commit |
 
@@ -112,7 +112,7 @@ Please answer these so I can plan the right approach.
 
 **Pushback escalation**: If user responses reveal the task needs fundamental re-scoping (e.g., "actually this is two separate features"), present re-scoping choices inline:
 - **Proceed**: Continue with the refined scope as stated
-- **Split**: Break into multiple tasks (create new beads issues, archive or narrow current task)
+- **Split**: Break into multiple tasks (create new beans issues, archive or narrow current task)
 - **Escalate tier**: If scope expansion warrants T3 treatment, use the existing escalation protocol in the Escalation Handling section below
 
 Re-scoping is handled inline — no new state or step is created.
@@ -126,7 +126,7 @@ Re-scoping is handled inline — no new state or step is created.
    - `{tier}` ← state.tier
    - `{current_step}` ← state.current_step
    - `{base_commit}` ← state.base_commit
-   - `{beads_epic_id}` ← state.beads_epic_id (if null, omit the Epic line from the preamble)
+   - `{epic_id}` ← state.epic_id (if null, omit the Epic line from the preamble)
 
 2. **Spawn agent**: The plan agent may spawn up to 3 Explore subagents internally for inline research (see Inline Research in the plan agent template in `step-agents.md`). For Tier 2 (which has no prior research step), all 3 subagent slots are available for initial codebase investigation. The same plan agent template is used for both T2 and T3 — the difference is what input the plan agent receives (task description for T2, research handoff for T3).
    ```
@@ -161,12 +161,12 @@ Re-scoping is handled inline — no new state or step is created.
 
 ### When current_step = "implement"
 
-1. **Subtask execution**: If plan created subtasks, work through them via `bd ready`:
+1. **Subtask execution**: If plan created subtasks, work through them via `bn ready`:
    ```bash
-   bd ready                              # Find next unblocked task
-   bd update <id> --status=in_progress   # Claim it
+   bn ready                              # Find next unblocked task
+   bn update <id> --status=in_progress   # Claim it
    # ... implement ...
-   bd close <id> --reason="Implemented: <summary>"
+   bn close <id> --reason="Implemented: <summary>"
    ```
 
 2. **Context**: Read the plan document. Search closed issues for patterns.
@@ -216,7 +216,7 @@ Re-scoping is handled inline — no new state or step is created.
 
 4. **Futures**: If review reveals deferred enhancements or improvements, append to `.work/<name>/futures.md`.
 
-5. **Archive**: When ready, run `/work-archive` to close the task. The archive gate requires all critical AND important findings to be FIXED or have `beads_issue_id`.
+5. **Archive**: When ready, run `/work-archive` to close the task. The archive gate requires all critical AND important findings to be FIXED or have `tracking_issue_id`.
 
 ## Escalation Handling
 
@@ -226,7 +226,7 @@ If the task reveals Tier 3 complexity during implementation:
 2. Insert `research`, `spec`, `decompose` steps before `implement`
 3. Reset `implement` and `review` to `not_started`
 4. Set `current_step` to `research`
-5. Create beads epic, set `beads_epic_id`
+5. Create beans epic, set `epic_id`
 6. Create research/specs/streams directories in `.work/<name>/`
 7. Append escalation note to `assessment.rationale`
 

@@ -53,7 +53,7 @@ This applies to file listings, findings, spec references, and any path written t
 - **4 tiers**: Fix (T1), Feature (T2), Initiative (T3), Research (R)
 - **Steps are data**: The `steps` array in state.json defines available phases
 - **Auto-detect**: Commands read `current_step` and present the right interface
-- **Every task has a beads issue**: Created during the assess step
+- **Every task has a beans issue**: Created during the assess step
 - **State committed to git**: `.work/` directory is tracked, not gitignored
 
 ## Tier System
@@ -111,12 +111,12 @@ Findings are stored in `.work/<name>/review/findings.jsonl` (append-only):
 - IDs: `f-YYYYMMDD-NNN` (assigned by review command, not agents)
 - Agents return findings to the orchestrating command; they do NOT write to findings.jsonl directly
 
-## Beads Integration
+## Beans Integration
 
-- Every task has a beads issue (created during assess step)
+- Every task has a beans issue (created during assess step)
 - Tier 3 tasks have an epic with sub-issues
-- Critical/important review findings get automatic beads issues
-- `bd ready` shows unblocked work; `bd close` marks completion
+- Critical/important review findings get automatic beans issues
+- `bn ready` shows unblocked work; `bn close` marks completion
 
 ## Escalation
 

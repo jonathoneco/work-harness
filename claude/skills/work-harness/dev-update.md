@@ -32,7 +32,7 @@ Read artifacts in this order. Stop when you have enough for a complete update:
    - Session progress notes
    - Resumption context from previous sessions
 
-4. **Beads issues** (`bd list --status=in_progress` and recently closed)
+4. **Beans issues** (`bn list --status=in_progress` and recently closed)
    - Claimed work in progress
    - Recently completed issues
 

@@ -9,7 +9,7 @@ meta:
 
 # Work Archive
 
-Archive a completed task. Verifies all steps are complete, checks finding triage status, generates an archive summary (Tier 3), and closes beads issues. The `.work/<name>/` directory remains in place with `archived_at` set — it is NOT deleted.
+Archive a completed task. Verifies all steps are complete, checks finding triage status, generates an archive summary (Tier 3), and closes beans issues. The `.work/<name>/` directory remains in place with `archived_at` set — it is NOT deleted.
 
 **Config injection**: If `.claude/harness.yaml` exists in the current project directory,
 read it and include a "Project Stack Context" section (language, framework, database,
@@ -47,18 +47,18 @@ Verify that `/work-review` was actually run:
 Read `.work/<name>/review/findings.jsonl` for this task (filter by `task_name`):
 
 1. For each finding ID, the last line with that ID is the current state
-2. All `critical` severity findings must be `FIXED` or have a non-null `beads_issue_id` (deferred with tracking)
-3. All `important` severity findings must be `FIXED` or have a non-null `beads_issue_id`
+2. All `critical` severity findings must be `FIXED` or have a non-null `tracking_issue_id` (deferred with tracking)
+3. All `important` severity findings must be `FIXED` or have a non-null `tracking_issue_id`
 4. `suggestion` findings are NOT gated — they do not block archive
 
 If untriaged critical/important findings exist:
 
 ```
 Cannot archive — <N> findings need triage:
-- <finding-id>: [CRITICAL] <title> (status: OPEN, no beads issue)
-- <finding-id>: [IMPORTANT] <title> (status: OPEN, no beads issue)
+- <finding-id>: [CRITICAL] <title> (status: OPEN, no beans issue)
+- <finding-id>: [IMPORTANT] <title> (status: OPEN, no beans issue)
 
-Run /work-review to reconcile, or create beads issues for deferred findings.
+Run /work-review to reconcile, or create beans issues for deferred findings.
 ```
 
 ### Step 5: Generate archive summary (Tier 3 only)
@@ -71,7 +71,7 @@ Write `.work/<name>/archive-summary.md`:
 **Tier:** <N>
 **Duration:** <created_at> -> <archived_at>
 **Sessions:** <N>
-**Beads epic:** <epic_id>
+**Beans epic:** <epic_id>
 
 ## What Was Built
 [Summarized from conversation context and step artifacts]
@@ -89,7 +89,7 @@ Write `.work/<name>/archive-summary.md`:
 ### Step 6: Deprecated table diff
 
 1. Read `base_commit` from `.work/<name>/state.json`
-2. Run: `git diff <base_commit>...HEAD -- .claude/rules/beads-workflow.md`
+2. Run: `git diff <base_commit>...HEAD -- .claude/rules/beans-workflow.md`
 3. Parse the diff for new rows in the "Deprecated Approaches" table:
    - New rows are lines starting with `+|` that contain a pipe-delimited entry
    - Extract the "Deprecated" column value from each new row
@@ -105,7 +105,7 @@ Write `.work/<name>/archive-summary.md`:
      - If **yes**: Create `.claude/tech-deps.yml` with a scaffold listing the project's key dependencies (infer from harness.yaml `stack.language`, `stack.framework`, `stack.database`, and any package manifests like `go.mod`, `package.json`, etc.). Format: YAML array of `{name, category, deps: []}` entries. Then continue the staleness scan with the new file.
      - If **no**: Skip staleness scan and proceed to Step 9.
    - If YAML parse fails: **STOP archive** — report parse error
-2. Read the current deprecated approaches table from `.claude/rules/beads-workflow.md`
+2. Read the current deprecated approaches table from `.claude/rules/beans-workflow.md`
 3. Build a set of deprecated technology identifiers (normalized)
 4. **Declared dependency check**: For each manifest entry, for each `dep` in the entry's `deps` list, normalize and check against the deprecated set. If match: flag as "stale declared dependency"
 5. **Content grep for newly deprecated** (only if `newly_deprecated` is non-empty): For each newly deprecated item, resolve all document paths (skills, rules, commands). Grep each file for the deprecated technology name (case-insensitive). Flag matches as "undeclared stale reference"
@@ -133,14 +133,14 @@ Write `.work/<name>/archive-summary.md`:
 1. If staleness report is empty (no findings): Print "Staleness scan: clean (N documents checked)". Continue to next step.
 2. If findings exist:
    - Print the full staleness report
-   - For each stale finding, create a beads issue:
+   - For each stale finding, create a beans issue:
      ```bash
-     bd create --title="[Housekeeping] <document>: stale <dep> reference" \
+     bn create --title="[Housekeeping] <document>: stale <dep> reference" \
        --type=task --priority=3
      ```
-   - For each manifest gap, create a beads issue:
+   - For each manifest gap, create a beans issue:
      ```bash
-     bd create --title="[Housekeeping] Update tech manifest: <document> uses <dep>" \
+     bn create --title="[Housekeeping] Update tech manifest: <document> uses <dep>" \
        --type=task --priority=4
      ```
    - Present findings to user
@@ -156,14 +156,14 @@ Update `docs/feature/<name>.md` (if it exists):
 - Replace `**Status:** active` with `**Status:** archived`
 - Append a `## Completed` section with: archive date, number of findings, key files changed, and a 1-2 sentence summary of what was delivered
 
-### Step 10: Close beads issue/epic
+### Step 10: Close beans issue/epic
 
-- **Tier 1-2**: `bd close <issue_id> --reason="Task archived: <title>"`
+- **Tier 1-2**: `bn close <issue_id> --reason="Task archived: <title>"`
 - **Tier 3**: Close all open issues under the epic, then close the epic:
   ```bash
-  bd list --status=open --label=workflow:<name>  # find remaining open issues
-  bd close <issue-ids> --reason="Task archived"
-  bd close <epic_id> --reason="Task archived: <title>"
+  bn list --status=open  # find remaining open issues for this workflow
+  bn close <issue-ids> --reason="Task archived"
+  bn close <epic_id> --reason="Task archived: <title>"
   ```
 
 ### Step 11: Promote futures
@@ -188,7 +188,7 @@ git commit -m "chore: archive <name>"
 Task `<name>` archived.
 
 Location: .work/<name>/ (archived_at set)
-Beads: <issue_id> closed
+Beans: <issue_id> closed
 
 <summary stats if Tier 3: N steps, N sessions, N findings>
 ```
@@ -197,5 +197,5 @@ Beads: <issue_id> closed
 
 - **Verify before archiving.** Never archive a task with incomplete steps or untriaged findings without explicit checks. The verification gates exist to catch forgotten work.
 - **The `.work/<name>/` directory is NOT deleted.** Archived tasks remain with `archived_at` set. State discovery filters them out.
-- **Finding triage gate is strict.** All critical AND important findings must be FIXED or have a `beads_issue_id`. Suggestions are not gated. This is different from the review step gate (which only checks critical).
+- **Finding triage gate is strict.** All critical AND important findings must be FIXED or have a `tracking_issue_id`. Suggestions are not gated. This is different from the review step gate (which only checks critical).
 - **Futures promotion is automatic.** If futures were captured during the task, they are promoted to `docs/futures/` at archive time for discovery by future tasks.

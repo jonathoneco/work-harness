@@ -9,7 +9,7 @@ meta:
 
 # Work Review
 
-Run a structured code review on the active task. Spawns specialist review agents, collects findings into `.work/<name>/review/findings.jsonl`, creates beads issues for critical/important findings, and manages the finding lifecycle across re-reviews.
+Run a structured code review on the active task. Spawns specialist review agents, collects findings into `.work/<name>/review/findings.jsonl`, creates beans issues for critical/important findings, and manages the finding lifecycle across re-reviews.
 
 **Config injection**: If `.claude/harness.yaml` exists in the current project directory,
 read it and include a "Project Stack Context" section (language, framework, database,
@@ -92,7 +92,7 @@ For each finding, construct the `findings.jsonl` record:
   "found_by": "<agent kebab-case file name, e.g. code-reviewer>",
   "resolved_at": null,
   "resolution": null,
-  "beads_issue_id": null
+  "tracking_issue_id": null
 }
 ```
 
@@ -123,16 +123,16 @@ If the `codex-review` skill is available (i.e., `which codex` succeeds):
 
 If `which codex` fails: log "Codex not available, skipping second-opinion review" and continue to Step 4. No error, no warning -- this is expected when Codex is not installed.
 
-### Step 4: Create Beads Issues for Critical/Important Findings
+### Step 4: Create Beans Issues for Critical/Important Findings
 
 For each finding with severity `critical` or `important`:
-1. Create beads issue:
+1. Create beans issue:
    ```bash
-   bd create --title="[Review] <finding title>" --type=bug --priority=<P>
+   bn create --title="[Review] <finding title>" --type=bug --priority=<P>
    ```
    - `critical` -> priority 1
    - `important` -> priority 2
-2. Populate the finding record's `beads_issue_id` field before writing to JSONL
+2. Populate the finding record's `tracking_issue_id` field before writing to JSONL
 
 ### Step 5: Re-review Reconciliation (re-review only)
 
@@ -145,7 +145,7 @@ Only runs if existing OPEN findings were passed to agents:
 
 2. For new findings from agents (not matching any existing finding):
    - Write with `status: "NEW"` (not "OPEN") to distinguish from first-pass findings
-   - Create beads issues for critical/important NEW findings
+   - Create beans issues for critical/important NEW findings
 
 ### Step 6: Write Findings
 
@@ -193,7 +193,7 @@ If this review is running during the review step of the active task:
    - Set `reviewed_at` to current ISO 8601 timestamp in state.json (mechanical evidence that review ran)
    - Also update `updated_at` to current ISO 8601 timestamp (per state mutation rule)
    - Mark review step as `completed` (set `completed_at`, update `current_step`)
-   - **Tier 1**: auto-archive (set `archived_at`, close beads issue with `bd close <issue_id>`)
+   - **Tier 1**: auto-archive (set `archived_at`, close beans issue with `bn close <issue_id>`)
    - **Tier 2-3**: task remains active until explicit `/work-archive`
    - **Wait for user acknowledgment** before proceeding
 
@@ -201,7 +201,7 @@ If this review is running during the review step of the active task:
    - Do NOT advance the step — review is incomplete
    - Suggest: "Fix the critical findings and re-run /work-review"
 
-**Important distinction**: Review step completes when no CRITICAL findings are OPEN. But `/work-archive` enforces a stricter gate: all critical AND important findings must be FIXED or have `beads_issue_id`. Important findings do not block review step completion — they block archive.
+**Important distinction**: Review step completes when no CRITICAL findings are OPEN. But `/work-archive` enforces a stricter gate: all critical AND important findings must be FIXED or have `tracking_issue_id`. Important findings do not block review step completion — they block archive.
 
 ## Key principles
 

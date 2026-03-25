@@ -28,13 +28,13 @@ if .work/<name>/ exists: name = name + "-2"   # increment until unique
   "title":          "string  — human-readable task description",
   "created_at":     "string  — ISO 8601 timestamp",
   "updated_at":     "string  — ISO 8601 timestamp, updated on every state change",
-  "issue_id":       "string  — beads issue ID (e.g., 'rag-1234')",
+  "issue_id":       "string  — beans issue ID (e.g., 'rag-1234')",
   "current_step":   "string  — must be a value in the steps array",
   "steps":          "object[] — ordered array of step objects [{name, status, ...}] for this tier",
   "step_status":    "object|null — DEPRECATED, use steps[].status instead. Legacy field, ignored by hooks.",
   "assessment":     "object|null — triage scoring, null until assess step completes",
   "docs_path":      "string|null — relative path to docs/feature/<name>, null for Tier 1",
-  "beads_epic_id":  "string|null — beads epic ID, only for Tier 3",
+  "epic_id":        "string|null — beans epic ID, only for Tier 3",
   "sessions":       "array   — session checkpoint records",
   "base_commit":    "string  — git commit hash at task creation time",
   "findings_file":  "string  — always '.review/findings.jsonl'",
@@ -75,7 +75,7 @@ No other transitions are valid:
   "completed_at":   "string|null — set when status becomes 'completed'",
   "skipped_reason": "string|null — one-line reason when status is 'skipped'",
   "handoff_prompt": "string|null — Tier 3 only, path relative to .work/<name>/",
-  "gate_id":        "string|null — beads issue ID for gate review, Tier 3 only",
+  "gate_id":        "string|null — beans issue ID for gate review, Tier 3 only",
   "gate_file":      "string|null — relative path from .work/<name>/ to the gate review file, Tier 3 only"
 }
 ```
@@ -103,7 +103,7 @@ To find the active task:
 ## Concurrency Model
 
 - Single-session per task
-- Parallel streams (Tier 3) use separate beads issues, not separate tasks
+- Parallel streams (Tier 3) use separate beans issues, not separate tasks
 - No locking mechanism — assumed single-user, single-session at a time
 
 ## Verdict Types

@@ -25,7 +25,7 @@ Step-by-step:
 4. **Initialize step_status**: Add new entries as `not_started` for each inserted step
 5. **Reset existing steps**: Set `implement` and `review` back to `not_started`
 6. **Rewind current_step**: Set `current_step` to the first new step (typically `plan` for 1→2, `research` for 1→3)
-7. **Create epic** (if escalating to Tier 3): Create beads epic, set `beads_epic_id`
+7. **Create epic** (if escalating to Tier 3): Create beans epic, set `epic_id`
 8. **Create docs directory** (if escalating to Tier 2-3): Create `docs/feature/<name>/`, set `docs_path`
 9. **Append rationale**: Add escalation note to `assessment.rationale`
 
@@ -36,7 +36,7 @@ Step-by-step:
 - `step_status` gains new entries; `implement` and `review` reset to `not_started`
 - `current_step` rewound to first new step
 - `docs_path` may be set (if escalating to Tier 2-3 and was null)
-- `beads_epic_id` may be set (if escalating to Tier 3)
+- `epic_id` may be set (if escalating to Tier 3)
 - `assessment.rationale` gets escalation note appended
 
 ## What Does NOT Change
@@ -46,7 +46,7 @@ Step-by-step:
 - **`assess` step status** — remains `completed`
 - **Original assessment scoring** — factors and score are preserved unchanged
 - **`base_commit`** — still the original commit at task creation
-- **`issue_id`** — same beads issue
+- **`issue_id`** — same beans issue
 
 ## Example: Tier 1 → Tier 3
 

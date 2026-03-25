@@ -39,7 +39,7 @@ Linting rules for AI tooling configuration files. Covers Claude Code settings, h
 ### References to Deprecated Tools or Approaches
 - **Pattern**: Instructions that reference tools, libraries, or patterns that the project has moved away from (e.g., "use `mocha` for tests" when the project migrated to `vitest`)
 - **Risk**: Agent generates code using the deprecated approach, creating inconsistency and potential compatibility issues with the current stack
-- **Fix**: Maintain a deprecation section in project rules (or the beads-workflow deprecated approaches table). When migrating tools, update all rule files that reference the old tool
+- **Fix**: Maintain a deprecation section in project rules (or the beans-workflow deprecated approaches table). When migrating tools, update all rule files that reference the old tool
 
 ### Overly Long Rule Files
 - **Pattern**: Individual `CLAUDE.md` or rule files exceeding 500 lines, or total rules content exceeding 2000 lines across all loaded files

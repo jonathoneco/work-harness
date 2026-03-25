@@ -80,20 +80,20 @@ Results:
 - **FAIL** (not executable): "Hook not executable: *path*. Run: `chmod +x <path>`"
 - **WARN** (no manifest): "Manifest not found -- cannot verify hooks. Run `install.sh`."
 
-### Check 4: Beads Initialized
+### Check 4: Beans Initialized
 
-Verify `.beads/` directory exists in the project root.
+Verify `.beans/` directory exists in the project root.
 
 Steps:
-1. Check `.beads/` directory exists.
-2. If it exists and `bd` is available, run `bd list --limit 1` to verify the beads database is functional.
+1. Check `.beans/` directory exists.
+2. If it exists and `bn` is available, run `bn list --json | head -1` to verify the beans database is functional.
 
 Results:
-- **PASS**: "`.beads/` initialized" (and if bd ran successfully, include issue count or note it works)
-- **FAIL** (no directory): "`.beads/` not found. Run: `bd init`"
-- **WARN** (directory exists but bd fails): "`.beads/` exists but `bd list` failed -- beads database may be corrupted"
+- **PASS**: "`.beans/` initialized" (and if bn ran successfully, include issue count or note it works)
+- **FAIL** (no directory): "`.beans/` not found. Run: `bn init`"
+- **WARN** (directory exists but bn fails): "`.beans/` exists but `bn list` failed -- beans database may be corrupted"
 
-If `bd` is not installed, just check directory existence and note that `bd` availability is checked in check 6.
+If `bn` is not installed, just check directory existence and note that `bn` availability is checked in check 6.
 
 ### Check 5: Schema Compatibility
 
@@ -115,8 +115,8 @@ Verify that all tools required by the harness are installed and accessible. For 
 |-----------|------------|--------------|
 | `jq` | install.sh, settings merger | "Available via system package manager (`apt`/`pacman`/`brew install jq`)" |
 | `yq` | config reader, hooks | "Install from https://github.com/mikefarah/yq" |
-| `git` | beads, install.sh, hooks | "Available via system package manager" |
-| `bd` | workflow commands, hooks | "Install beads: see beads documentation" |
+| `git` | beans, install.sh, hooks | "Available via system package manager" |
+| `bn` | workflow commands, hooks | "Install beans: see beans documentation" |
 
 Results:
 - **PASS**: All dependencies found. Report: "*tool1*, *tool2*, *tool3*, *tool4* all found"
@@ -164,7 +164,7 @@ Present the results in a structured report:
   1. Configuration     [symbol] [RESULT]  [detail]
   2. Review agents     [symbol] [RESULT]  [detail]
   3. Hooks             [symbol] [RESULT]  [detail]
-  4. Beads             [symbol] [RESULT]  [detail]
+  4. Beans             [symbol] [RESULT]  [detail]
   5. Schema compat     [symbol] [RESULT]  [detail]
   6. Dependencies      [symbol] [RESULT]  [detail]
   7. Agency-agents     [symbol] [RESULT]  [detail]
@@ -184,7 +184,7 @@ Present the results in a structured report:
   1. Install missing dependencies (check 6) -- required for everything else
   2. Run `install.sh` (check 3) -- hooks must be functional
   3. Run `/harness-init` (check 1) -- project config must exist
-  4. Run `bd init` (check 4) -- beads must be initialized
+  4. Run `bn init` (check 4) -- beans must be initialized
   5. Install missing agents (check 2) -- for review routing
 
 ## Rules
@@ -204,7 +204,7 @@ Present the results in a structured report:
 | harness.yaml malformed | Check 1 FAIL with parse error. Checks 2, 5, and 8 skip. |
 | Manifest missing | Checks 3 and 5 degrade to WARN (cannot verify). Other checks still run. |
 | Manifest malformed JSON | Same as missing -- degrade checks 3 and 5 with error message. |
-| `bd` not installed | Check 6 FAIL for bd. Check 4 degrades (skip `bd list` verification, only check directory). |
+| `bn` not installed | Check 6 FAIL for bn. Check 4 degrades (skip `bn list` verification, only check directory). |
 | `review_routing` empty | Check 2 PASS with "no routing configured" note. Check 7 skipped. |
 | review_routing references agent found in project but not global | PASS -- project-level agents are valid. |
 | Harness repo at harness_dir was deleted | Check 3 FAIL (hooks not found). Suggest re-cloning and re-running install. |
