@@ -1,6 +1,10 @@
 ---
 description: "Deep work — multi-session initiative with research, planning, specs, and phased implementation"
 user_invocable: true
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # /work-deep $ARGUMENTS

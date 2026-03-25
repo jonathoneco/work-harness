@@ -1,3 +1,12 @@
+---
+description: "Initialize a project for the work harness with interactive setup"
+user_invocable: true
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
+---
+
 # /harness-init -- Project Setup
 
 Initialize this project for the work harness. This command walks through an interactive prompt sequence to gather stack information, generates `.claude/harness.yaml`, initializes beads, and optionally scaffolds architecture rules and domain agent files.

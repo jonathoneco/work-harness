@@ -1,3 +1,12 @@
+---
+description: "Run a comprehensive health check on the harness installation and project configuration"
+user_invocable: true
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
+---
+
 # /harness-doctor -- Health Check
 
 Run a comprehensive health check on the harness installation and project configuration. This command is **read-only** -- it verifies that things work but does not modify any files.

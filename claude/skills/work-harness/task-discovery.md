@@ -1,6 +1,10 @@
 ---
 name: task-discovery
 description: "Active task finding, state reading, tier-command mapping. Used by all work commands at startup to detect and route to the active task."
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # Task Discovery

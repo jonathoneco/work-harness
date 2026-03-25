@@ -2,6 +2,10 @@
 description: "Fix lint/build issues and create or update PR — intelligent fixer using code-quality rules"
 user_invocable: true
 skills: [code-quality]
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # /pr-prep $ARGUMENTS

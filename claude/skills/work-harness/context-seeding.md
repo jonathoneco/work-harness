@@ -1,3 +1,12 @@
+---
+name: context-seeding
+description: "Context seeding protocol for step agent prompts — standard preamble, per-step context table, handoff contract, anti-patterns"
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
+---
+
 # Context Seeding Protocol
 
 Protocol for seeding step agents with exactly the right context. Consumed by

@@ -1,6 +1,10 @@
 ---
 description: "Review current work — runs specialist agents and tracks findings"
 user_invocable: true
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # Work Review

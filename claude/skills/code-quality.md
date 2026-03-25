@@ -1,6 +1,10 @@
 ---
 name: code-quality
 description: "Universal code quality anti-patterns and correctness rules. Activates when editing source files or running code review commands. Propagate to review agents and implementation subagents via skills: [code-quality] frontmatter."
+meta:
+  stack: ["all"]
+  version: 2
+  last_reviewed: 2026-03-24
 ---
 
 # Code Quality
@@ -70,10 +74,26 @@ and when-to-use guidance.
 ## Language-Specific Anti-Patterns
 
 Read `references/<language>-anti-patterns.md` where `<language>` is `stack.language`
-from `.claude/harness.yaml`. If no `harness.yaml` exists or `stack.language` is `other`,
-skip this section.
+from `.claude/harness.yaml`. If no `harness.yaml` exists, `stack.language` is absent or `other`,
+or no matching file exists, skip this section.
 
 Adding a new language pack requires only creating one file at `references/<language>-anti-patterns.md` — no changes to this file or any other file are needed.
+
+## Framework-Specific Anti-Patterns
+
+Read `references/<framework>-anti-patterns.md` where `<framework>` is `stack.framework`
+from `.claude/harness.yaml`. If no `harness.yaml` exists, `stack.framework` is absent,
+or no matching file exists, skip this section.
+
+Adding a new framework pack requires only creating one file at `references/<framework>-anti-patterns.md` — no changes to this file or any other file are needed.
+
+## Frontend-Specific Anti-Patterns
+
+Read `references/<frontend>-anti-patterns.md` where `<frontend>` is `stack.frontend`
+from `.claude/harness.yaml`. If no `harness.yaml` exists, `stack.frontend` is absent,
+or no matching file exists, skip this section.
+
+Adding a new frontend pack requires only creating one file at `references/<frontend>-anti-patterns.md` — no changes to this file or any other file are needed.
 
 ## Complementary Tools
 

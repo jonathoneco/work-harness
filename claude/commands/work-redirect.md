@@ -1,6 +1,10 @@
 ---
 description: "Record a dead end — document what failed and pivot to a new direction"
 user_invocable: true
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # Work Redirect

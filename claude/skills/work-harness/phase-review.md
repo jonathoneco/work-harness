@@ -1,6 +1,10 @@
 ---
 name: phase-review
 description: "Two-phase inter-step quality review protocol -- Phase A artifact validation and Phase B quality review with verdict handling. Used by work-deep at every step transition and extensible to other tier commands."
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # Phase Review

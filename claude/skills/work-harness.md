@@ -1,6 +1,10 @@
 ---
 name: work-harness
 description: "Adaptive work harness conventions — state model, triage, review gates, escalation. Activates when .work/ directory exists with active tasks (state.json where archived_at is null). Propagate to implementation and review subagents via skills: [work-harness] frontmatter."
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # Work Harness
@@ -29,6 +33,7 @@ research agents) inherit harness conventions.
 - **context-seeding** — Context seeding protocol for step agent prompts: standard preamble, per-step context table, handoff contract, anti-patterns (path: `claude/skills/work-harness/context-seeding.md`)
 - **step-agents** — Prompt templates for dispatched step agents (plan, spec, decompose) — other steps define prompts inline in command files (path: `claude/skills/work-harness/step-agents.md`)
 - **teams-protocol** — Agent Teams usage protocol: naming, task schema, teammate prompts, completion detection, failure handling (path: `claude/skills/work-harness/teams-protocol.md`)
+- **skill-lifecycle** — Staleness detection rules and metadata conventions (path: `claude/skills/work-harness/skill-lifecycle.md`)
 
 ## Path Convention
 

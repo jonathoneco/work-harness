@@ -1,6 +1,10 @@
 ---
 description: "Start or continue work — auto-assesses task depth and routes to the right tier"
 user_invocable: true
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # /work $ARGUMENTS

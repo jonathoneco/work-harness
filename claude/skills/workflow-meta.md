@@ -1,6 +1,10 @@
 ---
 name: workflow-meta
 description: "Self-hosting skill — conventions for improving the work harness itself. Activates when working on the claude-work-harness repository."
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # Workflow Meta

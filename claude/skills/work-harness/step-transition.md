@@ -1,6 +1,10 @@
 ---
 name: step-transition
 description: "Step transition protocol -- approval ceremony, gate file creation, state update, and context compaction. Used by tier commands and work-checkpoint at every step boundary."
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # Step Transition

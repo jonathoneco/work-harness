@@ -1,6 +1,10 @@
 ---
 description: "Save a checkpoint — captures progress for session continuity"
 user_invocable: true
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # Work Checkpoint

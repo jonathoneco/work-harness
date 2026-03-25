@@ -1,6 +1,10 @@
 ---
 description: "Standalone research — investigate a topic with structured synthesis"
 user_invocable: true
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # /work-research $ARGUMENTS

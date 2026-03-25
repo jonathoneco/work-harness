@@ -1,6 +1,10 @@
 ---
 name: codex-review
 description: "Optional Codex integration for second-opinion code review. Activates during /work-review when Codex CLI is available."
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # Codex Review
@@ -26,6 +30,51 @@ Run Codex in read-only sandbox mode with structured output:
       --sandbox read-only \
       "Review the following code changes for bugs, security issues, performance problems, and correctness errors. Focus on real issues, not style preferences. For each issue found, provide severity, category, file, line number, message, and suggested fix." \
       < <diff-input>
+
+## Diff Preparation
+
+Generate the diff to send to Codex. The diff should include all changes being reviewed:
+
+### For PR review (most common)
+```bash
+git diff $(gh pr view --json baseRefName -q '.baseRefName')...HEAD
+```
+
+### For staged changes
+```bash
+git diff --cached
+```
+
+### For unstaged changes
+```bash
+git diff
+```
+
+### Size limits
+- If the diff exceeds 50,000 characters, split by file and make multiple Codex calls
+- Each call should include full file context for the files being reviewed
+- Combine all findings before verification
+
+## Multi-File Handling
+
+When reviewing changes across many files:
+
+1. **Single invocation** (preferred for <50k chars): Send the full diff. Codex sees cross-file relationships.
+2. **Split by file** (for large diffs): Group related files together (e.g., handler + service + test). Send each group as a separate Codex call.
+3. **Combine findings**: Merge JSONL output from all calls, deduplicate by file+line, then verify all findings.
+
+Do NOT split a single file's diff across multiple invocations — Codex needs full file context to avoid false positives.
+
+## Integration with /work-review
+
+This skill is consumed by `/work-review` when Codex is available. The integration flow:
+
+1. `/work-review` spawns review agents (per review-methodology)
+2. One review agent handles Codex integration (this skill)
+3. The Codex agent: prepares diff → calls Codex → verifies findings → returns findings to orchestrator
+4. The orchestrator merges Codex findings with other agent findings into `findings.jsonl`
+
+The Codex agent does NOT write to `findings.jsonl` directly — it returns findings to the orchestrating `/work-review` command.
 
 ## Output Schema
 

@@ -1,6 +1,10 @@
 ---
 description: "Build a feature — plan, implement, and review in 1-2 sessions"
 user_invocable: true
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # /work-feature $ARGUMENTS

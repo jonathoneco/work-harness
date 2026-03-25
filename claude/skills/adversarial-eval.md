@@ -1,6 +1,10 @@
 ---
 name: adversarial-eval
 description: "Optional adversarial evaluation protocol for design decisions with meaningful trade-offs. Invocable by plan and spec agents when facing non-trivial architectural choices. Provides structured debate framings with position elicitation."
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # Adversarial Eval

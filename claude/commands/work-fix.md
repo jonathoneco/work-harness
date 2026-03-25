@@ -1,6 +1,10 @@
 ---
 description: "Quick fix — single-session bug fix with automatic review"
 user_invocable: true
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # /work-fix $ARGUMENTS

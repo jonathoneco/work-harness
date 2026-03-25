@@ -1,3 +1,12 @@
+---
+description: "Check project harness configuration against the installed harness version"
+user_invocable: true
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
+---
+
 # /harness-update -- Check Project Compatibility
 
 Check this project's harness configuration against the installed harness version. This command is **read-only** -- it reports status but does not modify any files.

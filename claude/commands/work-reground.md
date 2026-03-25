@@ -1,6 +1,10 @@
 ---
 description: "Recover context — re-read task state and artifacts after a break or compaction"
 user_invocable: true
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # Work Reground

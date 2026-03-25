@@ -1,6 +1,10 @@
 ---
 description: "Adversarial evaluation of a proposed approach. Two agents argue opposing positions, then a synthesis produces a final verdict."
 user_invocable: true
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # Adversarial Evaluation

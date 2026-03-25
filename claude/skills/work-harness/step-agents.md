@@ -1,3 +1,12 @@
+---
+name: step-agents
+description: "Prompt templates for dispatched step agents — plan, spec, decompose"
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
+---
+
 # Step Agent Prompt Templates
 
 Complete prompt templates for step agents. The dispatcher reads these

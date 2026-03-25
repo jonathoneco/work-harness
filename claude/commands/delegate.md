@@ -1,6 +1,10 @@
 ---
 description: "Delegate a sub-task to a specialist agent with proper context seeding"
 user_invocable: true
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # /delegate $ARGUMENTS

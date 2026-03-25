@@ -1,3 +1,12 @@
+---
+name: teams-protocol
+description: "Agent Teams usage protocol — naming, task schema, teammate prompts, completion detection, failure handling"
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
+---
+
 # Teams Protocol
 
 Protocol for using Agent Teams in the work harness for parallel agent workloads.

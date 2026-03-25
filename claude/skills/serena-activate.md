@@ -1,6 +1,10 @@
 ---
 name: serena-activate
 description: Initialize Serena LSP tools for semantic code navigation. Auto-triggered by SessionStart hook, or run manually after context compaction.
+meta:
+  stack: ["all"]
+  version: 1
+  last_reviewed: 2026-03-24
 ---
 
 # /serena-activate
