@@ -1,0 +1,27 @@
+{
+  "name": "beans-issue-tracker",
+  "tier": 2,
+  "title": "Build beans (bn) — sh+jq issue tracker replacing beads",
+  "steps": [
+    {"name": "assess", "status": "completed", "completed_at": "2026-03-25T02:00:00Z"},
+    {"name": "plan", "status": "completed", "completed_at": "2026-03-25T02:30:00Z"},
+    {"name": "implement", "status": "completed", "completed_at": "2026-03-25T03:30:00Z"},
+    {"name": "review", "status": "completed", "completed_at": "2026-03-25T22:00:00Z"}
+  ],
+  "current_step": "review",
+  "assessment": {
+    "scope_spread": 2,
+    "design_novelty": 1,
+    "decomposability": 1,
+    "bulk_modifier": -1,
+    "total": 3,
+    "tier_selected": 2,
+    "rationale": "Research already complete (.work/beads-replacement/). Remaining work: build script + migrate harness + validate. T2/T3 boundary — T2 chosen because research phase is done."
+  },
+  "issue_id": "work-harness-6l1",
+  "base_commit": "b6b9d98dca04b61be9afb8d3b526e0795d7c7bc1",
+  "reviewed_at": "2026-03-25T22:00:00Z",
+  "created_at": "2026-03-25T02:00:00Z",
+  "updated_at": "2026-03-25T22:00:00Z",
+  "archived_at": "2026-03-25T22:00:00Z"
+}

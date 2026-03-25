@@ -3,7 +3,6 @@
   "title": "Harden work harness enforcement \u2014 mechanical guardrails",
   "tier": 3,
   "base_commit": "6c0f03dfc9f1f980816687d9d69a04b7c06e3b1d",
-  "beads_epic_id": "rag-rne9",
   "issue_id": "rag-bg59",
   "current_step": "implement",
   "steps": [
@@ -50,5 +49,6 @@
   },
   "docs_path": "docs/feature/harness-enforcement.md",
   "created_at": "2026-03-14T23:00:00Z",
-  "archived_at": "2026-03-15T17:56:55Z"
+  "archived_at": "2026-03-15T17:56:55Z",
+  "epic_id": "rag-rne9"
 }

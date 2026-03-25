@@ -4,18 +4,52 @@
   "tier": 3,
   "description": "Add lifecycle management to context documents (skills, specs, rules). 5 mechanisms: (1) self-re-invocation at step gates, (2) archive-time housekeeping, (3) project-level tech manifest, (4) deprecated table diffing, (5) PostCompact hook for mechanical re-grounding. Plus gate approval bug fix (rag-idnu7).",
   "base_commit": "d7cdd3047b13ac16d0b371e3f18cd172e852b342",
-  "beads_epic_id": "rag-hc9ou",
   "beads_issue_id": "rag-51fmw",
-  "steps": ["assess", "research", "plan", "spec", "decompose", "implement", "review"],
+  "steps": [
+    "assess",
+    "research",
+    "plan",
+    "spec",
+    "decompose",
+    "implement",
+    "review"
+  ],
   "current_step": "review",
   "step_status": {
-    "assess": { "status": "completed", "completed_at": "2026-03-15T23:30:00Z" },
-    "research": { "status": "completed", "completed_at": "2026-03-16T00:30:00Z", "gate_id": "rag-becll" },
-    "plan": { "status": "completed", "completed_at": "2026-03-16T01:30:00Z", "gate_id": "rag-cy0wk" },
-    "spec": { "status": "completed", "completed_at": "2026-03-16T02:30:00Z", "gate_id": "rag-rnybv" },
-    "decompose": { "status": "completed", "completed_at": "2026-03-16T03:30:00Z", "gate_id": "rag-s8ouy" },
-    "implement": { "status": "completed", "completed_at": "2026-03-16T06:00:00Z", "gate_id": "rag-z7z2e" },
-    "review": { "status": "completed", "started_at": "2026-03-16T06:00:00Z", "completed_at": "2026-03-16T06:30:00Z" }
+    "assess": {
+      "status": "completed",
+      "completed_at": "2026-03-15T23:30:00Z"
+    },
+    "research": {
+      "status": "completed",
+      "completed_at": "2026-03-16T00:30:00Z",
+      "gate_id": "rag-becll"
+    },
+    "plan": {
+      "status": "completed",
+      "completed_at": "2026-03-16T01:30:00Z",
+      "gate_id": "rag-cy0wk"
+    },
+    "spec": {
+      "status": "completed",
+      "completed_at": "2026-03-16T02:30:00Z",
+      "gate_id": "rag-rnybv"
+    },
+    "decompose": {
+      "status": "completed",
+      "completed_at": "2026-03-16T03:30:00Z",
+      "gate_id": "rag-s8ouy"
+    },
+    "implement": {
+      "status": "completed",
+      "completed_at": "2026-03-16T06:00:00Z",
+      "gate_id": "rag-z7z2e"
+    },
+    "review": {
+      "status": "completed",
+      "started_at": "2026-03-16T06:00:00Z",
+      "completed_at": "2026-03-16T06:30:00Z"
+    }
   },
   "reviewed_at": "2026-03-16T06:30:00Z",
   "assessment": {
@@ -24,10 +58,11 @@
     "decomposability": 1,
     "bulk_modifier": 0,
     "total": 4,
-    "rationale": "User override: Tier 2 → Tier 3. Original score: 4. User wants research phase for AI best practices analysis on instruction persistence and context management."
+    "rationale": "User override: Tier 2 \u2192 Tier 3. Original score: 4. User wants research phase for AI best practices analysis on instruction persistence and context management."
   },
   "created_at": "2026-03-15T23:30:00Z",
   "updated_at": "2026-03-16T07:00:00Z",
   "archived_at": "2026-03-16T07:00:00Z",
-  "sessions": []
+  "sessions": [],
+  "epic_id": "rag-hc9ou"
 }

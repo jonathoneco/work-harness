@@ -5,16 +5,41 @@
   "tier": 3,
   "priority": 2,
   "base_commit": "c59ea008cd93e179ad37d3d480680159cb1869c4",
-  "beads_epic_id": "work-harness-ihi",
   "current_step": "review",
   "steps": [
-    { "name": "assess", "status": "completed" },
-    { "name": "research", "status": "completed", "gate_id": "work-harness-1rj" },
-    { "name": "plan", "status": "completed", "gate_id": "work-harness-hwn" },
-    { "name": "spec", "status": "completed", "gate_id": "work-harness-j6r" },
-    { "name": "decompose", "status": "completed", "gate_id": "work-harness-ist" },
-    { "name": "implement", "status": "completed", "gate_id": "work-harness-l9c" },
-    { "name": "review", "status": "completed" }
+    {
+      "name": "assess",
+      "status": "completed"
+    },
+    {
+      "name": "research",
+      "status": "completed",
+      "gate_id": "work-harness-1rj"
+    },
+    {
+      "name": "plan",
+      "status": "completed",
+      "gate_id": "work-harness-hwn"
+    },
+    {
+      "name": "spec",
+      "status": "completed",
+      "gate_id": "work-harness-j6r"
+    },
+    {
+      "name": "decompose",
+      "status": "completed",
+      "gate_id": "work-harness-ist"
+    },
+    {
+      "name": "implement",
+      "status": "completed",
+      "gate_id": "work-harness-l9c"
+    },
+    {
+      "name": "review",
+      "status": "completed"
+    }
   ],
   "reviewed_at": "2026-03-23T17:00:00Z",
   "assessment": {
@@ -27,5 +52,6 @@
   },
   "created_at": "2026-03-20T00:00:00Z",
   "updated_at": "2026-03-23T17:15:00Z",
-  "archived_at": "2026-03-23T17:15:00Z"
+  "archived_at": "2026-03-23T17:15:00Z",
+  "epic_id": "work-harness-ihi"
 }

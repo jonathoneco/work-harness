@@ -8,13 +8,69 @@
   "issue_id": "work-harness-bn1",
   "current_step": "review",
   "steps": [
-    {"name": "assess", "status": "completed", "started_at": "2026-03-24T21:00:00Z", "completed_at": "2026-03-24T21:00:00Z", "handoff_prompt": null, "gate_id": null, "gate_file": null},
-    {"name": "research", "status": "completed", "started_at": "2026-03-24T21:00:00Z", "completed_at": "2026-03-24T21:54:00Z", "handoff_prompt": "research/handoff-prompt.md", "gate_id": "work-harness-3q6", "gate_file": "gates/research-to-plan.md"},
-    {"name": "plan", "status": "completed", "started_at": "2026-03-24T21:54:00Z", "completed_at": "2026-03-24T23:30:00Z", "handoff_prompt": "plan/handoff-prompt.md", "gate_id": "work-harness-q9v", "gate_file": "gates/plan-to-spec.md"},
-    {"name": "spec", "status": "completed", "started_at": "2026-03-24T23:30:00Z", "completed_at": "2026-03-25T00:15:00Z", "handoff_prompt": "specs/handoff-prompt.md", "gate_id": "work-harness-1al", "gate_file": "gates/spec-to-decompose.md"},
-    {"name": "decompose", "status": "completed", "started_at": "2026-03-25T00:15:00Z", "completed_at": "2026-03-25T01:00:00Z", "handoff_prompt": "streams/handoff-prompt.md", "gate_id": "work-harness-87x", "gate_file": "gates/decompose-to-implement.md"},
-    {"name": "implement", "status": "completed", "started_at": "2026-03-25T01:00:00Z", "completed_at": "2026-03-25T06:00:00Z", "handoff_prompt": null, "gate_id": "work-harness-6z0", "gate_file": "gates/implement-to-review.md"},
-    {"name": "review", "status": "completed", "started_at": "2026-03-25T06:00:00Z", "completed_at": "2026-03-25T10:30:00Z", "handoff_prompt": null, "gate_id": null, "gate_file": null}
+    {
+      "name": "assess",
+      "status": "completed",
+      "started_at": "2026-03-24T21:00:00Z",
+      "completed_at": "2026-03-24T21:00:00Z",
+      "handoff_prompt": null,
+      "gate_id": null,
+      "gate_file": null
+    },
+    {
+      "name": "research",
+      "status": "completed",
+      "started_at": "2026-03-24T21:00:00Z",
+      "completed_at": "2026-03-24T21:54:00Z",
+      "handoff_prompt": "research/handoff-prompt.md",
+      "gate_id": "work-harness-3q6",
+      "gate_file": "gates/research-to-plan.md"
+    },
+    {
+      "name": "plan",
+      "status": "completed",
+      "started_at": "2026-03-24T21:54:00Z",
+      "completed_at": "2026-03-24T23:30:00Z",
+      "handoff_prompt": "plan/handoff-prompt.md",
+      "gate_id": "work-harness-q9v",
+      "gate_file": "gates/plan-to-spec.md"
+    },
+    {
+      "name": "spec",
+      "status": "completed",
+      "started_at": "2026-03-24T23:30:00Z",
+      "completed_at": "2026-03-25T00:15:00Z",
+      "handoff_prompt": "specs/handoff-prompt.md",
+      "gate_id": "work-harness-1al",
+      "gate_file": "gates/spec-to-decompose.md"
+    },
+    {
+      "name": "decompose",
+      "status": "completed",
+      "started_at": "2026-03-25T00:15:00Z",
+      "completed_at": "2026-03-25T01:00:00Z",
+      "handoff_prompt": "streams/handoff-prompt.md",
+      "gate_id": "work-harness-87x",
+      "gate_file": "gates/decompose-to-implement.md"
+    },
+    {
+      "name": "implement",
+      "status": "completed",
+      "started_at": "2026-03-25T01:00:00Z",
+      "completed_at": "2026-03-25T06:00:00Z",
+      "handoff_prompt": null,
+      "gate_id": "work-harness-6z0",
+      "gate_file": "gates/implement-to-review.md"
+    },
+    {
+      "name": "review",
+      "status": "completed",
+      "started_at": "2026-03-25T06:00:00Z",
+      "completed_at": "2026-03-25T10:30:00Z",
+      "handoff_prompt": null,
+      "gate_id": null,
+      "gate_file": null
+    }
   ],
   "assessment": {
     "scope_spread": 1,
@@ -22,12 +78,12 @@
     "decomposability": 2,
     "bulk_modifier": 0,
     "total": 4,
-    "rationale": "11 independent skill work items spanning skills, commands, and harness.yaml config. Each skill is substantively different (no bulk discount). Score 4 — Tier 3 initiative."
+    "rationale": "11 independent skill work items spanning skills, commands, and harness.yaml config. Each skill is substantively different (no bulk discount). Score 4 \u2014 Tier 3 initiative."
   },
   "docs_path": "docs/feature/skills-pipeline.md",
-  "beads_epic_id": "work-harness-alc",
   "sessions": [],
   "base_commit": "7ff960f9e960e706972d6be23688f89b2c8320b6",
   "findings_file": "review/findings.jsonl",
-  "archived_at": "2026-03-25T10:30:00Z"
+  "archived_at": "2026-03-25T10:30:00Z",
+  "epic_id": "work-harness-alc"
 }
