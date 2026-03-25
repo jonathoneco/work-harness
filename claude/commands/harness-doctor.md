@@ -15,7 +15,7 @@ Unlike `/harness-update` (which reports version compatibility and suggestions), 
 
 ## Execution
 
-Run the following 7 checks in order. For each, report the result as PASS, WARN, or FAIL with a clear description. **Run all checks regardless of earlier failures** -- do not short-circuit. Collect all results before reporting.
+Run the following 8 checks in order. For each, report the result as PASS, WARN, or FAIL with a clear description. **Run all checks regardless of earlier failures** -- do not short-circuit. Collect all results before reporting.
 
 | Result | Meaning | Symbol |
 |--------|---------|--------|
@@ -139,6 +139,21 @@ Results:
 - **WARN** (suggest install): "Missing review agents may be available from agency-agents. See: https://github.com/anthropics/agency-agents"
 - **PASS** (installed but names mismatch): "agency-agents appears to be installed -- check that agent names in `review_routing` match available agent filenames"
 
+### Check 8: Agency-Agents Recommendations
+
+Read `stack.language` and `stack.framework` from `.claude/harness.yaml` (skip if check 1 failed). Cross-reference against the agency-curation skill's recommendations for the detected stack.
+
+Steps:
+1. Determine the stack profile from harness.yaml (e.g., "Go Backend", "TypeScript/React Frontend")
+2. Look up the "Essential" agents for that profile from the agency-curation skill
+3. Check if each essential agent exists at `~/.claude/agents/<name>.md`
+
+Results:
+- **PASS** (all found): "Essential agents found for [profile]: [names]"
+- **WARN** (missing essentials): "Missing essential agents for [profile]: [names]. Run `./install.sh --agents` to install."
+- **PASS** (no profile match): "No specific agent recommendations for this stack configuration"
+- **PASS** (no harness.yaml): Skipped (depends on check 1)
+
 ## Output Format
 
 Present the results in a structured report:
@@ -153,9 +168,10 @@ Present the results in a structured report:
   5. Schema compat     [symbol] [RESULT]  [detail]
   6. Dependencies      [symbol] [RESULT]  [detail]
   7. Agency-agents     [symbol] [RESULT]  [detail]
+  8. Agent recommend    [symbol] [RESULT]  [detail]
 
 --- Summary ---
-7 checks: N passed, N warnings, N failures
+8 checks: N passed, N warnings, N failures
 
 [Conclusion or remediation guidance]
 ```

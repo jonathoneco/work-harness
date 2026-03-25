@@ -4,8 +4,8 @@ user_invocable: true
 skills: [code-quality]
 meta:
   stack: ["all"]
-  version: 1
-  last_reviewed: 2026-03-24
+  version: 2
+  last_reviewed: 2026-03-25
 ---
 
 # /pr-prep $ARGUMENTS
@@ -107,73 +107,106 @@ fix: resolve lint issues for PR
 
 If no code changes were needed, skip this step.
 
-## Step 8: Review PR Title and Description
+## Step 8: PR State Detection
 
 Skip this step if `$ARGUMENTS` contains `--no-pr`.
 
-### Step 8a: Check for Existing PR
+### Edge Case Pre-checks
 
-Check if a PR already exists for the current branch:
+Before running state detection, verify prerequisites:
+
+| Scenario | Handling |
+|----------|----------|
+| `gh` CLI not installed | Report error: "gh CLI required for PR management. Install: https://cli.github.com/" and stop. |
+| Not authenticated with gh | Report error: "Not authenticated. Run: `gh auth login`" and stop. |
+| No remote configured | Report error: "No remote configured for current branch." and stop. |
+| Multiple remotes | Ask user which remote to use. |
+
+Verify with:
 ```bash
-gh pr view --json number,title,body,baseRefName 2>/dev/null
+command -v gh >/dev/null 2>&1 || echo "NO_GH"
+gh auth status 2>&1 || echo "NO_AUTH"
+git remote 2>&1
 ```
 
-If this succeeds, a PR exists — proceed to **Step 8b** (review existing PR).
+### Force Override Flags
 
-If this fails (no PR for this branch), proceed to **Step 8c** (create new PR).
+If `$ARGUMENTS` contains a force flag, skip state detection and go directly to the corresponding action in Step 9:
 
-### Step 8b: Review Existing PR
+| Flag | Forces State | Use Case |
+|------|-------------|----------|
+| `--create-only` | `NO_PR` | Create a new PR even if one exists (e.g., targeting a different base) |
+| `--update-desc` | `STALE_DESC` | Force description regeneration regardless of current state |
+| `--cleanup` | `MERGED` | Force branch cleanup even if state detection fails |
 
-1. Parse the PR metadata from the `gh pr view` output above.
+### Detection Sequence
 
-2. Fetch the full diff against the base branch:
-```bash
-git log <baseRefName>..HEAD --oneline
-git diff <baseRefName>...HEAD --stat
-```
+If no force flag is present, run these checks in order. The **first matching state** determines the action.
 
-3. **Evaluate accuracy** — compare the current title and body against what the commits actually do:
-   - Does the title accurately describe the change? (under 70 chars, focuses on the "what")
-   - Does the body cover the key changes? Are there commits not reflected in the description?
-   - Are there claims in the body that are no longer true (e.g., referencing removed code)?
-
-4. **If the title and body are already accurate**, report "PR description is up to date" and skip to Step 9. Do NOT rewrite for style — only update when the content is materially wrong or incomplete.
-
-5. **If updates are needed**, draft the new title and/or body and show the diff to the user:
-   ```
-   Current title: <old>
-   Proposed title: <new>
-
-   Body changes: <summary of what changed and why>
-   ```
-
-   Wait for user approval, then apply:
+1. **`NO_PR` — No PR exists for current branch**:
    ```bash
-   gh pr edit --title "..." --body "$(cat <<'EOF'
-   ...
-   EOF
-   )"
+   gh pr view --json number,title,body,baseRefName,state,labels,reviewRequests,isDraft 2>&1
    ```
+   If command fails (exit code != 0) → state is `NO_PR`
 
-Skip to Step 9.
+2. **`MERGED` — PR is merged**:
+   If `state == "MERGED"` → state is `MERGED`
 
-### Step 8c: Create New PR
+3. **`CLOSED` — PR was closed without merging**:
+   If `state == "CLOSED"` → report "PR #N was closed without merging" and stop.
+
+4. **`DRAFT` — PR is a draft**:
+   If `isDraft == true` → state is `DRAFT`
+
+5. **`CI_FAIL` — CI checks are failing**:
+   ```bash
+   gh run list --branch "$(git branch --show-current)" --limit 5 --json status,conclusion,name,headSha
+   ```
+   If any run has `conclusion == "failure"` and `headSha` matches the current HEAD → state is `CI_FAIL`
+
+6. **`NO_DESC` — PR description is empty or placeholder**:
+   If `body` is empty or fewer than 20 characters, or `labels` is empty → state is `NO_DESC`
+
+7. **`STALE_DESC` — PR description doesn't match current diff**:
+   ```bash
+   git log $(gh pr view --json baseRefName -q '.baseRefName')..HEAD --oneline
+   ```
+   Compare commit count and changed files against what the PR description covers. If there are commits not reflected in the description (heuristic: description mentions fewer files than the diff touches) → state is `STALE_DESC`
+
+8. **`NEEDS_REVIEWERS` — No reviewers assigned**:
+   If `reviewRequests` is empty → state is `NEEDS_REVIEWERS`
+
+9. **`UP_TO_DATE` — PR is good, nothing to do**: Default if none of the above match.
+
+### Additional Edge Cases
+
+| Scenario | Handling |
+|----------|----------|
+| Force-pushed branch | State detection uses latest commit; force push does not affect state machine |
+| Multiple failing CI runs | Report all failures, not just the latest |
+| Branch behind base | Warn: "Branch is N commits behind base. Consider rebasing before PR actions." |
+
+## Step 9: Execute State Action
+
+Based on the detected state from Step 8, execute the corresponding action.
+
+### NO_PR — Create PR
 
 1. Determine the base branch (default branch of the repo):
-```bash
-gh repo view --json defaultBranchRef -q '.defaultBranchRef.name'
-```
+   ```bash
+   gh repo view --json defaultBranchRef -q '.defaultBranchRef.name'
+   ```
 
 2. Ensure the current branch is pushed to the remote:
-```bash
-git push -u origin HEAD
-```
+   ```bash
+   git push -u origin HEAD
+   ```
 
 3. Gather context for the PR description:
-```bash
-git log <base-branch>..HEAD --oneline
-git diff <base-branch>...HEAD --stat
-```
+   ```bash
+   git log <base-branch>..HEAD --oneline
+   git diff <base-branch>...HEAD --stat
+   ```
 
 4. Draft a PR title (under 70 chars, describes the "what") and body using this format:
    ```
@@ -201,10 +234,104 @@ git diff <base-branch>...HEAD --stat
 
 6. Report the PR URL to the user.
 
-## Step 9: Report
+### MERGED — Cleanup
+
+1. Report: "PR #N has been merged."
+2. Clean up local branch:
+   ```bash
+   git checkout $(gh pr view --json baseRefName -q '.baseRefName')
+   git pull
+   git branch -d <merged-branch>
+   ```
+3. Close associated beads issue if one exists:
+   ```bash
+   bd close <issue-id> --reason="PR #N merged"
+   ```
+   If no beads issue is associated, skip.
+4. Report cleanup results.
+
+### DRAFT — Work in Progress
+
+1. If description is empty, treat as `NO_DESC` (generate description for the draft).
+2. If description exists, ask user: "PR #N is a draft. Mark as ready for review?" If user accepts:
+   ```bash
+   gh pr ready
+   ```
+
+### CI_FAIL — Report and Offer Fix
+
+1. List failing runs with their names and failure reasons:
+   ```bash
+   gh run view <run-id> --log-failed 2>&1 | tail -50
+   ```
+2. Present failures to user.
+3. Offer to fix: "Would you like me to analyze and fix these CI failures?"
+4. If user accepts, analyze failure logs and apply fixes (same approach as lint fix in Steps 2-3).
+5. If user declines, report the failures and exit.
+
+### NO_DESC — Generate Description
+
+1. Fetch full diff against base branch.
+2. Draft title and body from diff analysis (same format as NO_PR step 4).
+3. Show to user for approval.
+4. Apply with:
+   ```bash
+   gh pr edit --title "..." --body "$(cat <<'EOF'
+   ...
+   EOF
+   )"
+   ```
+5. If labels are empty, suggest labels based on changed files.
+
+### STALE_DESC — Update Description
+
+1. Fetch current title and body.
+2. Compare against actual changes:
+   ```bash
+   git log <baseRefName>..HEAD --oneline
+   git diff <baseRefName>...HEAD --stat
+   ```
+3. Draft updated title/body reflecting current state of the branch.
+4. Show diff to user for approval:
+   ```
+   Current title: <old>
+   Proposed title: <new>
+
+   Body changes: <summary of what changed and why>
+   ```
+5. Wait for user approval, then apply:
+   ```bash
+   gh pr edit --title "..." --body "$(cat <<'EOF'
+   ...
+   EOF
+   )"
+   ```
+
+### NEEDS_REVIEWERS — Suggest Reviewers
+
+1. Read `review_routing` from `.claude/harness.yaml` (if available).
+2. Map changed files to reviewer areas.
+3. Suggest reviewers:
+   ```
+   Based on changes to [areas], suggested reviewers:
+   - @reviewer1 (area: backend)
+   - @reviewer2 (area: frontend)
+   ```
+4. If no `review_routing` configured, suggest based on:
+   ```bash
+   git log --format='%ae' -- <changed-files> | sort -u
+   ```
+5. Wait for user approval before assigning.
+
+### UP_TO_DATE — No Action
+
+Report: "PR #N is up to date. No action needed."
+
+## Step 10: Report
 
 Report to the user:
 - Number of code issues fixed, by category (if any)
-- Whether PR title/description was updated (and what changed)
+- PR state detected and action taken
+- Whether PR title/description was created or updated (and what changed)
 - Any issues that could not be auto-fixed
-- "Ready to push." if all clear
+- The PR URL (if created or updated)

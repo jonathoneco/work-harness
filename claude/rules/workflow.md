@@ -18,6 +18,10 @@ This project uses the adaptive work harness. Task state is tracked in `.work/` d
 | `/work-redirect <reason>` | Record a dead end and pivot |
 | `/work-archive [name]` | Archive a completed task |
 | `/delegate <description>` | Delegate a sub-task to a specialist agent with context seeding |
+| `/workflow-meta` | Enter harness self-modification mode |
+| `/dev-update` | Generate developer status update |
+| `/work-dump` | Decompose work into scoped workflows |
+| `/work-skill-update` | Scan skills for staleness |
 
 ## Key Principles
 

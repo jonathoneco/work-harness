@@ -34,6 +34,8 @@ research agents) inherit harness conventions.
 - **step-agents** — Prompt templates for dispatched step agents (plan, spec, decompose) — other steps define prompts inline in command files (path: `claude/skills/work-harness/step-agents.md`)
 - **teams-protocol** — Agent Teams usage protocol: naming, task schema, teammate prompts, completion detection, failure handling (path: `claude/skills/work-harness/teams-protocol.md`)
 - **skill-lifecycle** — Staleness detection rules and metadata conventions (path: `claude/skills/work-harness/skill-lifecycle.md`)
+- **dev-update** — Status update generation conventions (path: `claude/skills/work-harness/dev-update.md`)
+- **agency-curation** — Per-stack agent recommendations for review routing (path: `claude/skills/work-harness/agency-curation.md`)
 
 ## Path Convention
 
